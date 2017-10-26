@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "find_and_replace.h"
+#include "string/find_and_replace.h"
 
 #define MAX_INPUT_SIZE (100+1)
 //#define MAX_SEARCH_TERM_SIZE (15+1)

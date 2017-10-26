@@ -68,15 +68,21 @@ void replace_end(char *input_str, char *result, char *search, char *replace) {
 		ptrdiff_t offset = find(input_str+to_copy_start, input_len-to_copy_start, search, search_len);
 		_Bool is_last = (input_len-to_copy_start-offset) == search_len;
 
-		if (offset != -1 && is_last) {
+		if (offset != -1) {
 
 			// copy the string between the last copied position and currently found position
 			strncpy(result+result_marker, input_str+to_copy_start, offset);
 			result_marker += offset;
 
-			// copy the found instance with the replace word
-			strncpy(result+result_marker, replace, replace_len);
-			result_marker += replace_len;
+			if(is_last) {
+				// copy the "last" found instance with the replace word
+				strncpy(result+result_marker, replace, replace_len);
+				result_marker += replace_len;
+			} else {
+				//copy the search term itself
+				strncpy(result+result_marker, search, search_len);
+				result_marker += search_len;
+			}
 			to_copy_start += offset+search_len;
 
 		} else {

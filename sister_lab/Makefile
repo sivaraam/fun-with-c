@@ -2,8 +2,9 @@
 CC = gcc
 CFLAGS = -std=c99 -g -Wall -Wextra -pedantic
 
+BINARIES = find_and_replace replace_end words_test
 clean:
-	rm -f find_and_replace replace_end nouns_test
+	rm -f $(BINARIES)
 	rm -rf *.o a.out*
 
 find_and_replace.o: string/find_and_replace.c

@@ -1,12 +1,27 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-int foo(int a[10]) {
-    printf("%ld", sizeof(a));
+void foo(int a[10]) {
+    printf("%ld\n", sizeof(a));
     for (int i=0; i<10; i++)
-        printf("%d\n", a[i]);
+        printf("%d\t", a[i]);
+    printf("\n");
+}
+
+void fill_array(int *b, int data[50], size_t len) {
+    for(size_t i=0; i<len; i++) {
+        b[i] = data[i];
+    }
 }
 
 int main(void) {
     int a[15] = {15,7,0,9};
+    int *b = malloc(sizeof(int)*15);
+    int c[4] = {1, 2, 3, 4};
+
+    fill_array(b, a, 4u);
+
     foo(a);
+    foo(b);
+    foo(c);
 }

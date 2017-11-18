@@ -75,9 +75,24 @@ int main(void)
 		case 4:
 		{
 			unsigned record_found = 0;
+			FILE *temp = fopen("TEMP.DAT", "wb");
 			printf ("\nEnter name of employee to delete: ");
 			scanf ( "%s", empname );
 			rewind(fp);
+
+			// Deleting record by using auxilary temporary file
+
+			while (fread(&e, recsize, 1, fp) == 1) {
+				if (strcmp(e.name, empname) != 0)
+					fwrite(&e, recsize, 1, temp);
+			}
+			fclose(fp);
+			fclose(temp);
+			rename("TEMP.DAT", "EMP.DAT");
+			fp = fopen("EMP.DAT", "rb+");
+
+/*
+			// Deleting the record by shifting records and truncating the file
 
 			while (fread(&e, recsize, 1, fp) == 1)
 			{
@@ -87,9 +102,9 @@ int main(void)
 				}
 			}
 
-			/* move all records after found record
-			   to a position that is one record position
-			   less than its old position */
+			// move all records after found record
+			// to a position that is one record position
+			// less than its old position
 			if (record_found) {
 
 				while(1) {
@@ -103,18 +118,19 @@ int main(void)
 					}
 					else {
 						// handle last record
-						/* This might be an ugly way (switching between file pointer
-						   and file descriptor)[1] but it's the only way for "interactive"
-						   applications like this one (or may be they should have used file descriptors
-						   from the beginning!)
-
-							 [1]: http://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_05_01) */
+						// This might be an ugly way (switching between file pointer
+						// and file descriptor)[1] but it's the only way for "interactive"
+						// applications like this one (or may be they should have used file descriptors
+						// from the beginning!)
+						//
+						// [1]: http://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_05_01
 						fflush(fp);
 						ftruncate(fileno(fp), (off_t)ftell(fp)-recsize);
 						break;
 					}
 				}
-			}
+			} */
+
 			break;
 		}
 

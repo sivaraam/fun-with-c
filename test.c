@@ -188,4 +188,9 @@ int main(void) {
     free(ptr_malloc-1); // works
 //    free(ptr_malloc);      //*** Error in `./a.out': free(): invalid pointer: 0x00000000010ef834 ***
     printf("\n");
+
+    // 20. 0 mod x
+    printf("20. 0 mod x\n");
+    printf("%d", 0%10);
+    printf("\n");
 }

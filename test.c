@@ -3,9 +3,15 @@
 #include <stdlib.h>
 
 int *return_ref() {
-    static int val = 10;
+    static int val = 10; // Segmentation fault without 'static'
     printf("print in function: %d\n", val);
     return &val;
+}
+
+void print_char_array(char *arr, size_t size) {
+  for (size_t i=0; i<size; i++)
+    printf("%d ",*(arr+i));
+  printf("\n");
 }
 
 int main(void) {
@@ -39,31 +45,47 @@ int main(void) {
 
     // 4. Parser issue
     printf("4. Parser issue\n");
+//    printf("%x\n", 0xe+12); //  Doesn't compile due to a parser issue
     printf("%x\n", 0xe + 12);
     printf("\n");
 
     // 5. null termination test
+    printf("5. null termination test\n");
+
+    char zero_initialized_array[4] = {0};
+    print_char_array(zero_initialized_array, 4);
+
+    static char static_array[4]; // elements initialised to 0
+    print_char_array(static_array, 4);
+
     char arr[4];
+    print_char_array(arr, 4); // garbage
+
     arr[0] = 'g';
     arr[1] = 'i';
     arr[2] = 'l';
-    printf("5. null termination test\n");
     printf("%s\n", arr); // garbage after printing 'gil' in gcc. no garbage after 'gil' in clang
+    print_char_array(arr, 4);
     printf("\n");
 
     // 6. unsigned test
-    unsigned short i = -10; // assigning negative value is not an error
+    short unsigned i = -10; // assigning negative value is not an error
     // %hd prints -10
     // %u prints a value that interprets the 2's complement representation of -10 as it is (no sign bit)
     // %d ditto %u
     printf("6. unsigned test\n");
-    printf("%hd %d %u\n", i, i, i);
+    printf("Interpreting 'short unsigned' as ...\n");
+    printf("short: %hd\n", i);
+    printf("int: %d\n", i);
+    printf("short unsigned %hu\n", i);
+    printf("unsigned: %u\n", i);
+    printf("\n");
 
     i++;
     printf("%hd %u\n", i, i);
 
     for(; i<-2; i--) // unsigned value is never less than -2
-      printf("%d ", i);
+      printf("Loop: %d ", i);
     printf("\n");
 
     // 7. sequencing operator test
@@ -75,7 +97,7 @@ int main(void) {
 
     // 8. Divide by zero undefined
     printf("8. Divide by zero undefined (?)\n");
-//    printf("%d\n", 10/0);i
+//    printf("%d\n", 10/0);
     printf("\n");
 
     // 9. Octal test
@@ -91,15 +113,16 @@ int main(void) {
     // 11. Hexadecimal input
     int hex;
     printf("11. Hexadecimal Input\n");
-    printf("Enter a hexadecimal number: ");
+    printf("Enter a hexadecimal number (hex_val): ");
     scanf("%x", &hex);
-    printf("%x\n", hex%16);
+    printf("hex_val%16: %x\n", hex%16);
     printf("\n");
 
     // 12. Array test
     printf("12. Array test\n");
     int array[2] = {11, 12, 14, }; // seems to ignore the value 14
-    printf("%d\n", arr[3]);
+    printf("array[1]: %d\n", array[1]);
+    printf("array[2]: %d\n", array[2]);
     printf("\n");
 
     // 13. sizeof string
@@ -112,7 +135,7 @@ int main(void) {
     int ch = 1;
     switch(ch) {
         auto int switch_block_var;
-        case 1: printf("i = %d\n", switch_block_var);
+        case 1: printf("switch_block_var = %d\n", switch_block_var);
                 printf("\n");
                 break;
     }
@@ -160,6 +183,9 @@ int main(void) {
     printf("19. int malloc test\n");
     int *ptr_malloc = (int*) malloc(sizeof(int) * 10);
     *(ptr_malloc++) = 100;
-    printf("*ptr = %d\n", *(ptr_malloc-1));
-    //    free(ptr_malloc);      //*** Error in `./a.out': free(): invalid pointer: 0x00000000010ef834 ***
+    printf("*(ptr-1) = %d\n", *(ptr_malloc-1));
+    printf("*ptr = %d\n", *ptr_malloc);
+    free(ptr_malloc-1); // works
+//    free(ptr_malloc);      //*** Error in `./a.out': free(): invalid pointer: 0x00000000010ef834 ***
+    printf("\n");
 }

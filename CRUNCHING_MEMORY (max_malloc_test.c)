@@ -1,0 +1,147 @@
+SESSION 1
+=========
+The following shows a consequence of runnning two instances of the binary from max_malloc_test.c in the laptop wth 4GB RAM and 8GB swap space. The response time of the PC started increasing drastically after the memory was consumed a lot.
+
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        1.9G        444M        365M        1.5G        1.3G
+Swap:          7.5G          0B        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        1.9G        360M        365M        1.5G        1.2G
+Swap:          7.5G          0B        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        2.0G        287M        375M        1.5G        1.1G
+Swap:          7.5G          0B        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        2.1G        239M        375M        1.5G        1.1G
+Swap:          7.5G          0B        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        2.1G        194M        375M        1.5G        1.0G
+Swap:          7.5G          0B        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        2.2G        131M        375M        1.5G        1.0G
+Swap:          7.5G          0B        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        2.3G        101M        363M        1.4G        921M
+Swap:          7.5G        1.6M        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        2.3G        102M        361M        1.4G        883M
+Swap:          7.5G        3.7M        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        2.3G        102M        361M        1.3G        841M
+Swap:          7.5G        3.7M        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        2.6G         99M        370M        1.0G        524M
+Swap:          7.5G        8.4M        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        2.7G        116M        360M        982M        473M
+Swap:          7.5G        8.4M        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        2.7G        112M        356M        942M        433M
+Swap:          7.5G        8.4M        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        2.8G         99M        364M        906M        378M
+Swap:          7.5G        8.4M        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        2.8G        120M        356M        846M        349M
+Swap:          7.5G        8.4M        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        2.9G        121M        356M        809M        315M
+Swap:          7.5G        8.4M        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        2.9G         99M        356M        796M        281M
+Swap:          7.5G        8.4M        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        2.9G        112M        356M        752M        253M
+Swap:          7.5G        8.4M        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        3.0G        105M        364M        730M        219M
+Swap:          7.5G        8.4M        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        3.0G        110M        356M        696M        199M
+Swap:          7.5G        8.4M        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        3.0G        110M        356M        668M        175M
+Swap:          7.5G        8.4M        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        3.0G         99M        356M        652M        150M
+Swap:          7.5G        8.4M        7.5G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        3.1G        102M        360M        605M        111M
+Swap:          7.5G        8.4M        7.5G
+
+
+Note: One of the instance was terminated some where around here.
+
+
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        3.4G        103M        204M        266M         18M
+Swap:          7.5G        192M        7.3G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        3.4G         82M        200M        268M        984K
+Swap:          7.5G        256M        7.2G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        3.4G        106M        189M        261M         27M
+Swap:          7.5G        416M        7.1G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        3.4G        113M        191M        256M         30M
+Swap:          7.5G        584M        6.9G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        3.4G         83M        182M        245M         32M
+Swap:          7.5G        705M        6.8G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        3.4G         98M        182M        245M         14M
+Swap:          7.5G        778M        6.7G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        3.4G         83M        186M        254M        1.2M
+Swap:          7.5G        831M        6.7G
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        3.5G         82M        101M        187M         10M
+Swap:          7.5G        2.5G        5.0G
+
+
+Note: After killing the memory consuming proceses and switching to some existing processes.
+
+
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        872M        2.4G        203M        486M        2.5G
+Swap:          7.5G        1.1G        6.4G
+
+
+SESSION 2
+=========
+Note: The following was after about 15-20 minutes of spurious memory crunching and killing the processes due to very high response time. It caused the battery to be reduce like anything. Note that this observation is different from those found above.
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.8G        305M        3.2G         77M        256M        3.2G
+Swap:          7.5G        515M        7.0G

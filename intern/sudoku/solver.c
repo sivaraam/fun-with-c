@@ -226,8 +226,8 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 			if (sudoku_table[search_row][search_col] == 0 && possible_values[search_row][search_col].possible[val] != false)
 			{
 				possible_values[search_row][search_col].possible[val] = false;
-				possible_values[search_row][col].possibilities--;
-				if (possible_values[search_row][col].possibilities == 1)
+				possible_values[search_row][search_col].possibilities--;
+				if (possible_values[search_row][search_col].possibilities == 1)
 				{
 #ifdef KS_SUDOKU_DEBUG
 				fprintf(stderr, "update_possibilities: only_possibility: %u\n", find_fixed_possibility(possible_values, search_row, search_col));

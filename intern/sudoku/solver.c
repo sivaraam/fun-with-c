@@ -8,40 +8,35 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-
-// for the singly linked list
 #include <stdlib.h>
 #include <sys/queue.h>
 
 #include "sudoku_solver.h"
 
-#define MIN_VALUE 1
-#define MAX_VALUE 9
-#define NUMBER_OF_VALUES 9
-
-// Type to hold the possible values for a cell (identified by row nad column)
-struct possible_entires
+// Type to hold the possible values for a cell (identified by row and column)
+struct possible_entries
 {
 	bool possible[MAX_VALUE+1]; // an index is set to 'true' if the corresponding value is possible
 	unsigned possibilities; // the number of possible values for a cell
-} possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX];
-
-//struct slisthead *headp;                /* Singly-linked List head. */
-struct manipulate_entry { // TODO: better name required
-	size_t row, col;
-        STAILQ_ENTRY(manipulate_entry) entries;     /* Singly-linked List. */
 };
-STAILQ_HEAD(slisthead, manipulate_entry) head = STAILQ_HEAD_INITIALIZER(head);
+
+struct forced_cell {
+	size_t row, col;
+        STAILQ_ENTRY(forced_cell) entries;     /* Singly-linked List. */
+};
+
+// intialise the list used to store the cells to manipulate first
+STAILQ_HEAD(slisthead, forced_cell) head = STAILQ_HEAD_INITIALIZER(head);
 
 /**
-  * Find the values that are possible for a given sudoku cell.
-  * Obviously the cell is expected not to be an already filed one.
+  * Initialise 'possible_entries' with values that are possible for a given sudoku cell.
+  * Obviously the cell is expected not to be an already filled one.
   *
   * Done by linearly searching the row, the column and the square.
   *
   * Returns the number of possible values.
   */
-unsigned find_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col)
+unsigned initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col)
 {
 	unsigned possibilities = NUMBER_OF_VALUES;
 
@@ -59,9 +54,9 @@ unsigned find_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER
 			continue;
 		}
 
-		if (sudoku_table[row][search_col] != 0)
+		const unsigned val = sudoku_table[row][search_col];
+		if (val != 0)
 		{
-			const unsigned val = sudoku_table[row][search_col];
 			possible_values[row][col].possible[val] = false;
 			possibilities--;
 		}	
@@ -115,16 +110,16 @@ unsigned find_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER
 	return possibilities;
 }
 
-void insert_manipulation(size_t row, size_t col)
+void insert_forced_cell(size_t row, size_t col)
 {
-	struct manipulate_entry *n1 = malloc(sizeof(struct manipulate_entry));
+	struct forced_cell *n1 = malloc(sizeof(struct forced_cell));
 	n1->row = row;	n1->col = col;
 	STAILQ_INSERT_TAIL(&head, n1, entries);
 }
 
 
 // returns the only possible value for the given cell
-unsigned find_only_possible(size_t row, size_t col)
+unsigned find_fixed_possibility(struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col)
 {
 	for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
 	{
@@ -134,19 +129,19 @@ unsigned find_only_possible(size_t row, size_t col)
 		}
 	}
 #ifdef KS_SUDOKU_DEBUG
-	fprintf(stderr, "find_only_possible: Invalid row(%zu) and column(%zu). Has %u possibilities.\n", row, col, possible_values[row][col].possibilities);
+	fprintf(stderr, "find_fixed_possibility: Invalid row(%zu) and column(%zu). Has %u possibilities.\n", row, col, possible_values[row][col].possibilities);
 	for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
 		fprintf(stderr, "%zu: %d\t", value, possible_values[row][col].possible[value]);
 	exit(EXIT_FAILURE);
 #endif
-	return 0; // for safety
+//	return 0; // for safety (NOTE YET)
 	
 }
 
 // update the possibilities of cells as a consequence of the assignment of 'val' to the given cell
-void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col, unsigned val)
+void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col, unsigned val)
 {
-	// update the cells in the same column
+	// update the cells in the same row
 	for (size_t search_col=0; search_col<TABLE_ORDER_MAX; search_col++)
 	{
 		if (search_col == col)
@@ -161,9 +156,9 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 			if (possible_values[row][search_col].possibilities == 1)
 			{
 #ifdef KS_SUDOKU_DEBUG
-				fprintf(stderr, "update_possibilities: only_possibility: %u\n", find_only_possible(row, search_col));
+				fprintf(stderr, "update_possibilities: only_possibility: %u\n", find_fixed_possibility(possible_values, row, search_col));
 #endif
-				insert_manipulation(row, search_col);
+				insert_forced_cell(row, search_col);
 			}
 #ifdef KS_SUDOKU_DEBUG
 			else if (possible_values[row][search_col].possibilities == 0)
@@ -172,11 +167,15 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 				fprintf(stderr, "update_possibilities: it left %zuth row and %zuth column with no possibilities\n", row, search_col);
 				exit(EXIT_FAILURE);
 			}
+			else
+			{
+				fprintf(stderr, "update_possibilities(row cell): %u possibilities for %zuth row and %zuth column\n", possible_values[row][search_col].possibilities, row, search_col);
+			}
 #endif
 		}
 	}
 
-	// update the cells in the same row
+	// update the cells in the same column
 	for (size_t search_row=0; search_row<TABLE_ORDER_MAX; search_row++)
 	{
 		if (search_row == row)
@@ -191,9 +190,9 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 			if (possible_values[search_row][col].possibilities == 1)
 			{
 #ifdef KS_SUDOKU_DEBUG
-				fprintf(stderr, "update_possibilities: only_possibility: %u\n", find_only_possible(search_row, col));
+				fprintf(stderr, "update_possibilities: only_possibility: %u\n", find_fixed_possibility(possible_values, search_row, col));
 #endif
-				insert_manipulation(search_row, col);
+				insert_forced_cell(search_row, col);
 			}
 #ifdef KS_SUDOKU_DEBUG
 			else if (possible_values[search_row][col].possibilities == 0)
@@ -201,6 +200,10 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 				fprintf(stderr, "update_possibilities: incorrect move by updating %zuth row and %zuth col with %u\n", row, col, val);
 				fprintf(stderr, "update_possibilities: it left %zuth row and %zuth column with no possibilities\n", search_row, col);
 				exit(EXIT_FAILURE);
+			}
+			else
+			{
+				fprintf(stderr, "update_possibilities(column cell): %u possibilities for %zuth row and %zuth column\n", possible_values[search_row][col].possibilities, search_row, col);
 			}
 #endif
 		}
@@ -227,9 +230,9 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 				if (possible_values[search_row][col].possibilities == 1)
 				{
 #ifdef KS_SUDOKU_DEBUG
-				fprintf(stderr, "update_possibilities: only_possibility: %u\n", find_only_possible(search_row, search_col));
+				fprintf(stderr, "update_possibilities: only_possibility: %u\n", find_fixed_possibility(possible_values, search_row, search_col));
 #endif
-					insert_manipulation(search_row, col);
+					insert_forced_cell(search_row, col);
 				}
 #ifdef KS_SUDOKU_DEBUG
 				else if (possible_values[search_row][search_col].possibilities == 0)
@@ -238,6 +241,10 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 					fprintf(stderr, "update_possibilities: it left %zuth row and %zuth column with no possibilities\n", search_row, search_col);
 					exit(EXIT_FAILURE);
 				}
+				else
+				{
+					fprintf(stderr, "update_possibilities(other cell): %u possibilities for %zuth row and %zuth column\n", possible_values[search_row][search_col].possibilities, search_row, search_col);
+				}
 #endif
 			}
 		}
@@ -245,21 +252,21 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 
 }
 
-void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
+void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
 	while (!STAILQ_EMPTY(&head))
 	{
-		struct manipulate_entry *curr = STAILQ_FIRST(&head);
+		struct forced_cell *curr = STAILQ_FIRST(&head);
 		STAILQ_REMOVE_HEAD(&head, entries);
 
-		unsigned only_possible = find_only_possible(curr->row, curr->col);
-		sudoku_table[curr->row][curr->col] = only_possible;
+		unsigned fixed_possibility = find_fixed_possibility(possible_values, curr->row, curr->col);
+		sudoku_table[curr->row][curr->col] = fixed_possibility;
 		possible_values[curr->row][curr->col].possibilities--; // not much use but anyways as it zeros the result
-		update_possibilities(sudoku_table, curr->row, curr->col, only_possible);
+		update_possibilities(sudoku_table, possible_values, curr->row, curr->col, fixed_possibility);
 
 #ifdef KS_SUDOKU_DEBUG
-		printf("solve: only possible: %u\n", only_possible);
-		struct manipulate_entry *print_curr = STAILQ_FIRST(&head);
+		printf("solve: fixed possibility: %u\n", fixed_possibility);
+		struct forced_cell *print_curr = STAILQ_FIRST(&head);
 		printf("solve: Manipulate list entries:\n");
 		while (print_curr != NULL)
 		{
@@ -274,8 +281,9 @@ void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 
 void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
+	// the lookup table used to identify the possibilities of different cells
+	struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX];
 
-	// intialise the list used to store the cells to manipulate first
 	STAILQ_INIT(&head);
 
 #ifdef KS_SUDOKU_DEBUG
@@ -296,8 +304,8 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 		{
 			if (sudoku_table[row][col] == 0)
 			{
-				// find the possible values
-				possible_values[row][col].possibilities = find_possible_values(sudoku_table, row, col);
+				// initialise the possible values
+				possible_values[row][col].possibilities = initialise_possible_values(sudoku_table, possible_values, row, col);
 #ifdef KS_SUDOKU_DEBUG
 				printf("Possible values for %zuth row and %zuth column: %u\n", row, col, possible_values[row][col].possibilities);
 				for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
@@ -312,12 +320,13 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 
 				if (possible_values[row][col].possibilities == 1)
 				{
-					insert_manipulation(row, col);				}
+					insert_forced_cell(row, col);
 				}
+			}
 		}
 	}
 #ifdef KS_SUDOKU_DEBUG
-	struct manipulate_entry *curr = STAILQ_FIRST(&head);
+	struct forced_cell *curr = STAILQ_FIRST(&head);
 	printf("Manipulate list entries:\n");
 	while (curr != NULL)
 	{
@@ -326,5 +335,5 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 	}
 	printf("\n\n");
 #endif
-	solve(sudoku_table);
+	solve(sudoku_table, possible_values);
 }

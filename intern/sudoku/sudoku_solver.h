@@ -4,6 +4,9 @@
 #ifndef KS_SUDOKU_SOLVER
 #define KS_SUDOKU_SOLVER
 
+#define MIN_VALUE 1
+#define MAX_VALUE 9
+#define NUMBER_OF_VALUES 9
 #define TABLE_ORDER_MAX 9
 
 /**

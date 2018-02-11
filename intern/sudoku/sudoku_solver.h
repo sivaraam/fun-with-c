@@ -15,7 +15,7 @@
   *   - 9*9 solvable sudoku table
   *   - empty cells are represneted by '0'
   *   - no invalid table entries (i.e.) table entries are in range [0, 9]
-  *   - table has a minimum of 3 filled entries in a row/column
+  *   - table is solvable using "forced cell" moves alone
   *
   * Note: The resulting solved table is stored in the table given as input.
   */

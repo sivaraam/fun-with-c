@@ -1,5 +1,5 @@
 /**** DEV ****/
-#define KS_SUDOKU_DEBUG
+//#define KS_SUDOKU_DEBUG
 /**** DEV *****/
 
 #ifdef KS_SUDOKU_DEBUG

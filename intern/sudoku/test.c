@@ -22,19 +22,24 @@ void get_table(unsigned int table[TABLE_ORDER_MAX][TABLE_ORDER_MAX]) {
 }
 
 
-/*void print_table(unsigned **table) {
+void print_solution(unsigned int table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
+{
+	printf("\nSolved table:\n");
 	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
 	{
 		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
 		{
-			printf("%d", table[row][col]);
+			printf("%u\t", table[row][col]);
 		}
+		printf("\n");
 	}
-}*/
+	printf("Note: Solutions might be partial if table cannot be solved using \"forced cell\" moves alone.\n");
+}
 
 int main(void) {
 	unsigned table[TABLE_ORDER_MAX][TABLE_ORDER_MAX] = {0};
 	print_welcome_message();
 	get_table(table);
 	solve_sudoku(table);
+	print_solution(table);
 }

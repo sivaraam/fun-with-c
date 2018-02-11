@@ -29,86 +29,61 @@ struct forced_cell {
 // the head of the list
 STAILQ_HEAD(slisthead, forced_cell) head = STAILQ_HEAD_INITIALIZER(head);
 
+// used to avoid redundancy in the initialise_possible_values function
+void initialise_possible_values_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col, size_t search_row_start, size_t search_row_end, size_t search_col_start, size_t search_col_end)
+{
+	for (size_t search_row=search_row_start; search_row<=search_row_end; search_row++)
+	{
+		for (size_t search_col=search_col_start; search_col<=search_col_end; search_col++)
+		{
+			if ((search_row_start == search_row_end && search_col == col) || // ignore the col that caused the update during the row update
+			    (search_col_start == search_col_end && search_row == row) || // ignore the row that caused the update during the col update
+			    ((search_row_start != search_row_end && search_col_start != search_col_end) && (search_row == row || search_col == col)) // ignore the row and col which have already been updated during a square update
+				 )
+			{
+				continue;
+			}
+
+			const unsigned val = sudoku_table[search_row][search_col];
+			if (val != 0)
+			{
+				if (possible_values[row][col].possible[val] != false) // avoid multiple counting
+				{
+					possible_values[row][col].possible[val] = false;
+					possible_values[row][col].possibilities--;
+				}
+			}
+		}
+	}
+}
+
 /**
   * Initialise 'possible_entries' with values that are possible for a given sudoku cell.
   * Obviously the cell is expected not to be an already filled one.
   *
   * Done by linearly searching the row, the column and the square.
-  *
-  * Returns the number of possible values.
   */
-unsigned initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col)
+void initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col)
 {
-	unsigned possibilities = NUMBER_OF_VALUES;
-
 	// initialise all values to 'true'
 	for (size_t val=MIN_VALUE; val<=MAX_VALUE; val++)
 	{
 		possible_values[row][col].possible[val] = true;
 	}
+	possible_values[row][col].possibilities = NUMBER_OF_VALUES;
 
-	// search the row to find the values which are not possible
-	for (size_t search_col=0; search_col<TABLE_ORDER_MAX; search_col++)
-	{
-		if (search_col == col)
-		{
-			continue;
-		}
+	// initialise the row
+	initialise_possible_values_helper(sudoku_table, possible_values, row, col, row, row, 0, TABLE_ORDER_MAX-1);
 
-		const unsigned val = sudoku_table[row][search_col];
-		if (val != 0)
-		{
-			possible_values[row][col].possible[val] = false;
-			possibilities--;
-		}	
-	}
-
-	// search the column to find the values which are not possible
-	for (size_t search_row=0; search_row<TABLE_ORDER_MAX; search_row++)
-	{
-		if (search_row == row)
-		{
-			continue;
-		}
-
-		if (sudoku_table[search_row][col] != 0)
-		{
-			const unsigned val = sudoku_table[search_row][col];
-			if (possible_values[row][col].possible[val] != false) // avoid multiple counting
-			{
-				possible_values[row][col].possible[val] = false;
-				possibilities--;
-			}
-		}	
-	}
+	// intialise the column
+	initialise_possible_values_helper(sudoku_table, possible_values, row, col, 0, TABLE_ORDER_MAX-1, col, col);
 
 	// find corners of square
 	const size_t top_left_row = (row/3)*3;
 	const size_t top_left_col = (col/3)*3;
 
-	// search the remaining cells of the square for values which are not possible
-	for (size_t search_row=top_left_row; search_row<top_left_row+3; search_row++)
-	{
-		for (size_t search_col=top_left_col; search_col<top_left_col+3; search_col++)
-		{
-			if (search_row == row || search_col == col)
-			{
-				continue;
-			}
-
-			if (sudoku_table[search_row][search_col] != 0)
-			{
-				const unsigned val = sudoku_table[search_row][search_col];
-				if (possible_values[row][col].possible[val] != false) // avoid multiple counting
-				{
-					possible_values[row][col].possible[val] = false;
-					possibilities--;
-				}
-			}
-		}
-	}
-
-	return possibilities;
+	// initialise the square
+	initialise_possible_values_helper(sudoku_table, possible_values, row, col, top_left_row, top_left_row+2, top_left_col, top_left_col+2);
 }
 
 // inserts a forced cell possibility (identified by [row, col]) into the list
@@ -119,6 +94,19 @@ void insert_forced_cell(size_t row, size_t col)
 	STAILQ_INSERT_TAIL(&head, n1, entries);
 }
 
+#ifdef KS_SUDOKU_DEBUG
+void print_table(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
+{
+	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
+	{
+		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
+		{
+			printf("%u\t", sudoku_table[row][col]);
+		}
+		printf("\n");
+	}
+}
+#endif
 
 // returns the only possible value for the given cell
 unsigned find_fixed_possibility(struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col)
@@ -134,94 +122,37 @@ unsigned find_fixed_possibility(struct possible_entries possible_values[TABLE_OR
 	fprintf(stderr, "find_fixed_possibility: Invalid row(%zu) and column(%zu). Has %u possibilities.\n", row, col, possible_values[row][col].possibilities);
 	for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
 		fprintf(stderr, "%zu: %d\t", value, possible_values[row][col].possible[value]);
+//	print_table(sudoku_table);
 	exit(EXIT_FAILURE);
 #endif
-//	return 0; // for safety (NOTE YET)
-	
+	return 0; // for safety
 }
 
-// update the possibilities of cells as a consequence of the assignment of 'val' to the given cell
-void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col, unsigned val)
+// used to avoid redundancy in the update_possibility function
+/*
+	sudoku_table - the table containing the sudoku board
+	possible_values - lookup table for possible values of different cells in the
+	sudoku board.
+	(row, col) - the cell due to which the update is being performed
+	val - the value being inserted into (row, col)
+	(search_row_start, search_row_end) - the range of rows which must be updated
+	(search_col_start, search_col_end) - the range of colums which must be updated
+*/
+void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col, unsigned val, size_t search_row_start, size_t search_row_end, size_t search_col_start, size_t search_col_end)
 {
-	// update the cells in the same row
-	for (size_t search_col=0; search_col<TABLE_ORDER_MAX; search_col++)
-	{
-		if (search_col == col)
-		{
-			continue;
-		}
-
-		if (sudoku_table[row][search_col] == 0 && possible_values[row][search_col].possible[val] != false)
-		{
-			possible_values[row][search_col].possible[val] = false;
-			possible_values[row][search_col].possibilities--;
-			if (possible_values[row][search_col].possibilities == 1)
-			{
-#ifdef KS_SUDOKU_DEBUG
-				fprintf(stderr, "update_possibilities: only_possibility: %u\n", find_fixed_possibility(possible_values, row, search_col));
-#endif
-				insert_forced_cell(row, search_col);
-			}
-#ifdef KS_SUDOKU_DEBUG
-			else if (possible_values[row][search_col].possibilities == 0)
-			{
-				fprintf(stderr, "update_possibilities: incorrect move by updating %zuth row and %zuth col with %u\n", row, col, val);
-				fprintf(stderr, "update_possibilities: it left %zuth row and %zuth column with no possibilities\n", row, search_col);
-				exit(EXIT_FAILURE);
-			}
-			else
-			{
-				fprintf(stderr, "update_possibilities(row cell): %u possibilities for %zuth row and %zuth column\n", possible_values[row][search_col].possibilities, row, search_col);
-			}
-#endif
-		}
-	}
-
-	// update the cells in the same column
-	for (size_t search_row=0; search_row<TABLE_ORDER_MAX; search_row++)
-	{
-		if (search_row == row)
-		{
-			continue;
-		}
-
-		if (sudoku_table[search_row][col] == 0 && possible_values[search_row][col].possible[val] != false)
-		{
-			possible_values[search_row][col].possible[val] = false;
-			possible_values[search_row][col].possibilities--;
-			if (possible_values[search_row][col].possibilities == 1)
-			{
-#ifdef KS_SUDOKU_DEBUG
-				fprintf(stderr, "update_possibilities: only_possibility: %u\n", find_fixed_possibility(possible_values, search_row, col));
-#endif
-				insert_forced_cell(search_row, col);
-			}
-#ifdef KS_SUDOKU_DEBUG
-			else if (possible_values[search_row][col].possibilities == 0)
-			{
-				fprintf(stderr, "update_possibilities: incorrect move by updating %zuth row and %zuth col with %u\n", row, col, val);
-				fprintf(stderr, "update_possibilities: it left %zuth row and %zuth column with no possibilities\n", search_row, col);
-				exit(EXIT_FAILURE);
-			}
-			else
-			{
-				fprintf(stderr, "update_possibilities(column cell): %u possibilities for %zuth row and %zuth column\n", possible_values[search_row][col].possibilities, search_row, col);
-			}
-#endif
-		}
-	}
-
-	// find corners of square
-	const size_t top_left_row = (row/3)*3;
-	const size_t top_left_col = (col/3)*3;
-
 	// search the remaining cells of the square for values which are not possible
-	for (size_t search_row=top_left_row; search_row<top_left_row+3; search_row++)
+	for (size_t search_row=search_row_start; search_row<=search_row_end; search_row++)
 	{
-		for (size_t search_col=top_left_col; search_col<top_left_col+3; search_col++)
+		for (size_t search_col=search_col_start; search_col<=search_col_end; search_col++)
 		{
-			if (search_row == row || search_col == col)
+			if ((search_row_start == search_row_end && search_col == col) || // ignore the col that caused the update during the row update
+			    (search_col_start == search_col_end && search_row == row) || // ignore the row that caused the update during the col update
+			    ((search_row_start != search_row_end && search_col_start != search_col_end) && (search_row == row || search_col == col)) // ignore the row and col which have already been updated during a square update
+				 )
 			{
+#ifdef KS_SUDOKU_DEBUG
+					fprintf(stderr, "update_possibilities_helper: skipping %zuth row and %zuth col for\nsearch_row_start: %zu\t search_row_end: %zu\nsearch_col_start: %zu\t search_col_end: %zu\n", search_row, search_col, search_row_start, search_row_end, search_col_start, search_col_end);
+#endif
 				continue;
 			}
 
@@ -232,7 +163,7 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 				if (possible_values[search_row][search_col].possibilities == 1)
 				{
 #ifdef KS_SUDOKU_DEBUG
-				fprintf(stderr, "update_possibilities: only_possibility: %u\n", find_fixed_possibility(possible_values, search_row, search_col));
+				fprintf(stderr, "update_possibilities: only_possibility: %u for %zuth row and %zuth column\n", find_fixed_possibility(possible_values, search_row, search_col), search_row, search_col);
 #endif
 					insert_forced_cell(search_row, search_col);
 				}
@@ -241,6 +172,7 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 				{
 					fprintf(stderr, "update_possibilities: incorrect move by updating %zuth row and %zuth col with %u\n", row, col, val);
 					fprintf(stderr, "update_possibilities: it left %zuth row and %zuth column with no possibilities\n", search_row, search_col);
+					print_table(sudoku_table);
 					exit(EXIT_FAILURE);
 				}
 				else
@@ -251,7 +183,23 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 			}
 		}
 	}
+}
 
+// update the possibilities of cells as a consequence of the assignment of 'val' to the given cell
+void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col, unsigned val)
+{
+	// update the cells in the same row
+	update_possibilities_helper(sudoku_table, possible_values, row, col, val, row, row, 0, TABLE_ORDER_MAX-1);
+
+	// update the cells in the same column
+	update_possibilities_helper(sudoku_table, possible_values, row, col, val, 0, TABLE_ORDER_MAX-1, col, col);
+
+	// find corners of square
+	const size_t top_left_row = (row/3)*3;
+	const size_t top_left_col = (col/3)*3;
+
+	// update the remaining cell in the square
+	update_possibilities_helper(sudoku_table, possible_values, row, col, val, top_left_row, top_left_row+2, top_left_col, top_left_col+2);
 }
 
 void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
@@ -307,7 +255,7 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 			if (sudoku_table[row][col] == 0)
 			{
 				// initialise the possible values
-				possible_values[row][col].possibilities = initialise_possible_values(sudoku_table, possible_values, row, col);
+				initialise_possible_values(sudoku_table, possible_values, row, col);
 #ifdef KS_SUDOKU_DEBUG
 				printf("Possible values for %zuth row and %zuth column: %u\n", row, col, possible_values[row][col].possibilities);
 				for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)

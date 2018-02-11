@@ -234,7 +234,7 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 #ifdef KS_SUDOKU_DEBUG
 				fprintf(stderr, "update_possibilities: only_possibility: %u\n", find_fixed_possibility(possible_values, search_row, search_col));
 #endif
-					insert_forced_cell(search_row, col);
+					insert_forced_cell(search_row, search_col);
 				}
 #ifdef KS_SUDOKU_DEBUG
 				else if (possible_values[search_row][search_col].possibilities == 0)

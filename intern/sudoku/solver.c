@@ -20,12 +20,13 @@ struct possible_entries
 	unsigned possibilities; // the number of possible values for a cell
 };
 
+// the list that holds the forced cell moves to be done
 struct forced_cell {
 	size_t row, col;
-        STAILQ_ENTRY(forced_cell) entries;     /* Singly-linked List. */
+	STAILQ_ENTRY(forced_cell) entries;     /* Singly-linked List. */
 };
 
-// intialise the list used to store the cells to manipulate first
+// the head of the list
 STAILQ_HEAD(slisthead, forced_cell) head = STAILQ_HEAD_INITIALIZER(head);
 
 /**
@@ -110,6 +111,7 @@ unsigned initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE
 	return possibilities;
 }
 
+// inserts a forced cell possibility (identified by [row, col]) into the list
 void insert_forced_cell(size_t row, size_t col)
 {
 	struct forced_cell *n1 = malloc(sizeof(struct forced_cell));
@@ -261,7 +263,7 @@ void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possi
 
 		unsigned fixed_possibility = find_fixed_possibility(possible_values, curr->row, curr->col);
 		sudoku_table[curr->row][curr->col] = fixed_possibility;
-		possible_values[curr->row][curr->col].possibilities--; // not much use but anyways as it zeros the result
+		possible_values[curr->row][curr->col].possibilities--; // not of much use as it zeros the result (possibly helpful for debugging)
 		update_possibilities(sudoku_table, possible_values, curr->row, curr->col, fixed_possibility);
 
 #ifdef KS_SUDOKU_DEBUG
@@ -335,5 +337,6 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 	}
 	printf("\n\n");
 #endif
+
 	solve(sudoku_table, possible_values);
 }

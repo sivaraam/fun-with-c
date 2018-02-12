@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include "sudoku_solver.h"
 
-void print_welcome_message(void) {
+void print_welcome_message(void)
+{
 	printf("\n\tWelcome to the Sudoku solver!\n");
 	printf("\nIt tries to solve sudoku by identifying and filling forced cells.\n\n");
 	printf("Enter a VALID sudoku table:\n");
@@ -11,7 +12,8 @@ void print_welcome_message(void) {
 	printf("\t- A cell only has valid entries [0, 9]\n");
 }
 
-void get_table(unsigned int table[TABLE_ORDER_MAX][TABLE_ORDER_MAX]) {
+void get_table(unsigned int table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
+{
 	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
 	{
 		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
@@ -33,10 +35,11 @@ void print_solution(unsigned int table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 		}
 		printf("\n");
 	}
-	printf("Note: Solutions might be partial if table cannot be solved using \"forced cell\" moves alone.\n");
+	printf("Note: Solutions might be partial if the table cannot be solved using \"forced cell\" moves alone.\n");
 }
 
-int main(void) {
+int main(void)
+{
 	unsigned table[TABLE_ORDER_MAX][TABLE_ORDER_MAX] = {0};
 	print_welcome_message();
 	get_table(table);

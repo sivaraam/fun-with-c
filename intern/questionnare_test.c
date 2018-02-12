@@ -24,7 +24,7 @@ int main(void)
 	} t;
 
 	t.x = 0;
-	t.arr[1] = 'G';
+	t.arr[1] = 'G';  // index STARTS from 0 !!!
 	printf("%s", t.arr);
 	printf("\n");
 

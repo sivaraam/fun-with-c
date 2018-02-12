@@ -34,7 +34,7 @@ void print_table_debug(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
   */
 struct possible_entries
 {
-	bool possible[MAX_VALUE+1]; // an index is set to 'true' if the corresponding value is possible
+	bool possible[MAX_VALUE+1]; // an index is set to 'true' if the corresponding value is possible. Indexed from 1 to MAX_VALUE.
 	unsigned possibilities; // the number of possible values for a cell
 };
 

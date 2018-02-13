@@ -35,9 +35,11 @@ int main() {
   // any signs of obtaining the largest possible memory!
   size_t byte = 0;
   unsigned int rounds = 1;
+  *(p+10)='a';
   while (1) {
     *(p+byte) = rand() % CHAR_MAX;
-    byte = (byte+1u) % alloc_size;
+    printf("%d ", *(p+byte));
+    byte = (byte+rand()) % alloc_size;
     if (byte == 0)
       rounds++;
   }

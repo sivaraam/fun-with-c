@@ -97,4 +97,24 @@ int main(void)
 	};
 
 	printf("struct bitfields:\t sizeof(): %zu\t _Alignof(): %zu\n", sizeof(struct bitfields), _Alignof(struct bitfields));
+
+	struct long_double
+	{
+		int a;
+		long long l;
+		char c;
+		double d;
+	};
+
+	printf("struct long_double:\t sizeof(): %zu\t _Alignof(): %zu\n", sizeof(struct long_double), _Alignof(struct long_double));
+
+	struct {
+		char c[2];
+		int val;
+	} pad_test;
+
+	pad_test.c[0] = 'H';
+	pad_test.c[1] = 'e';
+	pad_test.val=0xABCDEF;
+	printf("Structure character contents: %d %d %d %d %x\n", pad_test.c[0], pad_test.c[1], pad_test.c[2], pad_test.c[3], pad_test.c[4]);
 }

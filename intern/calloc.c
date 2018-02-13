@@ -1,5 +1,5 @@
 #include <stdio.h>
-//#include <stdlib.h>
+#include <stdlib.h>
 #include <stdint.h> // SIZE_MAX
 #include <limits.h> // CHAR_MAX
 //#include <unistd.h>
@@ -21,6 +21,7 @@ int main(void) {
 	size_t i = 0;
 	while (1) {
 		*(p+i) = rand() % CHAR_MAX;
-		i=(i+1)%alloc_size;
+		printf("%d ", *(p+i));
+		i=(i+rand())%alloc_size;
 	}
 }

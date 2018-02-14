@@ -96,7 +96,7 @@ unsigned find_fixed_possibility(struct possible_entries possible_values[TABLE_OR
 }
 
 /**
-  * used to avoid redundancy in the update_possibility function
+  * used to avoid redundancy in the 'update_possibility' function
   */
 void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col, unsigned val, size_t search_row_start, size_t search_row_end, size_t search_col_start, size_t search_col_end)
 {
@@ -266,17 +266,17 @@ void initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
 	}
 	possible_values[row][col].possibilities = NUMBER_OF_VALUES;
 
-	// initialise the row
+	// initialise possible_values of cell by searching values in the same row
 	initialise_possible_values_helper(sudoku_table, possible_values, row, col, row, row, 0, TABLE_ORDER_MAX-1);
 
-	// intialise the column
+	// intialise possible_values of cell by searching values in the same column
 	initialise_possible_values_helper(sudoku_table, possible_values, row, col, 0, TABLE_ORDER_MAX-1, col, col);
 
 	// find corners of square
 	const size_t top_left_row = (row/3)*3;
 	const size_t top_left_col = (col/3)*3;
 
-	// initialise the square
+	// intialise possible_values of cell by searching values in the same square
 	initialise_possible_values_helper(sudoku_table, possible_values, row, col, top_left_row, top_left_row+2, top_left_col, top_left_col+2);
 }
 

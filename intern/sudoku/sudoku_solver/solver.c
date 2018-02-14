@@ -210,6 +210,34 @@ void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX]
 	}
 }
 
+void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
+{
+	solve_naked_singles(sudoku_table, possible_values);
+
+#ifdef KS_SUDOKU_DEBUG
+	printf("solve: possibility vectors after initally trying to solve 'naked_singles':\n");
+	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
+	{
+		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
+		{
+			if (sudoku_table[row][col] == 0)
+			{
+				printf("solve_sudoku: %u possible values for row: %zu, col: %zu\n", possible_values[row][col].possibilities, row, col);
+				for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
+				{
+					if (possible_values[row][col].possible[value] == true)
+					{
+						printf("%zu\t", value);
+					}
+				}
+				printf("\n\n");
+			}
+		}
+	}
+#endif
+
+}
+
 /**
   * used to avoid redundancy in the 'initialise_possible_values' function
   */
@@ -278,34 +306,6 @@ void initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
 
 	// intialise possible_values of cell by searching values in the same square
 	initialise_possible_values_helper(sudoku_table, possible_values, row, col, top_left_row, top_left_row+2, top_left_col, top_left_col+2);
-}
-
-void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
-{
-	solve_naked_singles(sudoku_table, possible_values);
-
-#ifdef KS_SUDOKU_DEBUG
-	printf("solve: possibility vectors after initally trying to solve 'naked_singles':\n");
-	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
-	{
-		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
-		{
-			if (sudoku_table[row][col] == 0)
-			{
-				printf("solve_sudoku: %u possible values for row: %zu, col: %zu\n", possible_values[row][col].possibilities, row, col);
-				for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
-				{
-					if (possible_values[row][col].possible[value] == true)
-					{
-						printf("%zu\t", value);
-					}
-				}
-				printf("\n\n");
-			}
-		}
-	}
-#endif
-
 }
 
 void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])

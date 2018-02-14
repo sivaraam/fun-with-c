@@ -8,6 +8,7 @@
 #define MAX_VALUE 9
 #define NUMBER_OF_VALUES 9
 #define TABLE_ORDER_MAX 9
+#define SQUARE_DIMENSION 3
 
 /**
   * Assumptions:

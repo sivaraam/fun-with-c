@@ -186,6 +186,94 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 	update_possibilities_helper(sudoku_table, possible_values, row, col, val, top_left_row, top_left_row+2, top_left_col, top_left_col+2);
 }
 
+void solve_hidden_singles_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+				 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+				 size_t search_row_start, size_t search_row_end,
+				 size_t search_col_start, size_t search_col_end,
+				 unsigned val)
+{
+	unsigned occurrence = 0;
+	size_t possible_row = 0, possible_col = 0;
+	for (size_t search_row=search_row_start; search_row<=search_row_end; search_row++)
+	{
+		for (size_t search_col=search_col_start; search_col<=search_col_end; search_col++)
+		{
+			if (sudoku_table[search_row][search_col] == 0)
+			{
+				if (possible_values[search_row][search_col].possible[val] == true)
+				{
+					occurrence++;
+					possible_row = search_row;
+					possible_col = search_col;
+				}
+			}
+		}
+	}
+
+	if (occurrence == 1u)
+	{
+
+#ifdef KS_SUDOKU_DEBUG
+		printf("solve_hidden_singles: found hidden single %u for row: %zu, col: %zu\n", val, possible_row, possible_col);
+#endif
+
+		sudoku_table[possible_row][possible_col] = val;
+		update_possibilities(sudoku_table, possible_values, possible_row, possible_col, val);
+	}
+}
+
+/**
+  * Identify the "hidden singles" and solve (fill in) them.
+  * This might help in identifying other possibilities such as "naked singles",
+  * "naked doubles" or even other "hidden singles".
+  *
+  * This is to be done by searching rows for values which exist in only one cell and
+  * confirming whether they are "single" by checking their other nighbours.
+ */
+void solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+			 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
+{
+	for (unsigned val=MIN_VALUE; val<=MAX_VALUE; val++)
+	{
+
+		// search for hidden singles in rows
+
+#ifdef KS_SUDOKU_DEBUG
+		printf("solve_naked_singles: searching for hidden singles in rows for val: %u\n\n", val);
+#endif
+
+		for (size_t row=0; row<TABLE_ORDER_MAX; row++)
+		{
+			solve_hidden_singles_helper(sudoku_table, possible_values, row, row, 0, TABLE_ORDER_MAX-1, val);
+		}
+
+		// search for hidden singles in cols
+
+#ifdef KS_SUDOKU_DEBUG
+		printf("solve_naked_singles: searching for hidden singles in cols for val: %u\n\n", val);
+#endif
+
+		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
+		{
+			solve_hidden_singles_helper(sudoku_table, possible_values, 0, TABLE_ORDER_MAX-1, col, col, val);
+		}
+
+		// search for hidden singles in squares
+
+#ifdef KS_SUDOKU_DEBUG
+		printf("solve_naked_singles: searching for hidden singles in squares for val: %u\n\n", val);
+#endif
+
+		for (size_t row=0; row<TABLE_ORDER_MAX; row+=SQUARE_DIMENSION)
+		{
+			for (size_t col=0; col<TABLE_ORDER_MAX; col+=SQUARE_DIMENSION)
+			{
+				solve_hidden_singles_helper(sudoku_table, possible_values, row, row+SQUARE_DIMENSION-1, col, col+SQUARE_DIMENSION-1, val);
+			}
+		}
+	}
+}
+
 /**
   * Solve (fill in) the "naked single" possibilities in the sudoku table.
   * The 'possible_entries' table should be initialized for the given 'sudoku_table'.
@@ -226,6 +314,30 @@ void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 
 #ifdef KS_SUDOKU_DEBUG
 	printf("solve: possibility vectors after initally trying to solve 'naked_singles':\n");
+	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
+	{
+		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
+		{
+			if (sudoku_table[row][col] == 0)
+			{
+				printf("solve_sudoku: %u possible values for row: %zu, col: %zu\n", possible_values[row][col].possibilities, row, col);
+				for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
+				{
+					if (possible_values[row][col].possible[value] == true)
+					{
+						printf("%zu\t", value);
+					}
+				}
+				printf("\n\n");
+			}
+		}
+	}
+#endif
+
+	solve_hidden_singles(sudoku_table, possible_values);
+
+#ifdef KS_SUDOKU_DEBUG
+	printf("solve: possibility vectors after initally trying to solve 'hidden singles':\n");
 	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
 	{
 		for (size_t col=0; col<TABLE_ORDER_MAX; col++)

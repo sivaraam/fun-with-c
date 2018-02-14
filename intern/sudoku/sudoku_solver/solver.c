@@ -183,7 +183,7 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 	const size_t top_left_col = (col/3)*3;
 
 	// update the remaining cell in the square
-	update_possibilities_helper(sudoku_table, possible_values, row, col, val, top_left_row, top_left_row+2, top_left_col, top_left_col+2);
+	update_possibilities_helper(sudoku_table, possible_values, row, col, val, top_left_row, top_left_row+SQUARE_DIMENSION-1, top_left_col, top_left_col+SQUARE_DIMENSION-1);
 }
 
 void solve_hidden_singles_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
@@ -433,7 +433,7 @@ void initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
 	const size_t top_left_col = (col/3)*3;
 
 	// intialise possible_values of cell by searching values in the same square
-	initialise_possible_values_helper(sudoku_table, possible_values, row, col, top_left_row, top_left_row+2, top_left_col, top_left_col+2);
+	initialise_possible_values_helper(sudoku_table, possible_values, row, col, top_left_row, top_left_row+SQUARE_DIMENSION-1, top_left_col, top_left_col+SQUARE_DIMENSION-1);
 }
 
 void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])

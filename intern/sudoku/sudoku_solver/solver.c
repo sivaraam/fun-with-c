@@ -292,7 +292,11 @@ void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX]
 
 #ifdef KS_SUDOKU_DEBUG
 		printf("solve_naked_singles: only possibility %u for row: %zu, col: %zu\n", naked_single, curr->row, curr->col);
+#endif
+
 		update_possibilities(sudoku_table, possible_values, curr->row, curr->col, naked_single);
+
+#ifdef KS_SUDOKU_DEBUG
 		struct naked_single *print_curr = STAILQ_FIRST(&naked_singles_head);
 		printf("solve_naked_singles: Naked single possibilities:\n");
 		while (print_curr != NULL)

@@ -34,8 +34,12 @@ void print_table_debug(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
   */
 struct possible_entries
 {
-	bool possible[MAX_VALUE+1]; // an index is set to 'true' if the corresponding value is possible. Indexed from 1 to MAX_VALUE.
-	unsigned possibilities; // the number of possible values for a cell
+	// an index is set to 'true' if the corresponding value is possible.
+	// Indexed from 1 to MAX_VALUE.
+	bool possible[MAX_VALUE+1];
+
+	// the number of possible values for a cell
+	unsigned possibilities;
 };
 
 /**
@@ -61,7 +65,8 @@ void insert_naked_single(size_t row, size_t col)
 #ifdef KS_SUDOKU_DEBUG
 	if (row >= TABLE_ORDER_MAX || col >= TABLE_ORDER_MAX)
 	{
-		fprintf(stderr, "insert_naked_single: invalid insertion row: %zu, col: %zu", row, col);
+		fprintf(stderr, "insert_naked_single: invalid insertion\n \
+				row: %zu, col: %zu", row, col);
 		exit(EXIT_FAILURE);
 	}
 #endif
@@ -72,7 +77,7 @@ void insert_naked_single(size_t row, size_t col)
 }
 
 /**
-  * Returns the "naked single" move for the given cell.
+  * Returns the "naked single" value for the given cell.
   */
 unsigned find_naked_single(struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 				size_t row, size_t col)
@@ -86,7 +91,8 @@ unsigned find_naked_single(struct possible_entries possible_values[TABLE_ORDER_M
 	}
 
 #ifdef KS_SUDOKU_DEBUG
-	fprintf(stderr, "find_naked_single: invalid request. row: %zu, col: %zu has %u possibilities!\n", row, col, possible_values[row][col].possibilities);
+	fprintf(stderr, "find_naked_single: invalid request.\n \
+			row: %zu, col: %zu has %u possibilities!\n", row, col, possible_values[row][col].possibilities);
 	fprintf(stderr, "find_naked_single: possibility vector: \n");
 	for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
 		fprintf(stderr, "%zu: %d\t", value, possible_values[row][col].possible[value]);
@@ -111,20 +117,33 @@ void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
 	{
 		for (size_t search_col=search_col_start; search_col<=search_col_end; search_col++)
 		{
-			if ((search_row_start == search_row_end && search_col == col) || // ignore the col that caused the update during the row update
-			    (search_col_start == search_col_end && search_row == row) || // ignore the row that caused the update during the col update
-			    ((search_row_start != search_row_end && search_col_start != search_col_end) && (search_row == row || search_col == col)) // ignore the row and col which have already been updated during a square update
-				 )
+			if (
+			    // During a row update, ignore the col that caused the update
+			    (search_row_start == search_row_end && search_col == col) ||
+
+			    // During a col update, ignore the row that caused the update
+			    (search_col_start == search_col_end && search_row == row) ||
+
+			    // During a square update, ignore the row and col which have already been updated
+			    ((search_row_start != search_row_end && search_col_start != search_col_end) &&
+			     (search_row == row || search_col == col))
+			)
 			{
 
 #ifdef KS_SUDOKU_DEBUG
-				printf("update_possibilities_helper: skipping row: %zu, col: %zu\nsearch_row_start: %zu\t search_row_end: %zu\nsearch_col_start: %zu\t search_col_end: %zu\n", search_row, search_col, search_row_start, search_row_end, search_col_start, search_col_end);
+				printf("update_possibilities_helper: skipping row: %zu, col: %zu\n \
+					search_row_start: %zu\t search_row_end: %zu\n \
+					search_col_start: %zu\t search_col_end: %zu\n",
+					search_row, search_col,
+					search_row_start, search_row_end,
+					search_col_start, search_col_end);
 #endif
 
 				continue;
 			}
 
-			if (sudoku_table[search_row][search_col] == 0 && possible_values[search_row][search_col].possible[val] != false)
+			if (sudoku_table[search_row][search_col] == 0 &&
+			    possible_values[search_row][search_col].possible[val] != false)
 			{
 				possible_values[search_row][search_col].possible[val] = false;
 				possible_values[search_row][search_col].possibilities--;
@@ -141,14 +160,21 @@ void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
 #ifdef KS_SUDOKU_DEBUG
 				else if (possible_values[search_row][search_col].possibilities == 0)
 				{
-					fprintf(stderr, "update_possibilities_helper: incorrect move by updating row: %zu, col: %zu with %u\n", row, col, val);
-					fprintf(stderr, "update_possibilities_helper: it left row: %zu, col: %zu with no possibilities\n", search_row, search_col);
+					fprintf(stderr, "update_possibilities_helper: incorrect move.\n");
+					fprintf(stderr, "update_possibilities_helper: updating row: \
+ 							%zu, col: %zu with %u\n", row, col, val);
+					fprintf(stderr, "update_possibilities_helper: left \
+							row: %zu, col: %zu with no possibilities\n",
+							search_row, search_col);
 					print_table_debug(sudoku_table);
 					exit(EXIT_FAILURE);
 				}
 				else
 				{
-					printf("update_possibilities_helper: %u possibilities for row: %zu, col: %zu\n", possible_values[search_row][search_col].possibilities, search_row, search_col);
+					printf("update_possibilities_helper: %u possibilities for\n \
+						row: %zu, col: %zu\n",
+						possible_values[search_row][search_col].possibilities,
+						search_row, search_col);
 				}
 #endif
 
@@ -173,19 +199,39 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 			  size_t row, size_t col, unsigned val)
 {
 	// update the cells in the same row
-	update_possibilities_helper(sudoku_table, possible_values, row, col, val, row, row, 0, TABLE_ORDER_MAX-1);
+	update_possibilities_helper(sudoku_table, possible_values, row, col, val,
+				    row, row,
+				    0, TABLE_ORDER_MAX-1);
 
 	// update the cells in the same column
-	update_possibilities_helper(sudoku_table, possible_values, row, col, val, 0, TABLE_ORDER_MAX-1, col, col);
+	update_possibilities_helper(sudoku_table, possible_values, row, col, val,
+				    0, TABLE_ORDER_MAX-1,
+				    col, col);
 
 	// find corners of square
 	const size_t top_left_row = (row/3)*3;
 	const size_t top_left_col = (col/3)*3;
 
 	// update the remaining cell in the square
-	update_possibilities_helper(sudoku_table, possible_values, row, col, val, top_left_row, top_left_row+SQUARE_DIMENSION-1, top_left_col, top_left_col+SQUARE_DIMENSION-1);
+	update_possibilities_helper(sudoku_table, possible_values, row, col, val,
+				    top_left_row, top_left_row+SQUARE_DIMENSION-1,
+				    top_left_col, top_left_col+SQUARE_DIMENSION-1);
 }
 
+/**
+  * Helper function to avoid redundancy in the 'solve_naked_singles' function.
+  *
+  * sudoku_table - the table containing the sudoku board
+  *  possible_values - lookup table for possible values of different cells in the
+  *                    sudoku board.
+  *  (search_row_start, search_row_end) - the range of rows which must be searched
+                                          for a "hidden single"
+  *  (search_col_start, search_col_end) - the range of colums which must be searched
+                                          for a "hidden single"
+  * val - the "hidden single" value which is being searched for
+  *
+  * Returns true if the 'val' is found as a hidden single in the search space.
+  */
 bool solve_hidden_singles_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 				 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 				 size_t search_row_start, size_t search_row_end,
@@ -215,7 +261,8 @@ bool solve_hidden_singles_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
 	{
 
 #ifdef KS_SUDOKU_DEBUG
-		printf("solve_hidden_singles: found hidden single %u for row: %zu, col: %zu\n", val, possible_row, possible_col);
+		printf("solve_hidden_singles_helper: found hidden single %u for row: %zu, col: %zu\n",
+			val, possible_row, possible_col);
 #endif
 
 		sudoku_table[possible_row][possible_col] = val;
@@ -231,9 +278,9 @@ bool solve_hidden_singles_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
   * This might help in identifying other possibilities such as "naked singles",
   * "naked doubles" or even other "hidden singles".
   *
-  * This is to be done by searching rows for values which exist in only one cell and
-  * confirming whether they are "single" by checking their other nighbours.
- */
+  * This is to done by identifying values which occur only once in a 'row' ('col' or 'square')
+  * and filling that cell with that value and correspindingly updating the possibilities.
+  */
 bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 			 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
@@ -249,7 +296,10 @@ bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 
 		for (size_t row=0; row<TABLE_ORDER_MAX; row++)
 		{
-			found_hidden_single |= solve_hidden_singles_helper(sudoku_table, possible_values, row, row, 0, TABLE_ORDER_MAX-1, val);
+			found_hidden_single |= solve_hidden_singles_helper(sudoku_table, possible_values,
+									   row, row,
+									   0, TABLE_ORDER_MAX-1,
+									   val);
 		}
 
 		// search for hidden singles in cols
@@ -260,7 +310,10 @@ bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 
 		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
 		{
-			found_hidden_single |= solve_hidden_singles_helper(sudoku_table, possible_values, 0, TABLE_ORDER_MAX-1, col, col, val);
+			found_hidden_single |= solve_hidden_singles_helper(sudoku_table, possible_values,
+									   0, TABLE_ORDER_MAX-1,
+									   col, col,
+									   val);
 		}
 
 		// search for hidden singles in squares
@@ -273,7 +326,10 @@ bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 		{
 			for (size_t col=0; col<TABLE_ORDER_MAX; col+=SQUARE_DIMENSION)
 			{
-				found_hidden_single |= solve_hidden_singles_helper(sudoku_table, possible_values, row, row+SQUARE_DIMENSION-1, col, col+SQUARE_DIMENSION-1, val);
+				found_hidden_single |= solve_hidden_singles_helper(sudoku_table, possible_values,
+										   row, row+SQUARE_DIMENSION-1,
+										   col, col+SQUARE_DIMENSION-1,
+										   val);
 			}
 		}
 	}
@@ -298,7 +354,8 @@ void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX]
 		possible_values[curr->row][curr->col].possibilities--; // not of much use as it zeros the result (possibly helpful for debugging)
 
 #ifdef KS_SUDOKU_DEBUG
-		printf("solve_naked_singles: only possibility %u for row: %zu, col: %zu\n", naked_single, curr->row, curr->col);
+		printf("solve_naked_singles: only possibility %u for row: %zu, col: %zu\n",
+			naked_single, curr->row, curr->col);
 #endif
 
 		update_possibilities(sudoku_table, possible_values, curr->row, curr->col, naked_single);
@@ -334,7 +391,9 @@ void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 		{
 			if (sudoku_table[row][col] == 0)
 			{
-				printf("solve_sudoku: %u possible values for row: %zu, col: %zu\n", possible_values[row][col].possibilities, row, col);
+				printf("solve_sudoku: %u possible values for\n \
+					row: %zu, col: %zu\n", possible_values[row][col].possibilities,
+					row, col);
 				for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
 				{
 					if (possible_values[row][col].possible[value] == true)
@@ -358,7 +417,9 @@ void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 		{
 			if (sudoku_table[row][col] == 0)
 			{
-				printf("solve_sudoku: %u possible values for row: %zu, col: %zu\n", possible_values[row][col].possibilities, row, col);
+				printf("solve_sudoku: %u possible values for\n \
+					row: %zu, col: %zu\n", possible_values[row][col].possibilities,
+					row, col);
 				for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
 				{
 					if (possible_values[row][col].possible[value] == true)
@@ -371,6 +432,7 @@ void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 		}
 	}
 #endif
+
     } while (found_hidden_single == true);
 
 }
@@ -388,10 +450,18 @@ void initialise_possible_values_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TA
 	{
 		for (size_t search_col=search_col_start; search_col<=search_col_end; search_col++)
 		{
-			if ((search_row_start == search_row_end && search_col == col) || // ignore the col that caused the update during the row update
-			    (search_col_start == search_col_end && search_row == row) || // ignore the row that caused the update during the col update
-			    ((search_row_start != search_row_end && search_col_start != search_col_end) && (search_row == row || search_col == col)) // ignore the row and col which have already been updated during a square update
-				 )
+			if (
+				// During a row initialization, ignore the col that caused the initialisation
+				(search_row_start == search_row_end && search_col == col) ||
+
+				// During a col update, ignore the row that caused the initialisation
+				(search_col_start == search_col_end && search_row == row) ||
+
+				// During a square update, ignore the row and col whose
+				// possibilities have already been initialised
+				((search_row_start != search_row_end && search_col_start != search_col_end) &&
+				 (search_row == row || search_col == col))
+			)
 			{
 				continue;
 			}
@@ -438,17 +508,26 @@ void initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
 	possible_values[row][col].possibilities = NUMBER_OF_VALUES;
 
 	// initialise possible_values of cell by searching values in the same row
-	initialise_possible_values_helper(sudoku_table, possible_values, row, col, row, row, 0, TABLE_ORDER_MAX-1);
+	initialise_possible_values_helper(sudoku_table, possible_values,
+					  row, col,
+					  row, row,
+					  0, TABLE_ORDER_MAX-1);
 
 	// intialise possible_values of cell by searching values in the same column
-	initialise_possible_values_helper(sudoku_table, possible_values, row, col, 0, TABLE_ORDER_MAX-1, col, col);
+	initialise_possible_values_helper(sudoku_table, possible_values,
+					  row, col,
+					  0, TABLE_ORDER_MAX-1,
+					  col, col);
 
 	// find corners of square
 	const size_t top_left_row = (row/3)*3;
 	const size_t top_left_col = (col/3)*3;
 
 	// intialise possible_values of cell by searching values in the same square
-	initialise_possible_values_helper(sudoku_table, possible_values, row, col, top_left_row, top_left_row+SQUARE_DIMENSION-1, top_left_col, top_left_col+SQUARE_DIMENSION-1);
+	initialise_possible_values_helper(sudoku_table, possible_values,
+					  row, col,
+					  top_left_row, top_left_row+SQUARE_DIMENSION-1,
+					  top_left_col, top_left_col+SQUARE_DIMENSION-1);
 }
 
 void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])

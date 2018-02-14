@@ -52,76 +52,6 @@ struct forced_cell {
 STAILQ_HEAD(slisthead, forced_cell) head = STAILQ_HEAD_INITIALIZER(head);
 
 /**
-  * used to avoid redundancy in the 'initialise_possible_values' function
-  */
-void initialise_possible_values_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col, size_t search_row_start, size_t search_row_end, size_t search_col_start, size_t search_col_end)
-{
-	for (size_t search_row=search_row_start; search_row<=search_row_end; search_row++)
-	{
-		for (size_t search_col=search_col_start; search_col<=search_col_end; search_col++)
-		{
-			if ((search_row_start == search_row_end && search_col == col) || // ignore the col that caused the update during the row update
-			    (search_col_start == search_col_end && search_row == row) || // ignore the row that caused the update during the col update
-			    ((search_row_start != search_row_end && search_col_start != search_col_end) && (search_row == row || search_col == col)) // ignore the row and col which have already been updated during a square update
-				 )
-			{
-				continue;
-			}
-
-			const unsigned val = sudoku_table[search_row][search_col];
-			if (val != 0)
-			{
-				if (possible_values[row][col].possible[val] != false) // avoid multiple counting
-				{
-					possible_values[row][col].possible[val] = false;
-					possible_values[row][col].possibilities--;
-				}
-			}
-		}
-	}
-}
-
-/**
-  * Initialise 'possible_entries' with values that are possible for a given sudoku cell.
-  * Obviously the cell is expected not to be an already filled one.
-  *
-  * Initialization is done by identifying values that are not possible for the given square
-  * by linearly searching the corresponding row, column and the square. The 'possible_entries'
-  * is updated accordingly.
-  */
-void initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col)
-{
-
-#ifdef KS_SUDOKU_DEBUG
-	if (sudoku_table[row][col] != 0)
-	{
-		fprintf(stderr, "initialise_possible_values: Trying to initialise an already filled cell\n");
-		exit(EXIT_FAILURE);
-	}
-#endif
-
-	// initially initialise all possibilities to 'true'
-	for (size_t val=MIN_VALUE; val<=MAX_VALUE; val++)
-	{
-		possible_values[row][col].possible[val] = true;
-	}
-	possible_values[row][col].possibilities = NUMBER_OF_VALUES;
-
-	// initialise the row
-	initialise_possible_values_helper(sudoku_table, possible_values, row, col, row, row, 0, TABLE_ORDER_MAX-1);
-
-	// intialise the column
-	initialise_possible_values_helper(sudoku_table, possible_values, row, col, 0, TABLE_ORDER_MAX-1, col, col);
-
-	// find corners of square
-	const size_t top_left_row = (row/3)*3;
-	const size_t top_left_col = (col/3)*3;
-
-	// initialise the square
-	initialise_possible_values_helper(sudoku_table, possible_values, row, col, top_left_row, top_left_row+2, top_left_col, top_left_col+2);
-}
-
-/**
   * inserts a forced cell possibility (identified by [row, col]) into the tail-queue
   */
 void insert_forced_cell(size_t row, size_t col)
@@ -278,6 +208,76 @@ void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possi
 		update_possibilities(sudoku_table, possible_values, curr->row, curr->col, fixed_possibility);
 		free(curr);
 	}
+}
+
+/**
+  * used to avoid redundancy in the 'initialise_possible_values' function
+  */
+void initialise_possible_values_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col, size_t search_row_start, size_t search_row_end, size_t search_col_start, size_t search_col_end)
+{
+	for (size_t search_row=search_row_start; search_row<=search_row_end; search_row++)
+	{
+		for (size_t search_col=search_col_start; search_col<=search_col_end; search_col++)
+		{
+			if ((search_row_start == search_row_end && search_col == col) || // ignore the col that caused the update during the row update
+			    (search_col_start == search_col_end && search_row == row) || // ignore the row that caused the update during the col update
+			    ((search_row_start != search_row_end && search_col_start != search_col_end) && (search_row == row || search_col == col)) // ignore the row and col which have already been updated during a square update
+				 )
+			{
+				continue;
+			}
+
+			const unsigned val = sudoku_table[search_row][search_col];
+			if (val != 0)
+			{
+				if (possible_values[row][col].possible[val] != false) // avoid multiple counting
+				{
+					possible_values[row][col].possible[val] = false;
+					possible_values[row][col].possibilities--;
+				}
+			}
+		}
+	}
+}
+
+/**
+  * Initialise 'possible_entries' with values that are possible for a given sudoku cell.
+  * Obviously the cell is expected not to be an already filled one.
+  *
+  * Initialization is done by identifying values that are not possible for the given square
+  * by linearly searching the corresponding row, column and the square. The 'possible_entries'
+  * is updated accordingly.
+  */
+void initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col)
+{
+
+#ifdef KS_SUDOKU_DEBUG
+	if (sudoku_table[row][col] != 0)
+	{
+		fprintf(stderr, "initialise_possible_values: Trying to initialise an already filled cell\n");
+		exit(EXIT_FAILURE);
+	}
+#endif
+
+	// initially initialise all possibilities to 'true'
+	for (size_t val=MIN_VALUE; val<=MAX_VALUE; val++)
+	{
+		possible_values[row][col].possible[val] = true;
+	}
+	possible_values[row][col].possibilities = NUMBER_OF_VALUES;
+
+	// initialise the row
+	initialise_possible_values_helper(sudoku_table, possible_values, row, col, row, row, 0, TABLE_ORDER_MAX-1);
+
+	// intialise the column
+	initialise_possible_values_helper(sudoku_table, possible_values, row, col, 0, TABLE_ORDER_MAX-1, col, col);
+
+	// find corners of square
+	const size_t top_left_row = (row/3)*3;
+	const size_t top_left_col = (col/3)*3;
+
+	// initialise the square
+	initialise_possible_values_helper(sudoku_table, possible_values, row, col, top_left_row, top_left_row+2, top_left_col, top_left_col+2);
 }
 
 void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])

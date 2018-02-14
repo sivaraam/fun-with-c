@@ -59,7 +59,7 @@ void insert_naked_single(size_t row, size_t col)
 {
 
 #ifdef KS_SUDOKU_DEBUG
-	if (row < 0 || row >= TABLE_ORDER_MAX || col < 0 || col >= TABLE_ORDER_MAX)
+	if (row >= TABLE_ORDER_MAX || col >= TABLE_ORDER_MAX)
 	{
 		fprintf(stderr, "insert_naked_single: invalid insertion row: %zu, col: %zu", row, col);
 		exit(EXIT_FAILURE);

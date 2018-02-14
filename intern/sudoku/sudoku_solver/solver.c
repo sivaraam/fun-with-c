@@ -186,12 +186,13 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 	update_possibilities_helper(sudoku_table, possible_values, row, col, val, top_left_row, top_left_row+SQUARE_DIMENSION-1, top_left_col, top_left_col+SQUARE_DIMENSION-1);
 }
 
-void solve_hidden_singles_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+bool solve_hidden_singles_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 				 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 				 size_t search_row_start, size_t search_row_end,
 				 size_t search_col_start, size_t search_col_end,
 				 unsigned val)
 {
+	bool found_hidden_single = false;
 	unsigned occurrence = 0;
 	size_t possible_row = 0, possible_col = 0;
 	for (size_t search_row=search_row_start; search_row<=search_row_end; search_row++)
@@ -219,7 +220,10 @@ void solve_hidden_singles_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
 
 		sudoku_table[possible_row][possible_col] = val;
 		update_possibilities(sudoku_table, possible_values, possible_row, possible_col, val);
+		found_hidden_single = true;
 	}
+
+	return found_hidden_single;
 }
 
 /**
@@ -230,9 +234,10 @@ void solve_hidden_singles_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
   * This is to be done by searching rows for values which exist in only one cell and
   * confirming whether they are "single" by checking their other nighbours.
  */
-void solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 			 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
+	bool found_hidden_single = false;
 	for (unsigned val=MIN_VALUE; val<=MAX_VALUE; val++)
 	{
 
@@ -244,7 +249,7 @@ void solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 
 		for (size_t row=0; row<TABLE_ORDER_MAX; row++)
 		{
-			solve_hidden_singles_helper(sudoku_table, possible_values, row, row, 0, TABLE_ORDER_MAX-1, val);
+			found_hidden_single |= solve_hidden_singles_helper(sudoku_table, possible_values, row, row, 0, TABLE_ORDER_MAX-1, val);
 		}
 
 		// search for hidden singles in cols
@@ -255,7 +260,7 @@ void solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 
 		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
 		{
-			solve_hidden_singles_helper(sudoku_table, possible_values, 0, TABLE_ORDER_MAX-1, col, col, val);
+			found_hidden_single |= solve_hidden_singles_helper(sudoku_table, possible_values, 0, TABLE_ORDER_MAX-1, col, col, val);
 		}
 
 		// search for hidden singles in squares
@@ -268,10 +273,12 @@ void solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 		{
 			for (size_t col=0; col<TABLE_ORDER_MAX; col+=SQUARE_DIMENSION)
 			{
-				solve_hidden_singles_helper(sudoku_table, possible_values, row, row+SQUARE_DIMENSION-1, col, col+SQUARE_DIMENSION-1, val);
+				found_hidden_single |= solve_hidden_singles_helper(sudoku_table, possible_values, row, row+SQUARE_DIMENSION-1, col, col+SQUARE_DIMENSION-1, val);
 			}
 		}
 	}
+
+	return found_hidden_single;
 }
 
 /**
@@ -314,6 +321,9 @@ void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX]
 void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 	   struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
+    bool found_hidden_single = false;
+    do
+    {
 	solve_naked_singles(sudoku_table, possible_values);
 
 #ifdef KS_SUDOKU_DEBUG
@@ -338,7 +348,7 @@ void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 	}
 #endif
 
-	solve_hidden_singles(sudoku_table, possible_values);
+	found_hidden_single = solve_hidden_singles(sudoku_table, possible_values);
 
 #ifdef KS_SUDOKU_DEBUG
 	printf("solve: possibility vectors after initally trying to solve 'hidden singles':\n");
@@ -361,6 +371,7 @@ void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 		}
 	}
 #endif
+    } while (found_hidden_single == true);
 
 }
 

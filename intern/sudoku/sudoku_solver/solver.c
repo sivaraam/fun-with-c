@@ -326,6 +326,8 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 				printf("\n\n");
 #endif
 
+				// This could also be done in 'initialise_possible_values_helper'.
+				// But doing this here saves us some unwanted checking.
 				if (possible_values[row][col].possibilities == 1)
 				{
 					insert_forced_cell(row, col);

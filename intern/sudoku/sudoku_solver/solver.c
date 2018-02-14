@@ -73,7 +73,8 @@ void insert_forced_cell(size_t row, size_t col)
 /**
   * returns the only possible value for the given cell
   */
-unsigned find_fixed_possibility(struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col)
+unsigned find_fixed_possibility(struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+				size_t row, size_t col)
 {
 	for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
 	{
@@ -98,7 +99,11 @@ unsigned find_fixed_possibility(struct possible_entries possible_values[TABLE_OR
 /**
   * used to avoid redundancy in the 'update_possibility' function
   */
-void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col, unsigned val, size_t search_row_start, size_t search_row_end, size_t search_col_start, size_t search_col_end)
+void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+				 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+				 size_t row, size_t col, unsigned val,
+				 size_t search_row_start, size_t search_row_end,
+				 size_t search_col_start, size_t search_col_end)
 {
 	// search the remaining cells of the square for values which are not possible
 	for (size_t search_row=search_row_start; search_row<=search_row_end; search_row++)
@@ -162,7 +167,9 @@ void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
  *  (search_row_start, search_row_end) - the range of rows which must be updated
  *  (search_col_start, search_col_end) - the range of colums which must be updated
  */
-void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col, unsigned val)
+void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+			  struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+			  size_t row, size_t col, unsigned val)
 {
 	// update the cells in the same row
 	update_possibilities_helper(sudoku_table, possible_values, row, col, val, row, row, 0, TABLE_ORDER_MAX-1);
@@ -182,7 +189,8 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
   * Solve (fill in) the "fixed cell" possibilities in the sudoku table.
   * The 'possible_entries' table should be initialized for the given 'sudoku_table'.
   */
-void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
+void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+			 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
 	while (!STAILQ_EMPTY(&head))
 	{
@@ -210,7 +218,8 @@ void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX]
 	}
 }
 
-void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
+void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+	   struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
 	solve_naked_singles(sudoku_table, possible_values);
 
@@ -241,7 +250,11 @@ void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possi
 /**
   * used to avoid redundancy in the 'initialise_possible_values' function
   */
-void initialise_possible_values_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col, size_t search_row_start, size_t search_row_end, size_t search_col_start, size_t search_col_end)
+void initialise_possible_values_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+				       struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+				       size_t row, size_t col,
+				       size_t search_row_start, size_t search_row_end,
+				       size_t search_col_start, size_t search_col_end)
 {
 	for (size_t search_row=search_row_start; search_row<=search_row_end; search_row++)
 	{
@@ -276,7 +289,9 @@ void initialise_possible_values_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TA
   * by linearly searching the corresponding row, column and the square. The 'possible_entries'
   * is updated accordingly.
   */
-void initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX], size_t row, size_t col)
+void initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+				struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+				size_t row, size_t col)
 {
 
 #ifdef KS_SUDOKU_DEBUG

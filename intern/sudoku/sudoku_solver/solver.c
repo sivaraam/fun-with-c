@@ -196,7 +196,7 @@ void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX]
 #ifdef KS_SUDOKU_DEBUG
 		printf("solve_naked_singles: fixed possibility %u for row: %zu, col: %zu\n", fixed_possibility, curr->row, curr->col);
 		struct forced_cell *print_curr = STAILQ_FIRST(&head);
-		printf("solve_naked_singles: Manipulate list entries:\n");
+		printf("solve_naked_singles: Naked single possibilities:\n");
 		while (print_curr != NULL)
 		{
 			printf("%zu\t%zu\n", print_curr->row, print_curr->col);
@@ -338,7 +338,7 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 
 #ifdef KS_SUDOKU_DEBUG
 	struct forced_cell *curr = STAILQ_FIRST(&head);
-	printf("solve_sudoku: Manipulate list entries:\n");
+	printf("solve_sudoku: Naked single possibilities:\n");
 	while (curr != NULL)
 	{
 		printf("%zu\t%zu\n", curr->row, curr->col);

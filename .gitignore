@@ -5,3 +5,6 @@
 
 # Ignore the eclipse file
 .project
+
+# Ignore the sync file used to update backup copies
+sync

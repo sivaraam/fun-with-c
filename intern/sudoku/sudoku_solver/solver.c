@@ -39,35 +39,35 @@ struct possible_entries
 };
 
 /**
-  * the tail-queue that holds the forced cell moves to be done
+  * The tail-queue that holds the "naked single" moves to be done.
   */
-struct forced_cell {
+struct naked_single {
 	size_t row, col;
-	STAILQ_ENTRY(forced_cell) entries;     /* Tail queue. */
+	STAILQ_ENTRY(naked_single) entries;     /* Tail queue. */
 };
 
 /**
   * the head of the tail-queue
   */
-STAILQ_HEAD(slisthead, forced_cell) head = STAILQ_HEAD_INITIALIZER(head);
+STAILQ_HEAD(slisthead, naked_single) naked_singles_head = STAILQ_HEAD_INITIALIZER(naked_singles_head);
 
 /**
-  * inserts a forced cell possibility (identified by [row, col]) into the tail-queue
+  * Inserts a "naked single" possibility (identified by [row, col]) into the tail-queue.
   */
-void insert_forced_cell(size_t row, size_t col)
+void insert_naked_single(size_t row, size_t col)
 {
 
 #ifdef KS_SUDOKU_DEBUG
 	if (row < 0 || row >= TABLE_ORDER_MAX || col < 0 || col >= TABLE_ORDER_MAX)
 	{
-		fprintf(stderr, "insert_forced_cell: invalid insertion row: %zu, col: %zu", row, col);
+		fprintf(stderr, "insert_naked_single: invalid insertion row: %zu, col: %zu", row, col);
 		exit(EXIT_FAILURE);
 	}
 #endif
 
-	struct forced_cell *n1 = malloc(sizeof(struct forced_cell));
+	struct naked_single *n1 = malloc(sizeof(struct naked_single));
 	n1->row = row;	n1->col = col;
-	STAILQ_INSERT_TAIL(&head, n1, entries);
+	STAILQ_INSERT_TAIL(&naked_singles_head, n1, entries);
 }
 
 /**
@@ -134,7 +134,7 @@ void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
 					printf("update_possibilities_helper: only_possibility: %u for row: %zu, col: %zu\n", find_fixed_possibility(possible_values, search_row, search_col), search_row, search_col);
 #endif
 
-					insert_forced_cell(search_row, search_col);
+					insert_naked_single(search_row, search_col);
 				}
 
 #ifdef KS_SUDOKU_DEBUG
@@ -192,10 +192,10 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 			 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
-	while (!STAILQ_EMPTY(&head))
+	while (!STAILQ_EMPTY(&naked_singles_head))
 	{
-		struct forced_cell *curr = STAILQ_FIRST(&head);
-		STAILQ_REMOVE_HEAD(&head, entries);
+		struct naked_single *curr = STAILQ_FIRST(&naked_singles_head);
+		STAILQ_REMOVE_HEAD(&naked_singles_head, entries);
 
 		unsigned fixed_possibility = find_fixed_possibility(possible_values, curr->row, curr->col);
 		sudoku_table[curr->row][curr->col] = fixed_possibility;
@@ -204,7 +204,7 @@ void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX]
 #ifdef KS_SUDOKU_DEBUG
 		printf("solve_naked_singles: fixed possibility %u for row: %zu, col: %zu\n", fixed_possibility, curr->row, curr->col);
 		update_possibilities(sudoku_table, possible_values, curr->row, curr->col, fixed_possibility);
-		struct forced_cell *print_curr = STAILQ_FIRST(&head);
+		struct naked_single *print_curr = STAILQ_FIRST(&naked_singles_head);
 		printf("solve_naked_singles: Naked single possibilities:\n");
 		while (print_curr != NULL)
 		{
@@ -328,7 +328,7 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 	// the lookup table used to identify the possibilities of different cells
 	struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX];
 
-	STAILQ_INIT(&head);
+	STAILQ_INIT(&naked_singles_head);
 
 #ifdef KS_SUDOKU_DEBUG
 	printf("\n");
@@ -368,14 +368,14 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 				// But doing this here saves us some unwanted checking.
 				if (possible_values[row][col].possibilities == 1)
 				{
-					insert_forced_cell(row, col);
+					insert_naked_single(row, col);
 				}
 			}
 		}
 	}
 
 #ifdef KS_SUDOKU_DEBUG
-	struct forced_cell *curr = STAILQ_FIRST(&head);
+	struct naked_single *curr = STAILQ_FIRST(&naked_singles_head);
 	printf("solve_sudoku: Naked single possibilities:\n");
 	while (curr != NULL)
 	{

@@ -65,8 +65,8 @@ void insert_naked_single(size_t row, size_t col)
 #ifdef KS_SUDOKU_DEBUG
 	if (row >= TABLE_ORDER_MAX || col >= TABLE_ORDER_MAX)
 	{
-		fprintf(stderr, "insert_naked_single: invalid insertion\n \
-				row: %zu, col: %zu", row, col);
+		fprintf(stderr, "insert_naked_single: invalid insertion\n"
+				"row: %zu, col: %zu", row, col);
 		exit(EXIT_FAILURE);
 	}
 #endif
@@ -91,8 +91,8 @@ unsigned find_naked_single(struct possible_entries possible_values[TABLE_ORDER_M
 	}
 
 #ifdef KS_SUDOKU_DEBUG
-	fprintf(stderr, "find_naked_single: invalid request.\n \
-			row: %zu, col: %zu has %u possibilities!\n", row, col, possible_values[row][col].possibilities);
+	fprintf(stderr, "find_naked_single: invalid request.\n"
+			"row: %zu, col: %zu has %u possibilities!\n", row, col, possible_values[row][col].possibilities);
 	fprintf(stderr, "find_naked_single: possibility vector: \n");
 	for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
 		fprintf(stderr, "%zu: %d\t", value, possible_values[row][col].possible[value]);
@@ -131,9 +131,9 @@ void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
 			{
 
 #ifdef KS_SUDOKU_DEBUG
-				printf("update_possibilities_helper: skipping row: %zu, col: %zu\n \
-					search_row_start: %zu\t search_row_end: %zu\n \
-					search_col_start: %zu\t search_col_end: %zu\n",
+				printf("update_possibilities_helper: skipping row: %zu, col: %zu\n"
+					"search_row_start: %zu\t search_row_end: %zu\n"
+					"search_col_start: %zu\t search_col_end: %zu\n",
 					search_row, search_col,
 					search_row_start, search_row_end,
 					search_col_start, search_col_end);
@@ -391,8 +391,8 @@ void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 		{
 			if (sudoku_table[row][col] == 0)
 			{
-				printf("solve_sudoku: %u possible values for\n \
-					row: %zu, col: %zu\n", possible_values[row][col].possibilities,
+				printf("solve_sudoku: %u possible values for\n"
+					"row: %zu, col: %zu\n", possible_values[row][col].possibilities,
 					row, col);
 				for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
 				{
@@ -417,8 +417,8 @@ void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 		{
 			if (sudoku_table[row][col] == 0)
 			{
-				printf("solve_sudoku: %u possible values for\n \
-					row: %zu, col: %zu\n", possible_values[row][col].possibilities,
+				printf("solve_sudoku: %u possible values for\n"
+					"row: %zu, col: %zu\n", possible_values[row][col].possibilities,
 					row, col);
 				for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
 				{

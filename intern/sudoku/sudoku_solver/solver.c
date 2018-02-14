@@ -310,7 +310,7 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 				initialise_possible_values(sudoku_table, possible_values, row, col);
 
 #ifdef KS_SUDOKU_DEBUG
-				printf("%u possible values for row: %zu, col: %zu\n", possible_values[row][col].possibilities, row, col);
+				printf("solve_sudoku: %u possible values for row: %zu, col: %zu\n", possible_values[row][col].possibilities, row, col);
 				for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
 				{
 					if (possible_values[row][col].possible[value] == true)
@@ -331,7 +331,7 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 
 #ifdef KS_SUDOKU_DEBUG
 	struct forced_cell *curr = STAILQ_FIRST(&head);
-	printf("Manipulate list entries:\n");
+	printf("solve_sudoku: Manipulate list entries:\n");
 	while (curr != NULL)
 	{
 		printf("%zu\t%zu\n", curr->row, curr->col);

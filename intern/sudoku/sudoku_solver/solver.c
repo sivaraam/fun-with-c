@@ -179,10 +179,10 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 }
 
 /**
-  * Solve the sudoku table using "fixed cell" moves alone. The 'possible_entries'
-  * table should be initialized for the given 'sudoku_table'.
+  * Solve (fill in) the "fixed cell" possibilities in the sudoku table.
+  * The 'possible_entries' table should be initialized for the given 'sudoku_table'.
   */
-void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
+void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
 	while (!STAILQ_EMPTY(&head))
 	{
@@ -194,9 +194,9 @@ void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possi
 		possible_values[curr->row][curr->col].possibilities--; // not of much use as it zeros the result (possibly helpful for debugging)
 
 #ifdef KS_SUDOKU_DEBUG
-		printf("solve: fixed possibility %u for row: %zu, col: %zu\n", fixed_possibility, curr->row, curr->col);
+		printf("solve_naked_singles: fixed possibility %u for row: %zu, col: %zu\n", fixed_possibility, curr->row, curr->col);
 		struct forced_cell *print_curr = STAILQ_FIRST(&head);
-		printf("solve: Manipulate list entries:\n");
+		printf("solve_naked_singles: Manipulate list entries:\n");
 		while (print_curr != NULL)
 		{
 			printf("%zu\t%zu\n", print_curr->row, print_curr->col);
@@ -278,6 +278,11 @@ void initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
 
 	// intialise possible_values of cell by searching values in the same square
 	initialise_possible_values_helper(sudoku_table, possible_values, row, col, top_left_row, top_left_row+2, top_left_col, top_left_col+2);
+}
+
+void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX], struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
+{
+	solve_naked_singles(sudoku_table, possible_values);
 }
 
 void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])

@@ -30,7 +30,7 @@ void print_table_debug(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 
 
 /**
-  * Type to hold the possible values for a cell (identified by row and column)
+  * Type to hold the possible values for a cell (identified by row and column).
   */
 struct possible_entries
 {
@@ -41,18 +41,19 @@ struct possible_entries
 /**
   * The tail-queue that holds the "naked single" moves to be done.
   */
-struct naked_single {
+struct naked_single
+{
 	size_t row, col;
 	STAILQ_ENTRY(naked_single) entries;     /* Tail queue. */
 };
 
 /**
-  * the head of the tail-queue
-  */
+ * The head of the tail-queue that holds "naked single" moves.
+ */
 STAILQ_HEAD(slisthead, naked_single) naked_singles_head = STAILQ_HEAD_INITIALIZER(naked_singles_head);
 
 /**
-  * Inserts a "naked single" possibility (identified by [row, col]) into the tail-queue.
+  * Inserts a "naked single" move (identified by [row, col]) into the tail-queue.
   */
 void insert_naked_single(size_t row, size_t col)
 {
@@ -71,9 +72,9 @@ void insert_naked_single(size_t row, size_t col)
 }
 
 /**
-  * returns the only possible value for the given cell
+  * Returns the "naked single" move for the given cell.
   */
-unsigned find_fixed_possibility(struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+unsigned find_naked_single(struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 				size_t row, size_t col)
 {
 	for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
@@ -85,8 +86,8 @@ unsigned find_fixed_possibility(struct possible_entries possible_values[TABLE_OR
 	}
 
 #ifdef KS_SUDOKU_DEBUG
-	fprintf(stderr, "find_fixed_possibility: invalid request. row: %zu, col: %zu has %u possibilities!\n", row, col, possible_values[row][col].possibilities);
-	fprintf(stderr, "find_fixed_possibility: possibility vector: \n");
+	fprintf(stderr, "find_naked_single: invalid request. row: %zu, col: %zu has %u possibilities!\n", row, col, possible_values[row][col].possibilities);
+	fprintf(stderr, "find_naked_single: possibility vector: \n");
 	for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
 		fprintf(stderr, "%zu: %d\t", value, possible_values[row][col].possible[value]);
 //	print_table_debug(sudoku_table);
@@ -97,7 +98,7 @@ unsigned find_fixed_possibility(struct possible_entries possible_values[TABLE_OR
 }
 
 /**
-  * used to avoid redundancy in the 'update_possibility' function
+  * Used to avoid redundancy in the 'update_possibility' function.
   */
 void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 				 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
@@ -131,7 +132,7 @@ void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
 				{
 
 #ifdef KS_SUDOKU_DEBUG
-					printf("update_possibilities_helper: only_possibility: %u for row: %zu, col: %zu\n", find_fixed_possibility(possible_values, search_row, search_col), search_row, search_col);
+					printf("update_possibilities_helper: only_possibility: %u for row: %zu, col: %zu\n", find_naked_single(possible_values, search_row, search_col), search_row, search_col);
 #endif
 
 					insert_naked_single(search_row, search_col);
@@ -157,7 +158,7 @@ void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
 }
 
 /*
- * update the possibilities of cells as a consequence of assignment of 'val' to the given cell
+ * Update the possibilities of cells as a consequence of assignment of 'val' to the given cell.
  *
  *  sudoku_table - the table containing the sudoku board
  *  possible_values - lookup table for possible values of different cells in the
@@ -186,7 +187,7 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 }
 
 /**
-  * Solve (fill in) the "fixed cell" possibilities in the sudoku table.
+  * Solve (fill in) the "naked single" possibilities in the sudoku table.
   * The 'possible_entries' table should be initialized for the given 'sudoku_table'.
   */
 void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
@@ -197,13 +198,13 @@ void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX]
 		struct naked_single *curr = STAILQ_FIRST(&naked_singles_head);
 		STAILQ_REMOVE_HEAD(&naked_singles_head, entries);
 
-		unsigned fixed_possibility = find_fixed_possibility(possible_values, curr->row, curr->col);
-		sudoku_table[curr->row][curr->col] = fixed_possibility;
+		unsigned naked_single = find_naked_single(possible_values, curr->row, curr->col);
+		sudoku_table[curr->row][curr->col] = naked_single;
 		possible_values[curr->row][curr->col].possibilities--; // not of much use as it zeros the result (possibly helpful for debugging)
 
 #ifdef KS_SUDOKU_DEBUG
-		printf("solve_naked_singles: fixed possibility %u for row: %zu, col: %zu\n", fixed_possibility, curr->row, curr->col);
-		update_possibilities(sudoku_table, possible_values, curr->row, curr->col, fixed_possibility);
+		printf("solve_naked_singles: only possibility %u for row: %zu, col: %zu\n", naked_single, curr->row, curr->col);
+		update_possibilities(sudoku_table, possible_values, curr->row, curr->col, naked_single);
 		struct naked_single *print_curr = STAILQ_FIRST(&naked_singles_head);
 		printf("solve_naked_singles: Naked single possibilities:\n");
 		while (print_curr != NULL)
@@ -248,7 +249,7 @@ void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 }
 
 /**
-  * used to avoid redundancy in the 'initialise_possible_values' function
+  * Used to avoid redundancy in the 'initialise_possible_values' function.
   */
 void initialise_possible_values_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 				       struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],

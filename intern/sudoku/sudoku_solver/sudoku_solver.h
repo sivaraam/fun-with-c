@@ -10,6 +10,21 @@
 #define TABLE_ORDER_MAX 9
 #define SQUARE_DIMENSION 3
 
+#include <stdbool.h>
+
+/**
+  * Type to hold the possible values for a cell (identified by row and column).
+  */
+struct possible_entries
+{
+	// an index is set to 'true' if the corresponding value is possible.
+	// Indexed from 1 to MAX_VALUE.
+	bool possible[MAX_VALUE+1];
+
+	// the number of possible values for a cell
+	unsigned possibilities;
+};
+
 /**
   * Assumptions:
   *

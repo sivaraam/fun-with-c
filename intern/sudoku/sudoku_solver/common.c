@@ -10,7 +10,7 @@ void print_table(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
                {
                        printf("%u\t", sudoku_table[row][col]);
                }
-               printf("\n");
+               printf("\n\n");
        }
 }
 

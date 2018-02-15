@@ -1,6 +1,7 @@
 #ifndef KS_SUDOKE_SOLVER_NAKED_SINGLE_QUEUE
 #define KS_SUDOKE_SOLVER_NAKED_SINGLE_QUEUE
 
+#include <stddef.h>
 #include <sys/queue.h>
 
 /**

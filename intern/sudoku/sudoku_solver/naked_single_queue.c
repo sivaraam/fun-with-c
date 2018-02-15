@@ -1,12 +1,9 @@
 #include "common.h"
 
-#ifdef KS_SUDOKU_DEBUG
-#include <stdio.h>
-#endif
-
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "naked_single_queue.h"
 
 /**
@@ -16,12 +13,14 @@ STAILQ_HEAD(slisthead, naked_single) naked_singles_head = STAILQ_HEAD_INITIALIZE
 
 void initialise_naked_single_queue(void)
 {
-	STAILQ_INIT(&naked_singles_head);
+	static bool initialised = false;
+	if (initialised == false)
+	{
+		STAILQ_INIT(&naked_singles_head);
+		initialised = true;
+	}
 }
 
-/**
-  * Inserts a "naked single" move (identified by [row, col]) into the tail-queue.
-  */
 void insert_naked_single(size_t row, size_t col)
 {
 
@@ -39,7 +38,7 @@ void insert_naked_single(size_t row, size_t col)
 	STAILQ_INSERT_TAIL(&naked_singles_head, n1, entries);
 }
 
-int is_naked_single_available()
+int is_naked_single_available(void)
 {
 	return !STAILQ_EMPTY(&naked_singles_head);
 }
@@ -59,7 +58,7 @@ void print_naked_singles(void)
 	}
 }
 
-void remove_first_naked_single()
+void remove_first_naked_single(void)
 {
 	STAILQ_REMOVE_HEAD(&naked_singles_head, entries);
 }

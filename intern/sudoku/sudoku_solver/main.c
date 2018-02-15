@@ -25,7 +25,6 @@ void get_table(unsigned int table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 	}
 }
 
-
 void print_solution(unsigned int table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
 	printf("\nSolved table:\n");

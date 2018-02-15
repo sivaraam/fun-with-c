@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "sudoku_solver.h"
 #include "common.h"
 
 void print_table(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
@@ -13,4 +12,3 @@ void print_table(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
                printf("\n\n");
        }
 }
-

@@ -28,6 +28,9 @@ struct possible_entries
 	unsigned possibilities;
 };
 
+/**
+  * Print the sudoku table to 'stdout'.
+  */
 void print_table(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX]);
 
 #endif

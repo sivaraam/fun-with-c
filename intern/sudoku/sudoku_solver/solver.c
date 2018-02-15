@@ -20,8 +20,8 @@
   * This is done by identifying values which occur only once in a 'row' ('col' or 'square')
   * and filling that cell with that value and correspindingly updating the possibilities.
   */
-bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
-			 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
+static bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+				 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
 	bool found_hidden_single = false;
 	for (unsigned val=MIN_VALUE; val<=MAX_VALUE; val++)
@@ -85,7 +85,7 @@ bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
   * The 'possible_entries' table should be initialized for the given 'sudoku_table'.
   * The moves are obtained from the tail-queue whose head is 'naked_singles_head'.
   */
-void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+static void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 			 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
 	while (is_naked_single_available())
@@ -114,7 +114,7 @@ void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX]
 	}
 }
 
-void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+static void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 	   struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
     bool found_hidden_single = false;

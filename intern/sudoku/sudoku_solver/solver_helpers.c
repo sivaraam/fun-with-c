@@ -5,9 +5,8 @@
 #include <stdio.h>
 #endif
 
-#include "sudoku_solver.h"
-#include "naked_single_queue.h"
 #include "solver_helpers.h"
+#include "naked_single_queue.h"
 
 unsigned find_naked_single(struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 			   size_t row, size_t col)
@@ -94,7 +93,7 @@ static void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][T
 				{
 					fprintf(stderr, "update_possibilities_helper: incorrect move.\n");
 					fprintf(stderr, "update_possibilities_helper: updating row: \
- 							%zu, col: %zu with %u\n", row, col, val);
+							%zu, col: %zu with %u\n", row, col, val);
 					fprintf(stderr, "update_possibilities_helper: left \
 							row: %zu, col: %zu with no possibilities\n",
 							search_row, search_col);
@@ -267,4 +266,3 @@ void initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
 					  top_left_row, top_left_row+SQUARE_DIMENSION-1,
 					  top_left_col, top_left_col+SQUARE_DIMENSION-1);
 }
-

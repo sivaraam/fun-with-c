@@ -1,8 +1,4 @@
-/**** DEV ****/
-#define KS_SUDOKU_DEBUG
-//#define KS_SUDOKU_DEBUG_UPDATE_POSSIBILITIES
-//#define KS_SUDOKU_DEBUG_HIDDEN_SINGLE_SEARCH
-/**** DEV *****/
+#include "common.h"
 
 #ifdef KS_SUDOKU_DEBUG
 #include <stdio.h>
@@ -13,7 +9,6 @@
 #include <stdlib.h>
 
 #include "sudoku_solver.h"
-#include "common.h"
 #include "naked_single_queue.h"
 #include "solver_helpers.h"
 

@@ -1,4 +1,10 @@
-#include <stdbool.h>
+#include "common.h"
+
+#ifdef KS_SUDOKU_DEBUG
+#include <stdlib.h>
+#include <stdio.h>
+#endif
+
 #include "sudoku_solver.h"
 #include "naked_single_queue.h"
 #include "solver_helpers.h"

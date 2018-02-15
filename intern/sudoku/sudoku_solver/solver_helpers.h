@@ -2,6 +2,7 @@
 #define KS_SUDOKU_SOLVER_SOLVER_HELPERS
 
 #include <stddef.h>
+#include "common.h"
 #include "sudoku_solver.h"
 
 /**

@@ -1,3 +1,9 @@
+#include "common.h"
+
+#ifdef KS_SUDOKU_DEBUG
+#include <stdio.h>
+#endif
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>

@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "sudoku_solver.h"
 #include "common.h"
+#include "sudoku_solver.h"
 
 void print_welcome_message(void)
 {

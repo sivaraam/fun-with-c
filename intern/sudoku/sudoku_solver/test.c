@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "sudoku_solver.h"
+#include "common.h"
 
 void print_welcome_message(void)
 {
@@ -28,14 +29,7 @@ void get_table(unsigned int table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 void print_solution(unsigned int table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
 	printf("\nSolved table:\n");
-	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
-	{
-		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
-		{
-			printf("%u\t", table[row][col]);
-		}
-		printf("\n");
-	}
+	print_table(table);
 	printf("Note: Solutions might be partial if the table cannot be solved using techniques mentioned before.\n");
 }
 

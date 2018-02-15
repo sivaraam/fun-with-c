@@ -12,22 +12,7 @@
 #include <sys/queue.h>
 
 #include "sudoku_solver.h"
-
-// functions used only for debug
-#ifdef KS_SUDOKU_DEBUG
-void print_table_debug(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
-{
-	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
-	{
-		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
-		{
-			printf("%u\t", sudoku_table[row][col]);
-		}
-		printf("\n");
-	}
-}
-#endif
-
+#include "common.h"
 
 /**
   * Type to hold the possible values for a cell (identified by row and column).
@@ -96,7 +81,7 @@ unsigned find_naked_single(struct possible_entries possible_values[TABLE_ORDER_M
 	fprintf(stderr, "find_naked_single: possibility vector: \n");
 	for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
 		fprintf(stderr, "%zu: %d\t", value, possible_values[row][col].possible[value]);
-//	print_table_debug(sudoku_table);
+//	print_table(sudoku_table);
 	exit(EXIT_FAILURE);
 #endif
 
@@ -166,7 +151,7 @@ void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
 					fprintf(stderr, "update_possibilities_helper: left \
 							row: %zu, col: %zu with no possibilities\n",
 							search_row, search_col);
-					print_table_debug(sudoku_table);
+					print_table(sudoku_table);
 					exit(EXIT_FAILURE);
 				}
 				else
@@ -540,15 +525,10 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 
 #ifdef KS_SUDOKU_DEBUG
 	printf("\n");
-	printf("solve_sudoku: SUDOKU table obtained as input\n");
-	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
-	{
-		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
-		{
-			printf("%u\t", sudoku_table[row][col]);
-		}
-		printf("\n\n");
-	}
+	printf("solve_sudoku: 'sudoku_table' obtained as input\n");
+	print_table(sudoku_table);
+
+	printf("solve_sudoku: possibility vectors:\n");
 #endif
 
 	for (size_t row=0; row<TABLE_ORDER_MAX; row++)

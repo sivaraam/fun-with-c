@@ -11,10 +11,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <sys/queue.h>
 
 #include "sudoku_solver.h"
 #include "common.h"
+#include "naked_single_queue.h"
 
 /**
   * Type to hold the possible values for a cell (identified by row and column).
@@ -28,40 +28,6 @@ struct possible_entries
 	// the number of possible values for a cell
 	unsigned possibilities;
 };
-
-/**
-  * The tail-queue that holds the "naked single" moves to be done.
-  */
-struct naked_single
-{
-	size_t row, col;
-	STAILQ_ENTRY(naked_single) entries;     /* Tail queue. */
-};
-
-/**
- * The head of the tail-queue that holds "naked single" moves.
- */
-STAILQ_HEAD(slisthead, naked_single) naked_singles_head = STAILQ_HEAD_INITIALIZER(naked_singles_head);
-
-/**
-  * Inserts a "naked single" move (identified by [row, col]) into the tail-queue.
-  */
-void insert_naked_single(size_t row, size_t col)
-{
-
-#ifdef KS_SUDOKU_DEBUG
-	if (row >= TABLE_ORDER_MAX || col >= TABLE_ORDER_MAX)
-	{
-		fprintf(stderr, "insert_naked_single: invalid insertion\n"
-				"row: %zu, col: %zu", row, col);
-		exit(EXIT_FAILURE);
-	}
-#endif
-
-	struct naked_single *n1 = malloc(sizeof(struct naked_single));
-	n1->row = row;	n1->col = col;
-	STAILQ_INSERT_TAIL(&naked_singles_head, n1, entries);
-}
 
 /**
   * Returns the "naked single" value for the given cell.
@@ -283,7 +249,7 @@ bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 		// search for hidden singles in rows
 
 #ifdef KS_SUDOKU_DEBUG_HIDDEN_SINGLE_SEARCH
-		printf("solve_naked_singles: searching for hidden singles in rows for val: %u\n", val);
+		printf("solve_hidden_singles: searching for hidden singles in rows for val: %u\n", val);
 #endif
 
 		for (size_t row=0; row<TABLE_ORDER_MAX; row++)
@@ -297,7 +263,7 @@ bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 		// search for hidden singles in cols
 
 #ifdef KS_SUDOKU_DEBUG_HIDDEN_SINGLE_SEARCH
-		printf("solve_naked_singles: searching for hidden singles in cols for val: %u\n", val);
+		printf("solve_hidden_singles: searching for hidden singles in cols for val: %u\n", val);
 #endif
 
 		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
@@ -311,7 +277,7 @@ bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 		// search for hidden singles in squares
 
 #ifdef KS_SUDOKU_DEBUG_HIDDEN_SINGLE_SEARCH
-		printf("solve_naked_singles: searching for hidden singles in squares for val: %u\n", val);
+		printf("solve_hidden_singles: searching for hidden singles in squares for val: %u\n", val);
 #endif
 
 		for (size_t row=0; row<TABLE_ORDER_MAX; row+=SQUARE_DIMENSION)
@@ -341,10 +307,10 @@ bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 			 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
-	while (!STAILQ_EMPTY(&naked_singles_head))
+	while (is_naked_single_available())
 	{
-		struct naked_single *curr = STAILQ_FIRST(&naked_singles_head);
-		STAILQ_REMOVE_HEAD(&naked_singles_head, entries);
+		struct naked_single *curr = get_first_naked_single();
+		remove_first_naked_single();
 
 		unsigned naked_single = find_naked_single(possible_values, curr->row, curr->col);
 		sudoku_table[curr->row][curr->col] = naked_single;
@@ -358,13 +324,8 @@ void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX]
 		update_possibilities(sudoku_table, possible_values, curr->row, curr->col, naked_single);
 
 #ifdef KS_SUDOKU_DEBUG
-		struct naked_single *print_curr = STAILQ_FIRST(&naked_singles_head);
 		printf("solve_naked_singles: Naked single possibilities:\n");
-		while (print_curr != NULL)
-		{
-			printf("%zu\t%zu\n", print_curr->row, print_curr->col);
-			print_curr = STAILQ_NEXT(print_curr, entries);
-		}
+		print_naked_singles();
 		printf("\n");
 #endif
 
@@ -549,7 +510,7 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 	// the lookup table used to identify the possibilities of different cells
 	struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX];
 
-	STAILQ_INIT(&naked_singles_head);
+	initialise_naked_single_queue();
 
 #ifdef KS_SUDOKU_DEBUG
 	printf("\n");
@@ -591,13 +552,7 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 	}
 
 #ifdef KS_SUDOKU_DEBUG
-	struct naked_single *curr = STAILQ_FIRST(&naked_singles_head);
 	printf("solve_sudoku: Naked single possibilities:\n");
-	while (curr != NULL)
-	{
-		printf("%zu\t%zu\n", curr->row, curr->col);
-		curr = STAILQ_NEXT(curr, entries);
-	}
 	printf("\n");
 #endif
 

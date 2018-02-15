@@ -1,0 +1,88 @@
+#! /bin/bash
+# Script for configuring git for customized use
+# It configures using --global option
+#
+# Usage: {script-name} <editor-name>
+#
+# Defaults:
+#    editor : vim
+
+. ./common-script
+
+# Exit statuses
+ERR_CONFIG_FAIL=136
+ERR_EDITOR_MISS=154
+
+# Email addresses
+MAINTAINER="Junio C Hamano <gitster@pobox.com>"
+MAILING_LIST="Git mailing list <git@vger.kernel.org>"
+
+# Function for global git configuration
+# Assumed that
+#  $1 - key
+#  $2 - value
+execute_git() {
+  if [ $# -lt 2 ]
+  then
+    error $FUNCTION_ERR_MSG $EXIT_FATAL
+  fi
+
+  git config $1 "$2"
+
+  if [ $? -ne 0 ]
+  then
+    error "Cofiguration of ${RED}$1${NC} with ${RED}$2${NC} failed!." $ERR_CONFIG_FAIL
+  else
+    echo -e "Configuration of ${GREEN}$1${NC} with ${GREEN}$2${NC} successful"
+  fi
+}
+
+# Debug
+# set -x
+
+configure_editor () {
+  DEFAULT_EDITOR='vim'
+  # If no editor specified, check for vim and use it
+  if [ -z "$1" ]
+  then
+    notify "No editor specified. Using $DEFAULT_EDITOR."
+    PREF_EDITOR=$DEFAULT_EDITOR
+  else
+    notify "Using $1 as editor"
+    PREF_EDITOR=$1
+  fi
+
+  # Check if editor is present and execute config
+  # command only if it's present
+  if ( command -v $PREF_EDITOR >/dev/null 2>&1 )
+  then
+    execute_git core.editor $PREF_EDITOR
+  else
+    error "$PREF_EDITOR is not present. Set another editor by passing a parameter. Aborting." $ERR_EDITOR_MISS
+  fi
+}
+
+notify 'Starting global configuration of git'
+
+# User configuration
+execute_git user.name 'Kaartic Sivaraam'
+execute_git user.email 'kaartic.sivaraam@gmail.com'
+
+# Short forms
+execute_git alias.co checkout
+execute_git alias.unstage 'reset HEAD --'
+execute_git alias.st 'status'
+execute_git alias.b 'branch'
+execute_git alias.ca 'commit --amend'
+execute_git alias.c 'commit -v'
+execute_git alias.check 'diff --check'
+
+# Miscellaneous
+configure_editor "$1"
+# execute_git help.autoCorrect 2
+execute_git credential.helper cache # Currently use default timeout (--timeout 900 [15 minutes])
+execute_git push.default simple  # Embrace new git push behaviour
+execute_git alias.send-git "send-email --to='$MAILING_LIST' --suppress-cc=self --compose"
+execute_git alias.complete-send-git "send-email --to='$MAINTAINER' --cc='$MAILING_LIST' --suppress-cc=self --compose"
+execute_git alias.refer-commit "show -s --date=short --pretty='format:%h (%s, %ad)'"
+# execute_git diff.indentHeuristic true # use the experimental heuristic

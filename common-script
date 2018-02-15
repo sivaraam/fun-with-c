@@ -1,0 +1,127 @@
+# Common functions used by all scripts
+
+# Exit statuses
+EXIT_FAILURE=1
+ERR_PARAM=17
+ERR_REQUIRED_FILE=196
+EXIT_FATAL=100
+
+# Colour Escape codes
+RED='\033[0;31m'
+BROWN='\033[0;33m'
+GREEN='\033[1;32m'
+NC='\033[0m'
+
+FUNCTION_ERR_MSG='FATAL. Improper usage of core function'
+
+# ---------- Print functions ------------
+# Function to print error message
+# Exit status passed as second argument
+# Default is value of EXIT_FAILURE
+error() {
+  exec >&2 # switch stdout to stderr
+
+  if [ $# -lt 1 ]
+  then
+    echo $FUNCTION_ERR_MSG
+  else
+    echo -e "${RED}ERROR:${NC} $1"
+  fi
+
+  exec >&- # close stdout
+  if [ -z "$2" ]
+  then
+    exit $EXIT_FAILURE
+  else
+    exit $2
+  fi
+}
+
+
+# Function to print Usage information
+# Takes the message as first parameter
+print_usage() {
+  if [ $# -lt 1 ]
+  then
+    error $FUNCTION_ERR_MSG $EXIT_FATAL
+  fi
+
+  script_invocation_name=`basename $0`
+  error "Usage: $script_invocation_name $1" $ERR_PARAM
+}
+
+# Function that notifies an user about a message.
+# Notification is done in colour for colour enabled shells.
+notify() {
+  if [ -z "$1" ]
+  then
+    error $FUNCTION_ERR_MSG $EXIT_FATAL
+  fi
+
+  echo -e "${BROWN}ALERT:${NC} $1"
+}
+
+# ---------- END: Print functions ------------
+
+# ---------- Auxiliary functions ------------
+# Function to check if user is ROOT
+root_check() {
+  ROOT_UID=0 # Root has $UID 0.
+  if [ $UID -eq $ROOT_UID ]
+  then
+    return 0
+  else
+    return 1
+  fi
+}
+
+# Require function to test if a required file exists
+# Behaviour:
+#  - Accepts path of file as first parameter
+#    Path could be relative to current directory (or)
+#    it could be an absolute one
+#  - Returns when file exists
+#  - Prints error and exists when file cannot be found
+require() {
+  if [ -z "$1" ]
+  then
+    error $FUNCTION_ERR_MSG $EXIT_FATAL
+  fi
+
+  if [ ! -f $1 ]
+  then
+    error "$1 doesn't exist, but it's required. Aborting" $ERR_REQUIRED_FILE
+  fi
+}
+
+# Function that writes the string in second parameter to file
+# specified in first parameter
+write_to_file() {
+  if [ $# -ne 2 ]
+  then
+    error $FUNCTION_ERR_MSG $EXIT_FATAL
+  fi
+
+  echo -e $2 > $1
+}
+
+# Function that appends the string in second parameter to file
+# specified in first parameter
+append_to_file() {
+  if [ $# -ne 2 ]
+  then
+    error $FUNCTION_ERR_MSG $EXIT_FATAL
+  fi
+
+  echo -e $2 >> $1
+}
+
+add_to_bashrc() {
+  if [ -z "$1" ]
+  then
+    error $FUNCTION_ERR_MSG $EXIT_FATAL
+  fi
+
+  append_to_file $HOME/.bashrc "$1"
+}
+# ---------- END: Auxiliary functions ------------

@@ -1,3 +1,6 @@
+#ifndef KS_SUDOKE_SOLVER_NAKED_SINGLE_QUEUE
+#define KS_SUDOKE_SOLVER_NAKED_SINGLE_QUEUE
+
 #include <sys/queue.h>
 
 /**
@@ -23,3 +26,4 @@ void print_naked_singles(void);
 
 void remove_first_naked_single(void);
 
+#endif

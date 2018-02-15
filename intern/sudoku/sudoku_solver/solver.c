@@ -1,5 +1,7 @@
 /**** DEV ****/
 #define KS_SUDOKU_DEBUG
+//#define KS_SUDOKU_DEBUG_UPDATE_POSSIBILITIES
+//#define KS_SUDOKU_DEBUG_HIDDEN_SINGLE_SEARCH
 /**** DEV *****/
 
 #ifdef KS_SUDOKU_DEBUG
@@ -115,7 +117,7 @@ void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
 			)
 			{
 
-#ifdef KS_SUDOKU_DEBUG
+#ifdef KS_SUDOKU_DEBUG_UPDATE_POSSIBILITIES
 				printf("update_possibilities_helper: skipping row: %zu, col: %zu\n"
 					"search_row_start: %zu\t search_row_end: %zu\n"
 					"search_col_start: %zu\t search_col_end: %zu\n",
@@ -135,14 +137,16 @@ void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
 				if (possible_values[search_row][search_col].possibilities == 1)
 				{
 
-#ifdef KS_SUDOKU_DEBUG
-					printf("update_possibilities_helper: only_possibility: %u for row: %zu, col: %zu\n", find_naked_single(possible_values, search_row, search_col), search_row, search_col);
+#ifdef KS_SUDOKU_DEBUG_UPDATE_POSSIBILITIES
+					printf("update_possibilities_helper: only_possibility: %u for row: %zu, col: %zu\n",
+						find_naked_single(possible_values, search_row, search_col),
+						search_row, search_col);
 #endif
 
 					insert_naked_single(search_row, search_col);
 				}
 
-#ifdef KS_SUDOKU_DEBUG
+#ifdef KS_SUDOKU_DEBUG_UPDATE_POSSIBILITIES
 				else if (possible_values[search_row][search_col].possibilities == 0)
 				{
 					fprintf(stderr, "update_possibilities_helper: incorrect move.\n");
@@ -156,8 +160,7 @@ void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
 				}
 				else
 				{
-					printf("update_possibilities_helper: %u possibilities for\n \
-						row: %zu, col: %zu\n",
+					printf("update_possibilities_helper: %u possibilities for row: %zu, col: %zu\n",
 						possible_values[search_row][search_col].possibilities,
 						search_row, search_col);
 				}
@@ -166,6 +169,10 @@ void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
 			}
 		}
 	}
+
+#ifdef KS_SUDOKU_DEBUG_UPDATE_POSSIBILITIES
+	printf("\n");
+#endif
 }
 
 /*
@@ -275,8 +282,8 @@ bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 
 		// search for hidden singles in rows
 
-#ifdef KS_SUDOKU_DEBUG
-		printf("solve_naked_singles: searching for hidden singles in rows for val: %u\n\n", val);
+#ifdef KS_SUDOKU_DEBUG_HIDDEN_SINGLE_SEARCH
+		printf("solve_naked_singles: searching for hidden singles in rows for val: %u\n", val);
 #endif
 
 		for (size_t row=0; row<TABLE_ORDER_MAX; row++)
@@ -289,8 +296,8 @@ bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 
 		// search for hidden singles in cols
 
-#ifdef KS_SUDOKU_DEBUG
-		printf("solve_naked_singles: searching for hidden singles in cols for val: %u\n\n", val);
+#ifdef KS_SUDOKU_DEBUG_HIDDEN_SINGLE_SEARCH
+		printf("solve_naked_singles: searching for hidden singles in cols for val: %u\n", val);
 #endif
 
 		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
@@ -303,8 +310,8 @@ bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 
 		// search for hidden singles in squares
 
-#ifdef KS_SUDOKU_DEBUG
-		printf("solve_naked_singles: searching for hidden singles in squares for val: %u\n\n", val);
+#ifdef KS_SUDOKU_DEBUG_HIDDEN_SINGLE_SEARCH
+		printf("solve_naked_singles: searching for hidden singles in squares for val: %u\n", val);
 #endif
 
 		for (size_t row=0; row<TABLE_ORDER_MAX; row+=SQUARE_DIMENSION)
@@ -318,6 +325,10 @@ bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 			}
 		}
 	}
+
+#ifdef KS_SUDOKU_DEBUG
+	printf("\n");
+#endif
 
 	return found_hidden_single;
 }
@@ -354,7 +365,7 @@ void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX]
 			printf("%zu\t%zu\n", print_curr->row, print_curr->col);
 			print_curr = STAILQ_NEXT(print_curr, entries);
 		}
-		printf("\n\n");
+		printf("\n");
 #endif
 
 		free(curr);
@@ -365,20 +376,26 @@ void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 	   struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
     bool found_hidden_single = false;
+
+#ifdef KS_SUDOKU_DEBUG
+    unsigned round = 1;
+#endif
+
     do
     {
 	solve_naked_singles(sudoku_table, possible_values);
 
 #ifdef KS_SUDOKU_DEBUG
-	printf("solve: possibility vectors after initally trying to solve 'naked_singles':\n");
+	printf("solve: Possibility vectors after trying to solve 'naked singles' in round: %u:\n",
+		round);
 	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
 	{
 		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
 		{
 			if (sudoku_table[row][col] == 0)
 			{
-				printf("solve_sudoku: %u possible values for\n"
-					"row: %zu, col: %zu\n", possible_values[row][col].possibilities,
+				printf("solve_sudoku: %u possible values for row: %zu, col: %zu\n",
+					possible_values[row][col].possibilities,
 					row, col);
 				for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
 				{
@@ -396,27 +413,38 @@ void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 	found_hidden_single = solve_hidden_singles(sudoku_table, possible_values);
 
 #ifdef KS_SUDOKU_DEBUG
-	printf("solve: possibility vectors after initally trying to solve 'hidden singles':\n");
-	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
+	if (found_hidden_single)
 	{
-		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
+		printf("solve: Possibility vectors after trying to solve 'hidden singles' in round: %u:\n",
+			round);
+
+		for (size_t row=0; row<TABLE_ORDER_MAX; row++)
 		{
-			if (sudoku_table[row][col] == 0)
+			for (size_t col=0; col<TABLE_ORDER_MAX; col++)
 			{
-				printf("solve_sudoku: %u possible values for\n"
-					"row: %zu, col: %zu\n", possible_values[row][col].possibilities,
-					row, col);
-				for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
+				if (sudoku_table[row][col] == 0)
 				{
-					if (possible_values[row][col].possible[value] == true)
+					printf("solve_sudoku: %u possible values for row: %zu, col: %zu\n",
+						possible_values[row][col].possibilities,
+						row, col);
+					for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
 					{
-						printf("%zu\t", value);
+						if (possible_values[row][col].possible[value] == true)
+						{
+							printf("%zu\t", value);
+						}
 					}
+					printf("\n\n");
 				}
-				printf("\n\n");
 			}
 		}
 	}
+	else
+	{
+		printf("solve: No hidden single found in round: %u.\n", round);
+	}
+
+	round++;
 #endif
 
     } while (found_hidden_single == true);
@@ -528,7 +556,7 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 	printf("solve_sudoku: 'sudoku_table' obtained as input\n");
 	print_table(sudoku_table);
 
-	printf("solve_sudoku: possibility vectors:\n");
+	printf("solve_sudoku: Possibility vectors:\n");
 #endif
 
 	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
@@ -570,7 +598,7 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 		printf("%zu\t%zu\n", curr->row, curr->col);
 		curr = STAILQ_NEXT(curr, entries);
 	}
-	printf("\n\n");
+	printf("\n");
 #endif
 
 	solve(sudoku_table, possible_values);

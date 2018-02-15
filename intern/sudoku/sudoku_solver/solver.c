@@ -95,7 +95,6 @@ static void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
 
 		unsigned naked_single = find_naked_single(possible_values, curr->row, curr->col);
 		sudoku_table[curr->row][curr->col] = naked_single;
-		possible_values[curr->row][curr->col].possibilities--; // not of much use as it zeros the result (possibly helpful for debugging)
 
 #ifdef KS_SUDOKU_DEBUG
 		printf("solve_naked_singles: only possibility %u for row: %zu, col: %zu\n",

@@ -278,7 +278,7 @@ bool solve_hidden_singles_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
   * This might help in identifying other possibilities such as "naked singles",
   * "naked doubles" or even other "hidden singles".
   *
-  * This is to done by identifying values which occur only once in a 'row' ('col' or 'square')
+  * This is done by identifying values which occur only once in a 'row' ('col' or 'square')
   * and filling that cell with that value and correspindingly updating the possibilities.
   */
 bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
@@ -340,6 +340,7 @@ bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
 /**
   * Solve (fill in) the "naked single" possibilities in the sudoku table.
   * The 'possible_entries' table should be initialized for the given 'sudoku_table'.
+  * The moves are obtained from the tail-queue whose head is 'naked_singles_head'.
   */
 void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 			 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])

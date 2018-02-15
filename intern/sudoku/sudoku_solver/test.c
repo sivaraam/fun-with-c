@@ -4,7 +4,8 @@
 void print_welcome_message(void)
 {
 	printf("\n\tWelcome to the Sudoku solver!\n");
-	printf("\nIt tries to solve sudoku by identifying and filling forced cells.\n\n");
+	printf("\nIt tries to solve sudoku by using the following techniques:\n\n");
+	printf("\t1. Naked single detection\n\t2. Hidden single detection\n\n");
 	printf("Enter a VALID sudoku table:\n");
 	printf("A VALID sudoku table satisfies the following criteria\n");
 	printf("\t- It is a 9*9 table\n");
@@ -35,7 +36,7 @@ void print_solution(unsigned int table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 		}
 		printf("\n");
 	}
-	printf("Note: Solutions might be partial if the table cannot be solved using \"forced cell\" moves alone.\n");
+	printf("Note: Solutions might be partial if the table cannot be solved using techniques mentioned before.\n");
 }
 
 int main(void)

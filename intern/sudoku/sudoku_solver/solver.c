@@ -36,7 +36,9 @@ static bool solve_naked_doubles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
 				break;
 			}
 
-			ssize_t second_double_col = first_double_col+1;
+			ssize_t second_double_col = find_double(sudoku_table, possible_values,
+								row, first_double_col+1);
+			ssize_t next_first_second_double = second_double_col; // next value to try for 'first_double_col'
 
 			while (second_double_col != -1 && second_double_col<TABLE_ORDER_MAX)
 			{
@@ -61,7 +63,7 @@ static bool solve_naked_doubles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
 				second_double_col++;
 			}
 
-			first_double_col++;
+			first_double_col = next_first_second_double;
 		}
 	}
 

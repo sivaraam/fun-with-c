@@ -17,7 +17,7 @@
   * This might help in identifying other possibilities such as "naked singles",
   * "naked doubles" or even other "hidden singles".
   *
-  * This is done by identifying values which occur only once in a 'row' ('col' or 'square')
+  * This is done by identifying values which occur only once in a group (row, column or square)
   * and filling that cell with that value and correspindingly updating the possibilities.
   */
 static bool solve_hidden_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],

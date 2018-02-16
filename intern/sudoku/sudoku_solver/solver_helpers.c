@@ -266,3 +266,60 @@ void initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
 					  top_left_row, top_left_row+SQUARE_DIMENSION-1,
 					  top_left_col, top_left_col+SQUARE_DIMENSION-1);
 }
+
+ssize_t find_double(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+		    struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+		    size_t row, size_t col)
+{
+
+#ifndef KS_SUDOKU_DEBUG
+	if (col >= TABLE_ORDER_MAX || row >= TABLE_ORDER_MAX)
+	{
+		fprintf(stderr, "find_double: Invalid cell to start from row: %zu, col: %zu",
+			row, col);
+		exit(EXIT_FAILURE);
+	}
+#endif
+
+	for (; col<TABLE_ORDER_MAX; col++)
+	{
+		if (sudoku_table[row][col] == 0)
+		{
+			if (possible_values[row][col].possibilities == 2)
+			{
+				return col;
+			}
+		}
+	}
+
+	return -1;
+}
+
+bool same_dual_possibility(struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+			   size_t row_1, size_t col_1,
+			   size_t row_2, size_t col_2)
+{
+
+#ifdef KS_SUDOKU_DEBUG
+	if (possible_values[row_1][col_2].possibilities != 2 ||
+	    possible_values[row_2][col_2].possibilities != 2)
+	{
+		fprintf(stderr, "same_dual_possibility: Invalid cells.\n");
+		fprintf(stderr, "same_dual_possibility: row_1: %zu, col_1: %zu\n", row_1, col_1);
+		fprintf(stderr, "same_dual_possibility: row_2: %zu, col_2: %zu\n", row_2, col_2);
+		fprintf(stderr, "same_dual_possibility: At least one cell doesn't have 2 possibilities\n");
+		exit(EXIT_FAILURE);
+	}
+#endif
+
+	for (unsigned val=MIN_VALUE; val<=MAX_VALUE; val++)
+	{
+		if (possible_values[row_1][col_1].possible[val] == true &&
+		    possible_values[row_2][col_2].possible[val] == false)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}

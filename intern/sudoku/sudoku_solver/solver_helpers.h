@@ -58,4 +58,21 @@ void initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
 				struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 				size_t row, size_t col);
 
+/**
+  * Finds a cell with two possibilities in a given row and returns the corresponding column.
+  * If no such cell is found returns -1.
+  * The search starts from 'col'.
+  */
+ssize_t find_double(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+		    struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+		    size_t row, size_t col);
+
+/**
+  * Returns 'true' if two cells have the same dual possibility.
+  * Else returns 'false'.
+  */
+bool same_dual_possibility(struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+			   size_t row_1, size_t col_1,
+			   size_t row_2, size_t col_2);
+
 #endif

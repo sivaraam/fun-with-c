@@ -13,6 +13,62 @@
 #include "solver_helpers.h"
 
 /**
+  * Idenitfy the "naked doubles" in a group (row, column or square) and update
+  * the corresponding group to remove them as possibilities.
+  * This might reveal other possibilities such as "naked singles", "hidden signles"
+  * or even other "naked doubles".
+  */
+static bool solve_naked_doubles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+				struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
+{
+	bool found_naked_double = false;
+
+	// search for naked doubles in rows
+	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
+	{
+		ssize_t first_double_col = 0;
+		while (first_double_col != -1 && first_double_col<TABLE_ORDER_MAX)
+		{
+			first_double_col = find_double(sudoku_table, possible_values, row, first_double_col);
+
+			if (first_double_col == -1)
+			{
+				break;
+			}
+
+			ssize_t second_double_col = first_double_col+1;
+
+			while (second_double_col != -1 && second_double_col<TABLE_ORDER_MAX)
+			{
+				second_double_col = find_double(sudoku_table, possible_values, row, second_double_col);
+
+				if (second_double_col == -1)
+				{
+					break;
+				}
+
+				if (same_dual_possibility(possible_values, row, first_double_col, row, second_double_col))
+				{
+
+#ifdef KS_SUDOKU_DEBUG
+					printf("solve_naked_doubles: found naked double row_1: %zu, col_1: %zu; row_2: %zu, col_2: %zu\n",
+						row, first_double_col, row, second_double_col);
+#endif
+
+					found_naked_double = true;
+				}
+
+				second_double_col++;
+			}
+
+			first_double_col++;
+		}
+	}
+
+	return found_naked_double;
+}
+
+/**
   * Identify the "hidden singles" and solve (fill in) them.
   * This might help in identifying other possibilities such as "naked singles",
   * "naked doubles" or even other "hidden singles".
@@ -116,7 +172,7 @@ static void solve_naked_singles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
 static void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 	   struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
-    bool found_hidden_single = false;
+    bool try_next_round = false;
 
 #ifdef KS_SUDOKU_DEBUG
     unsigned round = 1;
@@ -151,10 +207,10 @@ static void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 	}
 #endif
 
-	found_hidden_single = solve_hidden_singles(sudoku_table, possible_values);
+	try_next_round = solve_hidden_singles(sudoku_table, possible_values);
 
 #ifdef KS_SUDOKU_DEBUG
-	if (found_hidden_single)
+	if (try_next_round)
 	{
 		printf("solve: Possibility vectors after trying to solve 'hidden singles' in round: %u:\n",
 			round);
@@ -186,9 +242,11 @@ static void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 	}
 
 	round++;
+	print_table(sudoku_table);
 #endif
+	solve_naked_doubles(sudoku_table, possible_values);
 
-    } while (found_hidden_single == true);
+    } while (try_next_round == true);
 
 }
 

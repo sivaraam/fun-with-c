@@ -183,26 +183,7 @@ static void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 #ifdef KS_SUDOKU_DEBUG
 	printf("solve: Possibility vectors after trying to solve 'naked singles' in round: %u:\n",
 		round);
-	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
-	{
-		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
-		{
-			if (sudoku_table[row][col] == 0)
-			{
-				printf("solve_sudoku: %u possible values for row: %zu, col: %zu\n",
-					possible_values[row][col].possibilities,
-					row, col);
-				for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
-				{
-					if (possible_values[row][col].possible[value] == true)
-					{
-						printf("%zu\t", value);
-					}
-				}
-				printf("\n\n");
-			}
-		}
-	}
+	print_possibility_vector(sudoku_table, possible_values);
 #endif
 
 	bool found_hidden_single = solve_hidden_singles(sudoku_table, possible_values);
@@ -212,27 +193,7 @@ static void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 	{
 		printf("solve: Possibility vectors after trying to solve 'hidden singles' in round: %u:\n",
 			round);
-
-		for (size_t row=0; row<TABLE_ORDER_MAX; row++)
-		{
-			for (size_t col=0; col<TABLE_ORDER_MAX; col++)
-			{
-				if (sudoku_table[row][col] == 0)
-				{
-					printf("solve_sudoku: %u possible values for row: %zu, col: %zu\n",
-						possible_values[row][col].possibilities,
-						row, col);
-					for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
-					{
-						if (possible_values[row][col].possible[value] == true)
-						{
-							printf("%zu\t", value);
-						}
-					}
-					printf("\n\n");
-				}
-			}
-		}
+		print_possibility_vector(sudoku_table, possible_values);
 	}
 	else
 	{
@@ -243,7 +204,12 @@ static void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 	bool found_naked_double = solve_naked_doubles(sudoku_table, possible_values);
 
 #ifdef KS_SUDOKU_DEBUG
-	if (!found_naked_double)
+	if (found_naked_double)
+	{
+		printf("solve: Possibility vectors after trying to solve 'naked doubles' in round: %u:\n", round);
+		print_possibility_vector(sudoku_table, possible_values);
+	}
+	else
 	{
 		printf("solve: No 'naked double' found in round: %u.\n", round);
 	}
@@ -267,8 +233,6 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 	printf("\n");
 	printf("solve_sudoku: 'sudoku_table' obtained as input\n");
 	print_table(sudoku_table);
-
-	printf("solve_sudoku: Possibility vectors:\n");
 #endif
 
 	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
@@ -279,18 +243,6 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 			{
 				// initialise the possible values
 				initialise_possible_values(sudoku_table, possible_values, row, col);
-
-#ifdef KS_SUDOKU_DEBUG
-				printf("solve_sudoku: %u possible values for row: %zu, col: %zu\n", possible_values[row][col].possibilities, row, col);
-				for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
-				{
-					if (possible_values[row][col].possible[value] == true)
-					{
-						printf("%zu\t", value);
-					}
-				}
-				printf("\n\n");
-#endif
 
 				// This could also be done in 'initialise_possible_values_helper'.
 				// But doing this here saves us some unwanted checking.
@@ -303,7 +255,11 @@ void solve_sudoku(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 	}
 
 #ifdef KS_SUDOKU_DEBUG
+	printf("solve_sudoku: Possibility vector after initialization:\n");
+	print_possibility_vector(sudoku_table, possible_values);
+
 	printf("solve_sudoku: Naked single possibilities:\n");
+	print_naked_singles();
 	printf("\n");
 #endif
 

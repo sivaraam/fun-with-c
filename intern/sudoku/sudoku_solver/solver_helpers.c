@@ -36,12 +36,11 @@ unsigned find_naked_single(struct possible_entries possible_values[TABLE_ORDER_M
   * Used to avoid redundancy in the 'update_possibility' function.
   */
 static void update_possibilities_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
-				 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
-				 size_t row, size_t col, unsigned val,
-				 size_t search_row_start, size_t search_row_end,
-				 size_t search_col_start, size_t search_col_end)
+					 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+					 size_t row, size_t col, unsigned val,
+					 size_t search_row_start, size_t search_row_end,
+					 size_t search_col_start, size_t search_col_end)
 {
-	// search the remaining cells of the square for values which are not possible
 	for (size_t search_row=search_row_start; search_row<=search_row_end; search_row++)
 	{
 		for (size_t search_col=search_col_start; search_col<=search_col_end; search_col++)
@@ -473,10 +472,10 @@ bool solve_naked_doubles_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
   * Used to avoid redundancy in the 'initialise_possible_values' function.
   */
 static void initialise_possible_values_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
-				       struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
-				       size_t row, size_t col,
-				       size_t search_row_start, size_t search_row_end,
-				       size_t search_col_start, size_t search_col_end)
+					       struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+					       size_t row, size_t col,
+					       size_t search_row_start, size_t search_row_end,
+					       size_t search_col_start, size_t search_col_end)
 {
 	for (size_t search_row=search_row_start; search_row<=search_row_end; search_row++)
 	{
@@ -554,30 +553,30 @@ void initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
 					  top_left_col, top_left_col+SQUARE_DIMENSION-1);
 }
 
-ssize_t find_double(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
-		    struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
-		    size_t row, size_t col)
-{
-
 #ifdef KS_SUDOKU_DEBUG
-	if (col >= TABLE_ORDER_MAX || row >= TABLE_ORDER_MAX)
+void print_possibility_vector(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+			      struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
+{
+	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
 	{
-		fprintf(stderr, "find_double: Invalid cell to start from row: %zu, col: %zu",
-			row, col);
-		exit(EXIT_FAILURE);
-	}
-#endif
-
-	for (; col<TABLE_ORDER_MAX; col++)
-	{
-		if (sudoku_table[row][col] == 0)
+		for (size_t col=0; col<TABLE_ORDER_MAX; col++)
 		{
-			if (possible_values[row][col].possibilities == 2)
+			if (sudoku_table[row][col] == 0)
 			{
-				return col;
+				printf("print_possibility_vector: %u possible values for row: %zu, col: %zu\n",
+					possible_values[row][col].possibilities,
+					row, col);
+
+				for (size_t value=MIN_VALUE; value<=MAX_VALUE; value++)
+				{
+					if (possible_values[row][col].possible[value] == true)
+					{
+						printf("%zu\t", value);
+					}
+				}
+				printf("\n\n");
 			}
 		}
 	}
-
-	return -1;
 }
+#endif

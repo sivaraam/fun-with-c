@@ -20,8 +20,6 @@ unsigned find_naked_single(struct possible_entries possible_values[TABLE_ORDER_M
  *                    sudoku board.
  *  (row, col) - the cell due to which the update is being performed
  *  val - the value being inserted into (row, col)
- *  (search_row_start, search_row_end) - the range of rows which must be updated
- *  (search_col_start, search_col_end) - the range of colums which must be updated
  */
 void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 			  struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
@@ -31,15 +29,15 @@ void update_possibilities(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX
   * Helper function to avoid redundancy in the 'solve_naked_singles' function.
   *
   * sudoku_table - the table containing the sudoku board
-  *  possible_values - lookup table for possible values of different cells in the
+  * possible_values - lookup table for possible values of different cells in the
   *                    sudoku board.
-  *  (search_row_start, search_row_end) - the range of rows which must be searched
+  * (search_row_start, search_row_end) - the range of rows which must be searched
                                           for a "hidden single"
-  *  (search_col_start, search_col_end) - the range of colums which must be searched
+  * (search_col_start, search_col_end) - the range of colums which must be searched
                                           for a "hidden single"
   * val - the "hidden single" value which is being searched for
   *
-  * Returns true if the 'val' is found as a hidden single in the search space.
+  * Returns true if the 'val' is found as a "hidden single" in the search space.
   */
 bool solve_hidden_singles_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 				 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
@@ -93,12 +91,12 @@ void initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
 				struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 				size_t row, size_t col);
 
+#ifdef KS_SUDOKU_DEBUG
 /**
-  * Finds a cell with two possibilities in a given row and returns the corresponding column.
-  * If no such cell is found returns -1.
-  * The search starts from 'col'.
+  * Print the given possibility vector for the sudoku table.
   */
-ssize_t find_double(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
-		    struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
-		    size_t row, size_t col);
+void print_possibility_vector(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+			      struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX]);
+#endif
+
 #endif

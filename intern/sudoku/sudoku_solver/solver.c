@@ -24,46 +24,44 @@ static bool solve_naked_doubles(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
 	bool found_naked_double = false;
 
 	// search for naked doubles in rows
-	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
-	{
-		ssize_t first_double_col = 0;
-		while (first_double_col != -1 && first_double_col<TABLE_ORDER_MAX)
-		{
-			first_double_col = find_double(sudoku_table, possible_values, row, first_double_col);
 
-			if (first_double_col == -1)
-			{
-				break;
-			}
-
-			ssize_t second_double_col = find_double(sudoku_table, possible_values,
-								row, first_double_col+1);
-			ssize_t next_first_second_double = second_double_col; // next value to try for 'first_double_col'
-
-			while (second_double_col != -1 && second_double_col<TABLE_ORDER_MAX)
-			{
-				second_double_col = find_double(sudoku_table, possible_values, row, second_double_col);
-
-				if (second_double_col == -1)
-				{
-					break;
-				}
-
-				if (same_dual_possibility(possible_values, row, first_double_col, row, second_double_col))
-				{
-
-#ifdef KS_SUDOKU_DEBUG
-					printf("solve_naked_doubles: found naked double row_1: %zu, col_1: %zu; row_2: %zu, col_2: %zu\n",
-						row, first_double_col, row, second_double_col);
+#ifdef KS_SUDOKU_DEBUG_NAKED_DOUBLE_SEARCH
+	printf("solve_naked_doubles: searching for naked doubles in rows\n");
 #endif
 
-					found_naked_double = true;
-				}
+	for (size_t row=0; row<TABLE_ORDER_MAX; row++)
+	{
+		found_naked_double |= solve_naked_doubles_helper(sudoku_table, possible_values,
+								row, row,
+								0, TABLE_ORDER_MAX-1);
+	}
 
-				second_double_col++;
-			}
+	// search for naked doubles in cols
 
-			first_double_col = next_first_second_double;
+#ifdef KS_SUDOKU_DEBUG_NAKED_DOUBLE_SEARCH
+	printf("solve_naked_doubles: searching for naked doubles in cols\n");
+#endif
+
+	for (size_t col=0; col<TABLE_ORDER_MAX; col++)
+	{
+		found_naked_double |= solve_naked_doubles_helper(sudoku_table, possible_values,
+								0, TABLE_ORDER_MAX-1,
+								col, col);
+	}
+
+#ifdef KS_SUDOKU_DEBUG_NAKED_DOUBLE_SEARCH
+	printf("solve_naked_doubles: searching for naked doubles in squares\n");
+#endif
+
+	// search for naked doubles in squares
+
+	for (size_t row=0; row<TABLE_ORDER_MAX; row+=SQUARE_DIMENSION)
+	{
+		for (size_t col=0; col<TABLE_ORDER_MAX; col+=SQUARE_DIMENSION)
+		{
+			found_naked_double |= solve_naked_doubles_helper(sudoku_table, possible_values,
+									 row, row+SQUARE_DIMENSION-1,
+									 col, col+SQUARE_DIMENSION-1);
 		}
 	}
 
@@ -175,10 +173,8 @@ static void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 	   struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX])
 {
     bool try_next_round = false;
-
-#ifdef KS_SUDOKU_DEBUG
     unsigned round = 1;
-#endif
+    static const unsigned round_limit = 100;
 
     do
     {
@@ -209,10 +205,10 @@ static void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 	}
 #endif
 
-	try_next_round = solve_hidden_singles(sudoku_table, possible_values);
+	bool found_hidden_single = solve_hidden_singles(sudoku_table, possible_values);
 
 #ifdef KS_SUDOKU_DEBUG
-	if (try_next_round)
+	if (found_hidden_single)
 	{
 		printf("solve: Possibility vectors after trying to solve 'hidden singles' in round: %u:\n",
 			round);
@@ -240,15 +236,23 @@ static void solve(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 	}
 	else
 	{
-		printf("solve: No hidden single found in round: %u.\n", round);
+		printf("solve: No 'hidden single' found in round: %u.\n", round);
 	}
-
-	round++;
-	print_table(sudoku_table);
 #endif
-	solve_naked_doubles(sudoku_table, possible_values);
 
-    } while (try_next_round == true);
+	bool found_naked_double = solve_naked_doubles(sudoku_table, possible_values);
+
+#ifdef KS_SUDOKU_DEBUG
+	if (!found_naked_double)
+	{
+		printf("solve: No 'naked double' found in round: %u.\n", round);
+	}
+#endif
+
+	try_next_round = found_hidden_single | found_naked_double;
+	round++;
+    } while (try_next_round == true &&
+	     (round <= round_limit)); // to avoid infinite looping due to repeated detection of "naked doubles"
 
 }
 

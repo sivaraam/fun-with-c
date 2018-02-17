@@ -6,7 +6,7 @@ void print_welcome_message(void)
 {
 	printf("\n\tWelcome to the Sudoku solver!\n");
 	printf("\nIt tries to solve sudoku by using the following techniques:\n\n");
-	printf("\t1. Naked single detection\n\t2. Hidden single detection\n\n");
+	printf("\t1. Naked single detection\n\t2. Hidden single detection\n\t3. Naked double detection\n\n");
 	printf("Enter a VALID sudoku table:\n");
 	printf("A VALID sudoku table satisfies the following criteria\n");
 	printf("\t- It is a 9*9 table\n");

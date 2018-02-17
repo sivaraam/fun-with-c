@@ -18,6 +18,7 @@
   *
   *    - Naked single detection
   *    - Hidden single detection
+  *    - Naked double detection
   *
   * Note: The resulting solved table is stored in the table given as input.
   */

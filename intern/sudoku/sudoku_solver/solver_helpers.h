@@ -1,6 +1,7 @@
 #ifndef KS_SUDOKU_SOLVER_SOLVER_HELPERS
 #define KS_SUDOKU_SOLVER_SOLVER_HELPERS
 
+#include <sys/types.h>
 #include <stddef.h>
 #include "common.h"
 #include "sudoku_solver.h"
@@ -46,6 +47,40 @@ bool solve_hidden_singles_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_OR
 				 size_t search_col_start, size_t search_col_end,
 				 unsigned val);
 
+/*
+ * Update the possibilities of cells as a consequence of detecting a naked double pair
+ * {(row_1, col_1), (row_2, col_2)}.
+ *
+ *  sudoku_table - the table containing the sudoku board
+ *  possible_values - lookup table for possible values of different cells in the
+ *                    sudoku board.
+ *  (row_1, col_1; row_2, col_2) - the naked double pair due to which the update is being performed
+ *  doubles - the values in the naked double pair
+ */
+void update_possibilities_1(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+			  struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+			  size_t row_1, size_t col_1,
+			  size_t row_2, size_t col_2,
+			  struct naked_double_values doubles);
+
+/**
+  * Helper function to avoid redundancy in the 'solve_naked_doubles' function.
+  *
+  * sudoku_table - the table containing the sudoku board
+  * possible_values - lookup table for possible values of different cells in the
+  *                    sudoku board.
+  * (search_row_start, search_row_end) - the range of rows which must be searched
+                                          for a "naked double"
+  * (search_col_start, search_col_end) - the range of colums which must be searched
+                                          for a "naked double"
+  *
+  * Returns true if a "naked double" was found in the search space.
+  */
+bool solve_naked_doubles_helper(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+				 struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
+				 size_t search_row_start, size_t search_row_end,
+				 size_t search_col_start, size_t search_col_end);
+
 /**
   * Initialise 'possible_entries' with values that are possible for a given sudoku cell.
   * Obviously the cell is expected not to be an already filled one.
@@ -66,13 +101,4 @@ void initialise_possible_values(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORD
 ssize_t find_double(unsigned sudoku_table[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 		    struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
 		    size_t row, size_t col);
-
-/**
-  * Returns 'true' if two cells have the same dual possibility.
-  * Else returns 'false'.
-  */
-bool same_dual_possibility(struct possible_entries possible_values[TABLE_ORDER_MAX][TABLE_ORDER_MAX],
-			   size_t row_1, size_t col_1,
-			   size_t row_2, size_t col_2);
-
 #endif

@@ -10,7 +10,9 @@
 #define SQUARE_DIMENSION 3
 
 /**** DEV ****/
-#define KS_SUDOKU_DEBUG
+//#define KS_SUDOKU_DEBUG
+//#define KS_SUDOKU_DEBUG_NAKED_DOUBLE_SEARCH
+//#define KS_SUDOKU_DEBUG_UPDATE_POSSIBILITIES_1
 //#define KS_SUDOKU_DEBUG_UPDATE_POSSIBILITIES
 //#define KS_SUDOKU_DEBUG_HIDDEN_SINGLE_SEARCH
 /**** DEV *****/
@@ -26,6 +28,14 @@ struct possible_entries
 
 	// the number of possible values for a cell
 	unsigned possibilities;
+};
+
+/*
+ * Type to hold the naked double values.
+ */
+struct naked_double_values
+{
+	unsigned vals[2];
 };
 
 /**

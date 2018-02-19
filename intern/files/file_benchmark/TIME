@@ -1,0 +1,24 @@
+FILE_BENCHMARK:
+
+Attempt 1:
+real  0m1.121s
+user  0m0.052s
+sys 0m0.356s
+
+Attempt 2:
+real  0m0.997s
+user  0m0.120s
+sys 0m0.300s
+
+
+ARRAY_BENCHMARK:
+
+Attempt 1:
+real  0m0.893s
+user  0m0.100s
+sys 0m0.252s
+
+Attempt 2:
+real  0m0.886s
+user  0m0.088s
+sys 0m0.248s

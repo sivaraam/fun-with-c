@@ -11,7 +11,6 @@ int main(void)
   char *file_name = "find_op";
   char buf[10000+1];
   FILE *fp = fopen(file_name, "r");
-  unsigned long round = 1;
 
   struct lines *l = get_line_offsets(file_name);
 
@@ -25,7 +24,6 @@ int main(void)
     fgetc(fp);
 
     printf("%s\n", buf);
-    round++;
   }
 
   printf("\n");

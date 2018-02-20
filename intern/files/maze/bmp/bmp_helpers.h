@@ -18,6 +18,6 @@ unsigned find_padding(unsigned width);
  * width - width of the image
  * unsigned long N - the pixel required
  */
-char *get_pixel(char *image_data, unsigned long width, unsigned char padding, unsigned long N);
+unsigned char *get_pixel(unsigned char *image_data, unsigned long width, unsigned char padding, unsigned long N);
 
 #endif

@@ -12,7 +12,7 @@ unsigned find_padding(unsigned width)
   return padding_boundary-(row_size%4);
 }
 
-char *get_pixel(char *image_data, unsigned long width, unsigned char padding, unsigned long N)
+unsigned char *get_pixel(unsigned char *image_data, unsigned long width, unsigned char padding, unsigned long N)
 {
 
 #ifdef KS_BMP_HELPERS_DEBUG

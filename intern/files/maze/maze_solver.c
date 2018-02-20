@@ -1,33 +1,35 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "maze_solver.h"
 #include "bmp/bmp_helpers.h"
 
 #define KS_MAZE_SOLVER_DEBUG
 
-void solve_maze(unsigned char *maze_image, unsigned width, unsigned height)
+void solve_maze(struct maze_image *maze)
 {
 	// find the padding
-	unsigned long padding = find_padding(width);
+	maze->padding = find_padding(maze->width);
 
 #ifdef KS_MAZE_SOLVER_DEBUG
-	printf("padding: %lu bytes\n", padding);
+	printf("padding: %u bytes\n", maze->padding);
 #endif
 
 	// find the image data size
-	unsigned long image_data_size = (height*width*bytes_per_pixel)+(padding*height); // a way to find data size without file size
+	const unsigned long image_data_size = (maze->height*maze->width*bytes_per_pixel) +
+					      (maze->padding*maze->height); // a way to find data size without file size
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	printf("Size of image data: %lu\n", image_data_size);
 
 	printf("ASCII art image of maze:\n");
-	for (unsigned long pixel=0; pixel<width*height; pixel++)
+	for (unsigned long pixel=0; pixel<maze->width*maze->height; pixel++)
 	{
-		if (pixel%width == 0)
+		if (pixel%maze->width == 0)
 		{
 			printf("\n");
 		}
 		
-		unsigned char *pixel_ptr = get_pixel(maze_image, width, padding, pixel);
+		unsigned char *pixel_ptr = get_pixel(maze->data, maze->width, maze->padding, pixel);
 		
 		if ((*pixel_ptr&0xFF) == 0xFF)
 		{

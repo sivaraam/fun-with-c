@@ -27,17 +27,24 @@ int main(int argc, char *argv[])
 
 	static const unsigned long width_offset = 18L,
 				   header_size = 54L;
-	unsigned width = 0, height = 0;
-	unsigned char *image = NULL;
+
+	// create the maze object
+	struct maze_image *maze = malloc(sizeof(struct maze_image));
+
+	if (maze == NULL)
+	{
+		fprintf(stderr, "Not enough memory to create maze object!\n");
+		return 1;
+	}
 
 	// get the image width and height
 	fseek(image_file, width_offset, SEEK_SET); // go to the offset of the image width
-	fread(&width, 4L, 1, image_file);
-	fread(&height, 4L, 1, image_file);
+	fread(&(maze->width), 4L, 1, image_file);
+	fread(&(maze->height), 4L, 1, image_file);
 
 #ifdef DEBUG
 	printf("Image dimensions (in pixels):\n");
-	printf("width: %u\t height: %u\n", width, height);
+	printf("width: %u\t height: %u\n", maze->width, maze->height);
 #endif
 
 	// find the image data size
@@ -50,9 +57,9 @@ int main(int argc, char *argv[])
 #endif
 
 	// allocate memory to read in the image
-	image = malloc(data_size);
+	maze->data = malloc(data_size);
 
-	if (image == NULL)
+	if (maze->data == NULL)
 	{
 		fprintf(stderr, "Not enough memory to read in image!\n");
 		exit(EXIT_FAILURE);
@@ -62,13 +69,15 @@ int main(int argc, char *argv[])
 	fseek(image_file, 54L, SEEK_SET);
 
 	// read the image
-	if (fread(image, data_size, 1, image_file) == 0)
+	if (fread(maze->data, data_size, 1, image_file) == 0)
 	{
 		fprintf(stderr, "Reading image failed!\n");
 		exit(EXIT_FAILURE);
 	}
 
-	solve_maze(image, width, height);
+	solve_maze(maze);
 
-	free(image);
+	// free the memory
+	free(maze->data);
+	free(maze);
 }

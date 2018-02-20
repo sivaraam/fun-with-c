@@ -2,6 +2,7 @@
 
 #ifdef KS_BMP_HELPERS_DEBUG
 #include <stdio.h>
+#include <stdlib.h>
 #endif
 
 unsigned find_padding(unsigned width)

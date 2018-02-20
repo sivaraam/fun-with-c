@@ -43,14 +43,15 @@ struct lines *get_line_offsets(char *file_name)
   l->byte_offsets = NULL;
   unsigned long line = 0, position = 0;
 
-  // initial allocation
+  // initial allocation. assume it won't fail.
   re_allocate(&(l->byte_offsets), sizeof(unsigned long), initial_size);
 
   while (1)
   {
     *(l->byte_offsets+line) = position;
 
-    //get the next line and its position
+    // get the next line to find the position of the
+    // lline that follows
     int ch = 0;
     while ((ch = fgetc(fp)) != '\n' && ch != EOF);
 
@@ -73,7 +74,6 @@ struct lines *get_line_offsets(char *file_name)
         fprintf(stderr, "Could not get more memory to specify line offsets.");
         printf("realloc failed for new_limit: %zu\n", new_limit);
 #endif
-
         exit(EXIT_FAILURE);
       }
       else
@@ -86,7 +86,7 @@ struct lines *get_line_offsets(char *file_name)
   // There would be an entry for the last byte of the file
   // as the file is expected to end with a new line character
   //
-  // Hide that entry by not adding one to 'line' below.
+  // Hide that entry by not adding 1 to 'line' below.
   l->lines = line;
   return l;
 }

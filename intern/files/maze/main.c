@@ -8,12 +8,12 @@ int main(int argc, char *argv[])
 {
 	if (argc < 2)
 	{
-		printf("File name is required as first argument!\n");
+		fprintf(stderr, "File name is required as first argument!\n");
 		return 1;
 	}
 	else if (argc > 2)
 	{
-		printf("Too many arguments.\n");
+		fprintf(stderr, "Too many arguments.\n");
 		return 1;
 	}
 
@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 
 	if (image_file == NULL)
 	{
-		printf("Could not open the file!");
+		fprintf(stderr, "Could not open the file!");
 		return 1;
 	}
 
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 	if (maze->data == NULL)
 	{
 		fprintf(stderr, "Not enough memory to read in image!\n");
-		exit(EXIT_FAILURE);
+		return 1;
 	}
 
 	// skip past the header
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 	if (fread(maze->data, data_size, 1, image_file) == 0)
 	{
 		fprintf(stderr, "Reading image failed!\n");
-		exit(EXIT_FAILURE);
+		return 1;
 	}
 
 	solve_maze(maze);

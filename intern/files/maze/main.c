@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 
 	if (image_file == NULL)
 	{
-		fprintf(stderr, "Could not open the file!");
+		fprintf(stderr, "Could not open the file!\n");
 		return 1;
 	}
 

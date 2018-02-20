@@ -1,6 +1,8 @@
 #ifndef KS_BMP_HELPERS
 #define KS_BMP_HELPERS
 
+#define KS_BMP_HELPERS_DEBUG
+
 static const unsigned bytes_per_pixel = 3;
 
 /**

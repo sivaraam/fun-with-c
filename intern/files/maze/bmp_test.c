@@ -1,30 +1,51 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define PIXEL_PER_ROW 41
+#include "bmp/bmp_helpers.h"
 
+#define DEBUG
+
+#ifdef DEBUG
 /**
- * Find the number of bytes of possible padding
- * for a BMP image given its width.
+ * Checks whether the given image data size matches the value of
+ * '<file_size> - <header_size>'.
+ *
+ * Returns 0 on success and non-zero value on failure.
  */
-unsigned find_padding(unsigned width)
+int check_image_data_size(FILE *image_file, unsigned long image_header_size, unsigned long image_data_size)
 {
-  static const unsigned byte_per_pixel = 3, padding_boundary = 4;
-  const unsigned row_size = width*byte_per_pixel;
+  long old_pos = ftell(image_file); // save old position
 
-  return padding_boundary-(row_size%4);
-}
-
-int main(void)
-{
-  FILE *fp = fopen("test_inputs/BMP3.bmp", "r");
-  unsigned width=0, height=0;
-
-  struct pixel
+  fseek(image_file, 0, SEEK_END);
+  const long file_size = ftell(image_file);
+  if (file_size-image_header_size == image_data_size)
   {
-    unsigned char red;  // expect char to be 8 bits
-    unsigned char green;
-    unsigned char blue;
-  } row[PIXEL_PER_ROW] = {0};
+    printf("Value of image data size matches <file_size>-<header_size>.\n");
+    fseek(image_file, old_pos, SEEK_SET);
+    return 0;
+  }
+  else
+  {
+    fprintf(stderr, "Image data size didn't match <file_size>-<header_size>!\n");
+    return 1;
+  }
+
+}
+#endif
+
+int main(int argc, char *argv[])
+{
+  if (argc < 2)
+  {
+    printf("File name is required as first argument!\n");
+    return 1;
+  }
+  else if (argc > 2)
+  {
+    printf("Too many arguments.\n");
+    return 1;
+  }
+
+  FILE *fp = fopen(argv[1], "r");
 
   if (fp == NULL)
   {
@@ -32,10 +53,12 @@ int main(void)
     return 1;
   }
 
-  // get the image width and height
+  static const unsigned long width_offset = 18L;
+  unsigned width=0, height=0;
+  unsigned char *image = NULL;
 
-  // go to the offset of the image width
-  fseek(fp, 18L, SEEK_SET);
+  // get the image width and height
+  fseek(fp, width_offset, SEEK_SET); // go to the offset of the image width
   fread(&width, 4L, 1, fp);
   fread(&height, 4L, 1, fp);
   printf("Image dimensions (in pixels):\n");
@@ -43,30 +66,69 @@ int main(void)
 
   // find the padding
   unsigned long padding = find_padding(width);
-  printf("padding: %u bytes\n", find_padding(width));
+  printf("padding: %lu bytes\n", padding);
 
-  void *padding_bytes = malloc(padding);
+  // find the image data size
+  unsigned long image_data_size = (height*width*bytes_per_pixel)+(padding*height);
+  printf("Size of image data: %lu\n", image_data_size);
+
+#ifdef DEBUG
+  if (check_image_data_size(fp, 54L, image_data_size))
+  {
+    fprintf(stderr, "Assumption failed!\n");
+    return 1;
+  }
+#endif
+
+  // allocate memory to read in the image
+  image = malloc(image_data_size);
+
+  if (image == NULL)
+  {
+    fprintf(stderr, "Not enough memory to read in image!\n");
+    exit(EXIT_FAILURE);
+  }
 
   // skip past the header
   fseek(fp, 54L, SEEK_SET);
 
-  printf("sizeof(struct pixel): %zu\n", sizeof(struct pixel));
-
-  for (size_t i=0; i<2; i++)
+  // read the image
+  if (fread(image, image_data_size, 1, fp) == 0)
   {
-    printf("Pixel row %zu:\n", i+1);
-
-    // read a row
-    fread(row, 3L, PIXEL_PER_ROW, fp);
-
-    // read in the padding
-    fread(&padding, padding, 1, fp);
-
-    for (size_t i=0; i<PIXEL_PER_ROW; i++)
-    {
-      printf("pixel %03zu -> red: %02x, green: %02x, blue: %02x\n", i, row[i].red, row[i].green, row[i].blue);
-    }
-
-    printf("\n");
+    fprintf(stderr, "Reading image failed!\n");
+    exit(EXIT_FAILURE);
   }
+
+#ifdef DEBUG
+  unsigned row = 1;
+  for (unsigned long pixel=0; pixel<width*height; pixel++)
+  {
+    if (pixel%width == 0)
+    {
+      printf("\n");
+    }
+/*  if (pixel%width == 0)
+    {
+      printf("Row %u:\n", row++);
+    }
+*/
+    char *pixel_ptr = get_pixel(image, width, padding, pixel);
+
+    if ((*pixel_ptr&0xFF) == 0xFF)
+    {
+      printf(" ");
+    }
+    else if ((*pixel_ptr&0x00) == 0x00)
+    {
+      printf("\u2588");
+    }
+    else
+    {
+      fprintf(stderr, "Unexpected Hex!!\n");
+      exit(EXIT_FAILURE);
+    }
+//    printf("Pixel %04lu -> red: %x, green: %02x, blue: %02x\n", pixel, *pixel_ptr, *(pixel_ptr+1), *(pixel_ptr+2));
+  }
+  printf("\n");
+#endif
 }

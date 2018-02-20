@@ -28,7 +28,7 @@ static long find_gate(struct maze_image *maze, unsigned start_pixel, unsigned en
 	{
 		unsigned char *pixel_ptr = maze->data+get_pixel_offset(maze->width, maze->padding, pixel);
 
-		if (*pixel_ptr&CLEAR_PIXEL)
+		if ((*pixel_ptr&CLEAR_PIXEL) == CLEAR_PIXEL)
 		{
 
 #ifdef KS_MAZE_SOLVER_DEBUG
@@ -89,11 +89,11 @@ void print_ascii_maze(struct maze_image *maze)
 		
 		unsigned char *pixel_ptr = maze->data+get_pixel_offset(maze->width, maze->padding, pixel);
 		
-		if ((*pixel_ptr&0xFF) == 0xFF)
+		if ((*pixel_ptr&CLEAR_PIXEL) == CLEAR_PIXEL)
 		{
 			printf(" ");
 		}
-		else if ((*pixel_ptr&0x00) == 0x00)
+		else if ((*pixel_ptr&HURDLE_PIXEL) == HURDLE_PIXEL)
 		{
 			printf("\u2588"); // unicode block character
 		}

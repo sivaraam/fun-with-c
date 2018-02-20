@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "maze_solver.h"
 #include "bmp/bmp_helpers.h"
+#include "common.h"
+#include "maze_solver.h"
+#include "maze_solver_helpers.h"
 
-#define KS_MAZE_SOLVER_DEBUG
-
-void solve_maze(struct maze_image *maze)
+int solve_maze(struct maze_image *maze)
 {
 	// find the padding
 	maze->padding = find_padding(maze->width);
@@ -22,30 +22,21 @@ void solve_maze(struct maze_image *maze)
 	printf("Size of image data: %lu\n", image_data_size);
 
 	printf("ASCII art image of maze:\n");
-	for (unsigned long pixel=0; pixel<maze->width*maze->height; pixel++)
+	print_ascii_maze(maze);
+#endif
+
+	struct openings *o = find_openings(maze);
+
+	if (o == NULL)
 	{
-		if (pixel%maze->width == 0)
-		{
-			printf("\n");
-		}
-		
-		unsigned char *pixel_ptr = get_pixel(maze->data, maze->width, maze->padding, pixel);
-		
-		if ((*pixel_ptr&0xFF) == 0xFF)
-		{
-			printf(" ");
-		}
-		else if ((*pixel_ptr&0x00) == 0x00)
-		{
-			printf("\u2588"); // unicode block character
-		}
-		else
-		{
-			fprintf(stderr, "Unexpected Hex!!\n");
-			exit(EXIT_FAILURE);
-		}
+		fprintf(stderr, "Could not find openings for the given image!\n");
+		return ERROPENINGS;
 	}
 
-	printf("\n");
+#ifdef KS_MAZE_SOLVER_DEBUG
+	printf("Start gate pixel: %u\t End gate pixel: %u\n",
+		o->start_gate_pixel, o->end_gate_pixel);
 #endif
+
+	return 0;
 }

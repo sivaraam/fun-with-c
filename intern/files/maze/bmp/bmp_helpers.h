@@ -10,14 +10,14 @@ static const unsigned bytes_per_pixel = 3;
 unsigned find_padding(unsigned width);
 
 /**
- * Given the image data and the amount of padding in it gives a pointer
- * to the location of the Nth pixel. (Indexed from 0).
+ * Given the image width and the amount of padding in it gives the byte offset
+ * for Nth pixel. (Indexed from 0).
  *
- * image_data - the image with/without padding in between the rows
- * padding - the number of bytes of padding between the rows (cannot exeeed 3)
  * width - width of the image
- * unsigned long N - the pixel required
+ * padding - the number of bytes of padding between the rows (cannot exeeed 3)
+ * N - the pixel required
+ *     assumed to be in the range of width*height of the image
  */
-unsigned char *get_pixel(unsigned char *image_data, unsigned long width, unsigned char padding, unsigned long N);
+unsigned long get_pixel_offset(unsigned long width, unsigned char padding, unsigned long N);
 
 #endif

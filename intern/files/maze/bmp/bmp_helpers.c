@@ -12,7 +12,7 @@ unsigned find_padding(unsigned width)
   return padding_boundary-(row_size%4);
 }
 
-unsigned char *get_pixel(unsigned char *image_data, unsigned long width, unsigned char padding, unsigned long N)
+unsigned long get_pixel_offset(unsigned long width, unsigned char padding, unsigned long N)
 {
 
 #ifdef KS_BMP_HELPERS_DEBUG
@@ -26,7 +26,5 @@ unsigned char *get_pixel(unsigned char *image_data, unsigned long width, unsigne
   // amount of padding bytes before the pixel
   unsigned padding_bytes = (N/width)*padding;
 
-  unsigned long pixel_offset = N*bytes_per_pixel+padding_bytes;
-
-  return image_data+pixel_offset;
+  return N*bytes_per_pixel+padding_bytes;
 }

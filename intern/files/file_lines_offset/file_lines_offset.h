@@ -14,6 +14,7 @@ struct lines
  *  For the given file generate an array indexed by line number
  *  which contains the byte offset of that particular line in the file.
  *
+ *  A line is said to be a characters followed by a new line character.
  *  File is expected to end with a new line.
  */
 struct lines *get_line_offsets(char *file_name);

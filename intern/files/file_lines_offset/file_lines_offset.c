@@ -4,9 +4,6 @@
 
 // #define DEBUG
 
-#ifdef DEBUG
-#endif
-
 /**
  *  For now assume multiplication doesn't overflow.
  *  FIXME: Check for overflows.
@@ -70,10 +67,11 @@ struct lines *get_line_offsets(char *file_name)
       {
 
 #ifdef DEBUG
-        // FIXME: handle this in a better way
-        fprintf(stderr, "Could not get more memory to specify line offsets.");
         printf("realloc failed for new_limit: %zu\n", new_limit);
 #endif
+
+        // FIXME: handle this in a better way
+        fprintf(stderr, "Could not get more memory to specify line offsets.");
         exit(EXIT_FAILURE);
       }
       else

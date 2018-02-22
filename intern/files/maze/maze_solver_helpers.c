@@ -119,7 +119,7 @@ struct openings *find_openings(struct maze_image *maze)
 	}
 
 	long start_gate_pixel = find_gate(maze, 0, maze->width-1),
-	     end_gate_pixel = find_gate(maze, (maze->width-1)*maze->height, maze->width*maze->height-1);
+	     end_gate_pixel = find_gate(maze, (maze->width)*(maze->height-1), maze->width*maze->height-1);
 
 	if (start_gate_pixel == -1 || end_gate_pixel == -1)
 	{

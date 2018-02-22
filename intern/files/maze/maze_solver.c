@@ -19,9 +19,6 @@ int solve_maze(struct maze_image *maze)
 					      (maze->padding*maze->height); // a way to find data size without file size
 
 	printf("solve_maze: Size of image data: %lu\n", image_data_size);
-
-	printf("solve_maze: ASCII art image of maze:\n");
-//	print_ascii_maze(maze);
 #endif
 
 	struct openings *o = find_openings(maze);

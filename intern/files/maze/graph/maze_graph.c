@@ -11,7 +11,7 @@ int insert_adjacency(struct node *n, struct node *adj)
 
 	static const unsigned increment = 2;
 
-	// re-allocate when necessary first adjacency for n
+	// re-allocate when necessary
 	if (n->adjlist.num % 2 == 0)
 	{
 		struct node **temp = realloc(n->adjlist.adjs, (n->adjlist.num+increment)*sizeof(struct node *));

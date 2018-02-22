@@ -74,7 +74,7 @@ static long find_gate(struct maze_image *maze, unsigned start_pixel, unsigned en
 {
 	long gate = -1;
 
-#ifdef KS_MAZE_SOLVER_DEBUG
+#ifdef KS_MAZE_SOLVER_DEBUG_FIND_GATE
 	bool found_gate = false;
 #endif
 
@@ -86,22 +86,20 @@ static long find_gate(struct maze_image *maze, unsigned start_pixel, unsigned en
 		if ((*pixel_ptr&CLEAR_PIXEL) == CLEAR_PIXEL)
 		{
 
-#ifdef KS_MAZE_SOLVER_DEBUG
+#ifdef KS_MAZE_SOLVER_DEBUG_FIND_GATE
 			if (found_gate)
 			{
-				fprintf(stderr, "Two start gates found!\n");
+				fprintf(stderr, "find_gate: Two start gates found!\n");
 				exit(EXIT_FAILURE);
 			}
 #endif
 
 			gate = pixel;
 
-#ifndef KS_MAZE_SOLVER_DEBUG
-			break;
-#endif
-
-#ifdef KS_MAZE_SOLVER_DEBUG
+#ifdef KS_MAZE_SOLVER_DEBUG_FIND_GATE
 			found_gate = true;
+#else
+			break;
 #endif
 
 		}
@@ -254,6 +252,7 @@ struct pixel_neighbours find_start_gate_neighbours(struct maze_image *maze, unsi
 	)
 	{
 		fprintf(stderr, "find_start_gate_neighbours: Invalid pixel value\n");
+		fprintf(stderr, "find_start_gate_neighbours: p:%ld\t bottom: %ld\n", p, bottom);
 		exit(EXIT_FAILURE);
 	}
 #endif
@@ -295,6 +294,7 @@ struct pixel_neighbours find_end_gate_neighbours(struct maze_image *maze, unsign
 	)
 	{
 		fprintf(stderr, "find_end_gate_neighbours: Invalid pixel value\n");
+		fprintf(stderr, "find_end_gate_neighbours: p: %ld\t top: %ld\n", p, top);
 		exit(EXIT_FAILURE);
 	}
 #endif
@@ -340,7 +340,10 @@ struct pixel_neighbours find_neighbours(struct maze_image *maze, unsigned pixel)
 		top < 0 || bottom > maze->width*maze->height
 	)
 	{
-		fprintf(stderr, "find_end_gate_neighbours: Invalid pixel value\n");
+		fprintf(stderr, "find_neighbours: Invalid pixel value\n");
+		fprintf(stderr, "find_neighbours: p: %ld\t left: %ld\t right: %ld\t "
+				"top: %ld\t bottom: %ld\n",
+			p, left, right, top, bottom);
 		exit(EXIT_FAILURE);
 	}
 #endif
@@ -427,18 +430,37 @@ int initialize_adjacencies(struct maze_image *maze, struct openings *o)
 	return 0;
 }
 
+/**
+ * Construct the shortest path from the values of the predecessor of each node
+ * starting from the end node.
+ *
+ * Returns NULL in case of an error.
+ */
 static struct sp_queue_head *construct_shortest_path(struct openings *o)
 {
 	struct node *path_node = get_node(o->end_gate_pixel);
 
 	// initialize the shortest path queue
 	struct sp_queue_head *sp = malloc(sizeof(struct sp_queue_head));
+
+	if (sp == NULL)
+	{
+		return NULL;
+	}
+
 	initialise_sp_queue(sp);
 
 	while (path_node->pi != NULL)
 	{
 		// insert the current path node
 		struct sp_queue_elem *path_elem = malloc(sizeof(struct sp_queue_elem));
+
+		if (path_elem == NULL)
+		{
+			// FIXME: free the elements inserted so far
+			return NULL;
+		}
+
 		path_elem->elem = path_node->pixel;
 
 		sp_insert_elem(sp, path_elem);
@@ -457,24 +479,35 @@ static struct sp_queue_head *construct_shortest_path(struct openings *o)
 struct sp_queue_head *find_shortest_path(struct openings *o)
 {
 	struct node *start_node = get_node(o->start_gate_pixel);
-	bool found_dest = false;
+	bool found_dest = false, out_of_mem = false;
 
 	// initial setup
 	start_node->colour = GREY;
 
 	// create the frotier queue head
 	struct bfsfront_queue_head *frontier = malloc(sizeof(struct bfsfront_queue_head));
+
+	if (frontier == NULL)
+	{
+		return NULL;
+	}
+
 	initialise_bfsfront_queue(frontier);
 
 	// insert the start node into the frontier
 	struct bfsfront_queue_elem *first = malloc(sizeof(struct bfsfront_queue_elem));
+
+	if (first == NULL)
+	{
+		return NULL;
+	}
+
 	first->elem = start_node;
 	bfsfront_insert_elem(frontier, first);
 
 	while (!bfsfront_queue_empty(frontier))
 	{
 		struct bfsfront_queue_elem *curr_elem = bfsfront_remove_elem(frontier);
-		struct node *curr = curr_elem->elem;
 
 		// stop expanding and just free obtained memory when,
 		//
@@ -482,6 +515,9 @@ struct sp_queue_head *find_shortest_path(struct openings *o)
 		//  ii) memory issue occurs
 		//
 		if (!(found_dest | out_of_mem)) {
+
+			struct node *curr = curr_elem->elem;
+
 			for (unsigned adj=0; adj<curr->adjlist.num; adj++)
 			{
 				struct node *curr_adj = *(curr->adjlist.adjs + adj);
@@ -516,6 +552,11 @@ struct sp_queue_head *find_shortest_path(struct openings *o)
 		}
 
 		free(curr_elem);
+	}
+
+	if (out_of_mem)
+	{
+		return NULL;
 	}
 
 	// construct the shortest path from the values of the predecessors

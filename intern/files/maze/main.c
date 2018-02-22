@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
 	}
 
 	FILE *image_file = fopen(argv[1], "r+");
+	unsigned char ret_val = 0;
 
 	if (image_file == NULL)
 	{
@@ -34,13 +35,21 @@ int main(int argc, char *argv[])
 	if (maze == NULL)
 	{
 		fprintf(stderr, "Not enough memory to create maze object!\n");
-		return 1;
+		ret_val = 1;
+		goto QUIT;
 	}
 
 	// get the image width and height
 	fseek(image_file, width_offset, SEEK_SET); // go to the offset of the image width
-	fread(&(maze->width), 4L, 1, image_file);
-	fread(&(maze->height), 4L, 1, image_file);
+	if (
+		fread(&(maze->width), 4L, 1, image_file) == 0 ||
+		fread(&(maze->height), 4L, 1, image_file) == 0
+	)
+	{
+		fprintf(stderr, "Reading image metadata failed!\n");
+		ret_val = 1;
+		goto FREE_NODATA_QUIT;
+	}
 
 #ifdef DEBUG
 	printf("Image dimensions (in pixels):\n");
@@ -62,7 +71,8 @@ int main(int argc, char *argv[])
 	if (maze->data == NULL)
 	{
 		fprintf(stderr, "Not enough memory to read in image!\n");
-		return 1;
+		ret_val = 1;
+		goto FREE_NODATA_QUIT;
 	}
 
 	// skip past the header
@@ -72,13 +82,16 @@ int main(int argc, char *argv[])
 	if (fread(maze->data, data_size, 1, image_file) == 0)
 	{
 		fprintf(stderr, "Reading image failed!\n");
-		return 1;
+		ret_val = 1;
+		goto FREE_QUIT;
 	}
 
-	int ret_val = solve_maze(maze);
+	ret_val = solve_maze(maze);
 	if (ret_val == ERRMEMORY)
 	{
 		fprintf(stderr, "Could not solve maze due to insufficient memory!\n");
+		ret_val = 1;
+		goto FREE_QUIT;
 	}
 
 	// seek to the start of image data
@@ -88,10 +101,19 @@ int main(int argc, char *argv[])
 	if (fwrite(maze->data, data_size, 1, image_file) == 0)
 	{
 		fprintf(stderr, "Could not write the solved maze successfully to the file!\n");
+		ret_val = 1;
+		goto FREE_QUIT;
 	}
 
+FREE_QUIT:
 	// free the memory
 	free(maze->data);
+
+FREE_NODATA_QUIT:
 	free(maze);
+
+QUIT:
+	// close the file
+	fclose(image_file);
 	return ret_val;
 }

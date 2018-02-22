@@ -21,7 +21,7 @@ unsigned np_list_vals = 0;
  * Values that specify the incremental dynamic allocation units of
  * the np_list entries.
  */
-static const unsigned np_list_increment = 10;
+static const unsigned np_list_increment = 500;
 static unsigned np_list_curr_size = 0;
 
 /**
@@ -94,16 +94,38 @@ struct node *create_node(unsigned pixel)
 struct node *get_node(unsigned pixel)
 {
 
-	for (unsigned clear=0; clear<np_list_vals; clear++)
-	{
-		if ( (*(np_list+clear))->pixel == pixel)
-		{
-			return (*(np_list+clear))->pixel_node;
-		}
+	unsigned first_clear = 0, last_clear = np_list_vals-1;
 
 #ifdef KS_MAZE_SOLVER_DEBUG_GET_NODE
-		printf("Found node for pixel: %u at position: %u\n", pixel, clear);
+	printf("get_node: Searching for node of pixel: %u\n", pixel);
 #endif
+
+	while (first_clear <= last_clear)
+	{
+		const unsigned mid_clear = (first_clear+last_clear)/2,
+				curr_pixel = (*(np_list+mid_clear))->pixel;
+
+#ifdef KS_MAZE_SOLVER_DEBUG_GET_NODE
+		printf("Searching at position %u for pixel %u. Position pixel: %u.\n", mid_clear, pixel, curr_pixel);
+#endif
+
+		if (curr_pixel == pixel)
+		{
+
+#ifdef KS_MAZE_SOLVER_DEBUG_GET_NODE
+		printf("Found node for pixel: %u at position: %u\n", pixel, mid_clear);
+#endif
+			return (*(np_list+mid_clear))->pixel_node;
+		}
+		else if (pixel > curr_pixel)
+		{
+			first_clear = mid_clear+1;
+		}
+		else
+		{
+			last_clear = mid_clear-1;
+		}
+
 	}
 
 	return NULL;

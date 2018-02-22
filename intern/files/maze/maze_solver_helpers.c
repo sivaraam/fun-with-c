@@ -135,7 +135,7 @@ struct openings *find_openings(struct maze_image *maze)
 #ifdef KS_MAZE_SOLVER_DEBUG
 void print_ascii_maze(struct maze_image *maze)
 {
-	for (unsigned long pixel=0; pixel<maze->width*maze->height; pixel++)
+	for (unsigned pixel=0; pixel<maze->width*maze->height; pixel++)
 	{
 		if (pixel%maze->width == 0)
 		{
@@ -232,14 +232,14 @@ struct pixel_neighbours find_start_gate_neighbours(struct maze_image *maze, unsi
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	long
-#elif
+#else
 	unsigned
 #endif
 	p = sg_pixel;
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	long
-#elif
+#else
 	unsigned
 #endif
 	bottom = p+maze->width;
@@ -273,14 +273,14 @@ struct pixel_neighbours find_end_gate_neighbours(struct maze_image *maze, unsign
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	long
-#elif
+#else
 	unsigned
 #endif
 	p = eg_pixel;
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	long
-#elif
+#else
 	unsigned
 #endif
 	top = p - maze->width;
@@ -316,14 +316,14 @@ struct pixel_neighbours find_neighbours(struct maze_image *maze, unsigned pixel)
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	long
-#elif
+#else
 	unsigned
 #endif
 	p = pixel;
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	long
-#elif
+#else
 	unsigned
 #endif
 	top = p - maze->width, bottom = p + maze->width,

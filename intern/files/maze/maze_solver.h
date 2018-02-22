@@ -20,7 +20,7 @@ struct maze_image
 };
 
 /**
- * Solve the given maze by finding the shortest path from the start to the end.
+ * Solve the given maze by finding the shortest path from the start gate to the end gate.
  *
  * maze - a pointer to a 'struct maze_image' object containing the maze extracted from
  *        the BMP image.

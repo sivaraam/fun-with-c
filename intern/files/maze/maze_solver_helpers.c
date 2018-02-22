@@ -476,37 +476,46 @@ struct sp_queue_head *find_shortest_path(struct openings *o)
 		struct bfsfront_queue_elem *curr_elem = bfsfront_remove_elem(frontier);
 		struct node *curr = curr_elem->elem;
 
-		for (unsigned adj=0; adj<curr->adjlist.num; adj++)
-		{
-			struct node *curr_adj = *(curr->adjlist.adjs + adj);
-
-			if (curr_adj->colour == WHITE)
+		// stop expanding and just free obtained memory when,
+		//
+		//   i) destination has been found (or)
+		//  ii) memory issue occurs
+		//
+		if (!(found_dest | out_of_mem)) {
+			for (unsigned adj=0; adj<curr->adjlist.num; adj++)
 			{
-				// set the attributes
-				curr_adj->colour = GREY;
-				curr_adj->src_dist = curr->src_dist+1;
-				curr_adj->pi = curr;
+				struct node *curr_adj = *(curr->adjlist.adjs + adj);
 
-				// insert the element into the frontier
-				struct bfsfront_queue_elem *adj_elem = malloc(sizeof(struct bfsfront_queue_elem));
-				adj_elem->elem = curr_adj;
-				bfsfront_insert_elem(frontier, adj_elem);
-
-				if (curr_adj->pixel == o->end_gate_pixel)
+				if (curr_adj->colour == WHITE)
 				{
-					found_dest = true;
-					break;
+					// set the attributes
+					curr_adj->colour = GREY;
+					curr_adj->src_dist = curr->src_dist+1;
+					curr_adj->pi = curr;
+
+					// insert the element into the frontier
+					struct bfsfront_queue_elem *adj_elem = malloc(sizeof(struct bfsfront_queue_elem));
+
+					if (adj_elem == NULL)
+					{
+						out_of_mem = true;
+					}
+
+					adj_elem->elem = curr_adj;
+					bfsfront_insert_elem(frontier, adj_elem);
+
+					if (curr_adj->pixel == o->end_gate_pixel)
+					{
+						found_dest = true;
+						break;
+					}
 				}
 			}
+
+			curr->colour = BLACK;
 		}
 
-		curr->colour = BLACK;
 		free(curr_elem);
-
-		if (found_dest)
-		{
-			break;
-		}
 	}
 
 	// construct the shortest path from the values of the predecessors

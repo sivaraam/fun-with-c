@@ -2,6 +2,7 @@
 #include "common.h"
 #include "bmp/bmp_helpers.h"
 #include "graph/maze_graph.h"
+#include "bfs_frontier/queue.h"
 #include "maze_solver.h"
 #include "maze_solver_helpers.h"
 #include "maze_graph_bridge.h"
@@ -424,6 +425,76 @@ int initialize_adjacencies(struct maze_image *maze, struct openings *o)
 	}
 
 	return 0;
+}
+
+static struct sp_queue_head *construct_shortest_path(struct openings *o)
+{
+	struct node *path_node = get_node(o->end_gate_pixel);
+
+	// initialize the shortest path queue
+	struct sp_queue_head *sp = malloc(sizeof(struct sp_queue_head));
+	initialise_sp_queue(sp);
+
+	while (path_node->pi != NULL)
+	{
+		// insert the current path node
+		struct sp_queue_elem *path_elem = malloc(sizeof(struct sp_queue_elem));
+		path_elem->elem = path_node->pixel;
+
+		sp_insert_elem(sp, path_elem);
+
+		path_node = path_node->pi;
+	}
+
+	return sp;
+}
+
+struct sp_queue_head *find_shortest_path(struct openings *o)
+{
+	struct node *start_node = get_node(o->start_gate_pixel);
+
+	// initial setup
+	start_node->colour = GREY;
+
+	// create the frotier queue head
+	struct bfsfront_queue_head *frontier = malloc(sizeof(struct bfsfront_queue_head));
+	initialise_bfsfront_queue(frontier);
+
+	// insert the start node into the frontier
+	struct bfsfront_queue_elem *first = malloc(sizeof(struct bfsfront_queue_elem));
+	first->elem = start_node;
+	bfsfront_insert_elem(frontier, first);
+
+	while (!bfsfront_queue_empty(frontier))
+	{
+		struct bfsfront_queue_elem *curr_elem = bfsfront_remove_elem(frontier);
+		struct node *curr = curr_elem->elem;
+
+		for (unsigned adj=0; adj<curr->adjlist.num; adj++)
+		{
+			struct node *curr_adj = *(curr->adjlist.adjs + adj);
+
+			if (curr_adj->colour == WHITE)
+			{
+				// set the attributes
+				curr_adj->colour = GREY;
+				curr_adj->src_dist = curr->src_dist+1;
+				curr_adj->pi = curr;
+
+				// insert the element into the frontier
+				struct bfsfront_queue_elem *adj_elem = malloc(sizeof(struct bfsfront_queue_elem));
+				adj_elem->elem = curr_adj;
+				bfsfront_insert_elem(frontier, adj_elem);
+			}
+
+		}
+
+		curr->colour = BLACK;
+		free(curr_elem);
+	}
+
+	// construct the shortest path from the values of the predecessors
+	return construct_shortest_path(o);
 }
 
 void delete_graph(void)

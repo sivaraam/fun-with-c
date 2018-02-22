@@ -4,6 +4,13 @@ COMPILER_FLAGS += "-Wextra"
 
 BMP_LIBRARY = bmp/bmp_helpers.c
 GRAPH_LIBRARY = graph/maze_graph.c
+BFS_FRONTIER_QUEUE_LIBRARY = bfs_frontier/queue.c
+SHORTEST_PATH_QUEUE_LIBRARY = shortest_path/queue.c
 
-maze_solver.out: *.c ${BMP_LIBRARY} ${GRAPH_LIBRARY}
+LIBRARIES = ${BMP_LIBRARY}
+LIBRARIES += ${GRAPH_LIBRARY}
+LIBRARIES += ${BFS_FRONTIER_QUEUE_LIBRARY}
+LIBRARIES += ${SHORTEST_PATH_QUEUE_LIBRARY}
+
+maze_solver.out: *.c ${LIBRARIES}
 	gcc ${COMPILER_FLAGS} $^ -o $@

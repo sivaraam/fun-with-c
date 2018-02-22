@@ -3,6 +3,7 @@
 
 #define CLEAR_PIXEL 0xFF
 #define HURDLE_PIXEL 0x00
+#define PIXEL_BYTES 3
 
 #define ERROPENINGS 1
 #define ERRMEMORY 2

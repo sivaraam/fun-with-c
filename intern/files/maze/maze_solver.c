@@ -21,7 +21,7 @@ int solve_maze(struct maze_image *maze)
 	printf("solve_maze: Size of image data: %lu\n", image_data_size);
 
 	printf("solve_maze: ASCII art image of maze:\n");
-	print_ascii_maze(maze);
+//	print_ascii_maze(maze);
 #endif
 
 	struct openings *o = find_openings(maze);
@@ -53,7 +53,8 @@ int solve_maze(struct maze_image *maze)
 	// for the constructed graph
 	struct sp_queue_head *sp = find_shortest_path(o);
 
-#ifdef KS_MAZE_SOLVER_DEBUG
+#ifdef KS_MAZE_SOLVER_DEBUG_PRINT_SHORTEST_PATH
+	// Warning: This removes the items from the queue!
 	printf("Shortest path from %u to %u:\n", o->start_gate_pixel, o->end_gate_pixel);
 
 	while (!sp_queue_empty(sp))
@@ -64,6 +65,8 @@ int solve_maze(struct maze_image *maze)
 	}
 
 	printf("\n");
+#else
+	colour_path(maze, sp);
 #endif
 
 	delete_graph();

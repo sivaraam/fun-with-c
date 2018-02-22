@@ -19,7 +19,9 @@ struct openings *find_openings(struct maze_image *maze);
 void print_ascii_maze(struct maze_image *maze);
 #endif
 
+//
 // FIXME: Think about moving these to imaze_graph_bridge.
+//
 
 /**
  * Create the graph nodes for each clear pixel in the maze image.
@@ -49,5 +51,15 @@ struct sp_queue_head *find_shortest_path(struct openings *o);
  * Free up the memory taken up by the graph and its related structure.
  */
 void delete_graph(void);
+
+//
+// END FIXME
+//
+
+/**
+ * Colour the pixels corresponding to the shortest path with a colour other
+ * than black and white.
+ */
+void colour_path(struct maze_image *maze, struct sp_queue_head *sp);
 
 #endif

@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	FILE *image_file = fopen(argv[1], "r");
+	FILE *image_file = fopen(argv[1], "r+");
 
 	if (image_file == NULL)
 	{
@@ -79,6 +79,15 @@ int main(int argc, char *argv[])
 	if (ret_val == ERRMEMORY)
 	{
 		fprintf(stderr, "Could not solve maze due to insufficient memory!\n");
+	}
+
+	// seek to the start of image data
+	fseek(image_file, 54L, SEEK_SET);
+
+	// write the solution
+	if (fwrite(maze->data, data_size, 1, image_file) == 0)
+	{
+		fprintf(stderr, "Could not write the solved maze successfully to the file!\n");
 	}
 
 	// free the memory

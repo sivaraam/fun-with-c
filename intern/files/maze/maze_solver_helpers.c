@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdbool.h>
 #include "common.h"
 #include "bmp/bmp_helpers.h"
 #include "graph/maze_graph.h"
@@ -9,7 +10,6 @@
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 #include <stdio.h>
-#include <stdbool.h>
 #endif
 
 #define MAX_NEIGHBOURS 4
@@ -446,12 +446,18 @@ static struct sp_queue_head *construct_shortest_path(struct openings *o)
 		path_node = path_node->pi;
 	}
 
+	// insert the source node
+	struct sp_queue_elem *source_elem = malloc(sizeof(struct sp_queue_elem));
+	source_elem->elem = o->start_gate_pixel;
+	sp_insert_elem(sp, source_elem);
+
 	return sp;
 }
 
 struct sp_queue_head *find_shortest_path(struct openings *o)
 {
 	struct node *start_node = get_node(o->start_gate_pixel);
+	bool found_dest = false;
 
 	// initial setup
 	start_node->colour = GREY;
@@ -485,12 +491,22 @@ struct sp_queue_head *find_shortest_path(struct openings *o)
 				struct bfsfront_queue_elem *adj_elem = malloc(sizeof(struct bfsfront_queue_elem));
 				adj_elem->elem = curr_adj;
 				bfsfront_insert_elem(frontier, adj_elem);
-			}
 
+				if (curr_adj->pixel == o->end_gate_pixel)
+				{
+					found_dest = true;
+					break;
+				}
+			}
 		}
 
 		curr->colour = BLACK;
 		free(curr_elem);
+
+		if (found_dest)
+		{
+			break;
+		}
 	}
 
 	// construct the shortest path from the values of the predecessors
@@ -504,9 +520,39 @@ void delete_graph(void)
 	{
 		struct node **curr_pixel_node = &(*(np_list+clear_pixel))->pixel_node;
 		free(*curr_pixel_node);
-		*curr_pixel_node = NULL;
 	}
 
 	// now delete the np_list itself
 	delete_np_list();
+}
+
+/**
+ * Colour the given pixel in the maze.
+ */
+inline static
+void colour_pixel(struct maze_image *maze, unsigned pixel)
+{
+	unsigned char *pixel_bytes = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
+
+	// ordering of RGB for little-endian architecture
+	static const unsigned char colour_bytes[3] = {
+	   0x00, // blue,
+	   0x00, // green
+	   0xFF //red
+	};
+
+	for (unsigned byte=0; byte<PIXEL_BYTES; byte++)
+	{
+		*(pixel_bytes + byte) = colour_bytes[byte];
+	}
+}
+
+void colour_path(struct maze_image *maze, struct sp_queue_head *sp)
+{
+	while (!sp_queue_empty(sp))
+	{
+		struct sp_queue_elem *curr_elem = sp_remove_elem(sp);
+		colour_pixel(maze, curr_elem->elem);
+		free(curr_elem);
+	}
 }

@@ -18,4 +18,12 @@ int main(void)
 
 	printf("void*: %p\t sizeof(void*): %zu\t sizeof(*(void*)): %zu\n", ptr, sizeof(ptr), sizeof(*ptr));
 	printf("char*: %p\t sizeof(char*): %zu\t sizeof(*(char*)): %zu\n", c_ptr, sizeof(c_ptr), sizeof(*c_ptr));
+
+	char *base_plus_one_ptr = calloc(2, sizeof(char));
+	base_plus_one_ptr++;
+//	free(base_plus_one_ptr);  invalid free
+	base_plus_one_ptr--;
+	free(base_plus_one_ptr);
+
+	char *(ch[3]);  // array of 3 pointers to characters
 }

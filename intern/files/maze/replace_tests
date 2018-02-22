@@ -1,0 +1,4 @@
+#! /bin/bash
+
+rm -rf test_inputs/
+cp -r test_inputs.bak/ test_inputs/

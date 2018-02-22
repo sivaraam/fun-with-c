@@ -32,12 +32,12 @@ struct adj_list
 struct node
 {
 	unsigned pixel; // the corresponding pixel value for the node
-
 	struct adj_list adjlist; // the adjacency list for this node
 
 	// BFS related data
 	enum bfs_colour colour; // holds the colour of the node during the search
 	unsigned src_dist; // distance of the node from the source node
+	struct node *pi; // predecessor of the node
 };
 
 /**

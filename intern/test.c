@@ -18,5 +18,13 @@ int main(void) {
 //	*name = "Hello"
 
 	int a;
-	scanf("%d", a);
+//	scanf("%d", a); SEG fault
+
+	unsigned short val = 40000;
+	signed short s_val = val;
+	signed short sc_val = (signed short)val;
+
+	printf("unsigned short: %hu\n", val);
+	printf("signed short: %hd\n", s_val);
+	printf("signed short (cast): %hd\n", sc_val);
 }

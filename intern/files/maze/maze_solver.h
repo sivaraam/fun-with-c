@@ -5,6 +5,7 @@
 #define HURDLE_PIXEL 0x00
 
 #define ERROPENINGS 1
+#define ERRMEMORY 2
 
 // Type of each byte in the maze
 typedef unsigned char maze_type;
@@ -12,6 +13,7 @@ typedef unsigned char maze_type;
 struct maze_image
 {
 	maze_type *data;
+	unsigned clear_pixels;
 	unsigned width;
 	unsigned height;
 	unsigned char padding:2;

@@ -75,9 +75,14 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	solve_maze(maze);
+	int ret_val = solve_maze(maze);
+	if (ret_val == ERRMEMORY)
+	{
+		fprintf(stderr, "Could not solve maze due to insufficient memory!\n");
+	}
 
 	// free the memory
 	free(maze->data);
 	free(maze);
+	return ret_val;
 }

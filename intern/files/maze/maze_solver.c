@@ -4,6 +4,7 @@
 #include "common.h"
 #include "maze_solver.h"
 #include "maze_solver_helpers.h"
+#include "maze_graph_bridge.h"
 
 int solve_maze(struct maze_image *maze)
 {
@@ -29,14 +30,27 @@ int solve_maze(struct maze_image *maze)
 
 	if (o == NULL)
 	{
-		fprintf(stderr, "Could not find openings for the given image!\n");
+		fprintf(stderr, "solve_maze: Could not find openings for the given image!\n");
 		return ERROPENINGS;
 	}
 
 #ifdef KS_MAZE_SOLVER_DEBUG
-	printf("Start gate pixel: %u\t End gate pixel: %u\n",
+	printf("solve_maze: Start gate pixel: %u\t End gate pixel: %u\n",
 		o->start_gate_pixel, o->end_gate_pixel);
 #endif
 
+	if (create_graph(maze))
+	{
+		return ERRMEMORY;
+	}
+
+	// initialize the adjacency for each node in the graph
+	initialize_adjacencies(maze, o);
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	printf("solve_maze: Found %u clear pixels\n", maze->clear_pixels);
+#endif
+
+	delete_graph();
 	return 0;
 }

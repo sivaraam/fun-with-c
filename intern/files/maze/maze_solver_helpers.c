@@ -1,13 +1,67 @@
 #include <stdlib.h>
 #include "common.h"
 #include "bmp/bmp_helpers.h"
+#include "graph/maze_graph.h"
 #include "maze_solver.h"
 #include "maze_solver_helpers.h"
+#include "maze_graph_bridge.h"
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 #include <stdio.h>
 #include <stdbool.h>
 #endif
+
+#define MAX_NEIGHBOURS 4
+
+/**
+ * Returns non-zero value if the given pixel in the maze is a hurdle pixel.
+ * Else returns 0.
+ */
+int is_hurdle_pixel(struct maze_image *maze, unsigned pixel)
+{
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	if (pixel >= maze->width*maze->height)
+	{
+		fprintf(stderr, "is_hurdle_pixel: Invalid pixel %u\n", pixel);
+		exit(EXIT_FAILURE);
+	}
+#endif
+
+	unsigned char *pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
+
+	if ((*pixel_byte&HURDLE_PIXEL) == HURDLE_PIXEL) // It's enough to check one byte for now
+	{
+		return 1;
+	}
+
+	return 0;
+}
+
+/**
+ * Returns non-zero value if the given pixel in the maze is a clear pixel.
+ * Else returns 0.
+ */
+int is_clear_pixel(struct maze_image *maze, unsigned pixel)
+{
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	if (pixel >= maze->width*maze->height)
+	{
+		fprintf(stderr, "is_clear_pixel: Invalid pixel %u\n", pixel);
+		exit(EXIT_FAILURE);
+	}
+#endif
+
+	unsigned char *pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
+
+	if ((*pixel_byte&CLEAR_PIXEL) == CLEAR_PIXEL) // It's enough to check one byte for now
+	{
+		return 1;
+	}
+
+	return 0;
+}
 
 /**
  * Finds a 'gate' in the given range. A gate is the only clear pixel in the given range.
@@ -55,6 +109,7 @@ static long find_gate(struct maze_image *maze, unsigned start_pixel, unsigned en
 
 	return gate;
 }
+
 struct openings *find_openings(struct maze_image *maze)
 {
 	struct openings *o = malloc(sizeof(struct openings));
@@ -87,13 +142,11 @@ void print_ascii_maze(struct maze_image *maze)
 			printf("\n");
 		}
 		
-		unsigned char *pixel_ptr = maze->data+get_pixel_offset(maze->width, maze->padding, pixel);
-		
-		if ((*pixel_ptr&CLEAR_PIXEL) == CLEAR_PIXEL)
+		if (is_clear_pixel(maze, pixel))
 		{
 			printf(" ");
 		}
-		else if ((*pixel_ptr&HURDLE_PIXEL) == HURDLE_PIXEL)
+		else if (is_hurdle_pixel(maze, pixel))
 		{
 			printf("\u2588"); // unicode block character
 		}
@@ -107,3 +160,282 @@ void print_ascii_maze(struct maze_image *maze)
 	printf("\n");
 }
 #endif
+
+int create_graph(struct maze_image *maze)
+{
+	unsigned clear_pixels=0;
+
+	if (maze == NULL)
+	{
+		return 1;
+	}
+
+	for (unsigned pixel=0; pixel<maze->width*maze->height; pixel++)
+	{
+		if (is_clear_pixel(maze, pixel))
+		{
+			// create the node
+			struct node *n = create_node(pixel);
+
+			if (n == NULL)
+			{
+
+#ifdef KS_MAZE_SOLVER_DEBUG_CREATE_GRAPH
+				fprintf(stderr, "create_graph: 'create_node' failed for pixel: %u\n", pixel);
+#endif
+
+				return 1;
+			}
+
+			// insert the node into the 'np_list'
+			if (insert_node(pixel, n))
+			{
+
+#ifdef KS_MAZE_SOLVER_DEBUG_CREATE_GRAPH
+				fprintf(stderr, "create_graph: 'insert_node' failed for pixel: %u\n", pixel);
+#endif
+
+				return 1;
+			}
+
+#ifdef KS_MAZE_SOLVER_DEBUG_CREATE_GRAPH
+			printf("create_graph: node value: %u\n", n->pixel);
+			fflush(stdout);
+#endif
+
+			clear_pixels++;
+		}
+	}
+
+	maze->clear_pixels = clear_pixels;
+	return 0;
+}
+
+/**
+ * The data structure used to hold the four possible neighbouring clear pixels
+ * for a given pixel.
+ *
+ * The value is non-negative for a valid neighbour.
+ */
+struct pixel_neighbours
+{
+	long neighbour[4];
+
+};
+
+/**
+ * Identifies valid clear pixel neighbours for the given "start gate" pixel and returns a valid
+ * 'struct pixel_neighbours' object.
+ */
+struct pixel_neighbours find_start_gate_neighbours(struct maze_image *maze, unsigned sg_pixel)
+{
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	long
+#elif
+	unsigned
+#endif
+	p = sg_pixel;
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	long
+#elif
+	unsigned
+#endif
+	bottom = p+maze->width;
+
+	struct pixel_neighbours pn = { {-1L, -1L, -1L, -1L} };
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	if (
+		p > maze->width*maze->height ||
+		bottom > maze->width*maze->height
+	)
+	{
+		fprintf(stderr, "find_start_gate_neighbours: Invalid pixel value\n");
+		exit(EXIT_FAILURE);
+	}
+#endif
+
+	if (is_clear_pixel(maze, bottom))
+	{
+		pn.neighbour[0] = bottom;
+	}
+
+	return pn;
+}
+/**
+ * Identifies valid clear pixel neighbours for the given "end gate" pixel and returns a valid
+ * 'struct pixel_neighbours' object.
+ */
+struct pixel_neighbours find_end_gate_neighbours(struct maze_image *maze, unsigned eg_pixel)
+{
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	long
+#elif
+	unsigned
+#endif
+	p = eg_pixel;
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	long
+#elif
+	unsigned
+#endif
+	top = p - maze->width;
+
+	struct pixel_neighbours pn = { {-1L, -1L, -1L, -1L} };
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	if (
+		p > maze->width*maze->height ||
+		top < 0
+	)
+	{
+		fprintf(stderr, "find_end_gate_neighbours: Invalid pixel value\n");
+		exit(EXIT_FAILURE);
+	}
+#endif
+
+	if (is_clear_pixel(maze, top))
+	{
+		pn.neighbour[0] = top;
+	}
+
+	return pn;
+}
+
+/**
+ * Identifiies neighbouring clear pixels for the given pixel and returns a valid
+ * 'struct pixel_neighbours' object accordingly. Pixels are not expected to be
+ * border pixels (those that have fewer than 4 valid neighbours).
+ */
+struct pixel_neighbours find_neighbours(struct maze_image *maze, unsigned pixel)
+{
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	long
+#elif
+	unsigned
+#endif
+	p = pixel;
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	long
+#elif
+	unsigned
+#endif
+	top = p - maze->width, bottom = p + maze->width,
+	left = p - 1, right = p + 1;
+
+	struct pixel_neighbours pn = { {-1L, -1L, -1L, -1L} };
+
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	if (
+		p > maze->width*maze->height ||
+		left < 0 || right > maze->width*maze->height ||
+		top < 0 || bottom > maze->width*maze->height
+	)
+	{
+		fprintf(stderr, "find_end_gate_neighbours: Invalid pixel value\n");
+		exit(EXIT_FAILURE);
+	}
+#endif
+
+	if (is_clear_pixel(maze, left))
+	{
+		pn.neighbour[0] = left;
+	}
+
+	if (is_clear_pixel(maze, right))
+	{
+		pn.neighbour[1] = right;
+	}
+
+	if (is_clear_pixel(maze, top))
+	{
+		pn.neighbour[2] = top;
+	}
+
+	if (is_clear_pixel(maze, bottom))
+	{
+		pn.neighbour[3] = bottom;
+	}
+
+	return pn;
+}
+
+int initialize_adjacencies(struct maze_image *maze, struct openings *o)
+{
+	for (unsigned clear_pixel=0; clear_pixel<np_list_vals; clear_pixel++)
+	{
+		const unsigned curr_pixel = (*(np_list+clear_pixel))->pixel;
+
+		struct pixel_neighbours n;
+
+		// special case gates for simplicity
+		if (
+			curr_pixel != o->start_gate_pixel &&
+			curr_pixel != o->end_gate_pixel
+		)
+		{
+			// normal pixel
+			n = find_neighbours(maze, curr_pixel);
+		}
+		else if (curr_pixel == o->start_gate_pixel)
+		{
+			// start gate_pixel
+			n = find_start_gate_neighbours(maze, curr_pixel);
+		}
+		else
+		{
+			// end gate pixel
+			n = find_end_gate_neighbours(maze, curr_pixel);
+		}
+
+		for (unsigned curr=0; curr<MAX_NEIGHBOURS; curr++)
+		{
+			if (n.neighbour[curr] < 0)
+			{
+				continue;
+			}
+
+#ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
+			printf("%ld\t", n.neighbour[curr]);
+#endif
+
+			if (
+				add_adjacency((*(np_list+clear_pixel))->pixel_node,
+					      get_node(n.neighbour[curr]))
+			)
+			{
+				return 1;
+			}
+		}
+
+#ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
+		printf("\nTotally %u adjacencies for pixel: %u\n",
+			(*(np_list+clear_pixel))->pixel_node->adjlist.num,
+			curr_pixel);
+#endif
+
+	}
+
+	return 0;
+}
+
+void delete_graph(void)
+{
+	// initially free the individual nodes
+	for (unsigned clear_pixel=0; clear_pixel<np_list_vals; clear_pixel++)
+	{
+		struct node **curr_pixel_node = &(*(np_list+clear_pixel))->pixel_node;
+		free(*curr_pixel_node);
+		*curr_pixel_node = NULL;
+	}
+
+	// now delete the np_list itself
+	delete_np_list();
+}

@@ -2,11 +2,9 @@
 #include <stdbool.h>
 #include "common.h"
 #include "bmp/bmp_helpers.h"
-#include "graph/maze_graph.h"
-#include "bfs_frontier/queue.h"
-#include "maze_solver.h"
 #include "maze_solver_helpers.h"
 #include "maze_graph_bridge.h"
+#include "bfs_frontier/queue.h"
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 #include <stdio.h>

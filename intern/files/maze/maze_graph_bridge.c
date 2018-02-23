@@ -1,9 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "common.h"
-#include "maze_solver.h"
 #include "maze_graph_bridge.h"
-#include "graph/maze_graph.h"
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 #include <stdio.h>

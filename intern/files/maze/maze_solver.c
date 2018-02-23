@@ -4,7 +4,6 @@
 #include "common.h"
 #include "maze_solver.h"
 #include "maze_solver_helpers.h"
-#include "maze_graph_bridge.h"
 
 int solve_maze(struct maze_image *maze)
 {

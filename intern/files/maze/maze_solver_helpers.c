@@ -518,6 +518,16 @@ void delete_graph(struct maze_image *maze)
 		if (is_clear_pixel(maze, pixel))
 		{
 			struct node *const curr_pixel_node = (*(np_list+pixel))->pixel_node;
+			struct adj_list_elem *curr_adj_elem = curr_pixel_node->adj_head.first;
+
+			// free memory for the adjacent list elements
+			while (curr_adj_elem != NULL)
+			{
+				struct adj_list_elem *elem_to_free = curr_adj_elem;
+				curr_adj_elem = curr_adj_elem->next;
+				free(elem_to_free);
+			}
+
 			free(curr_pixel_node);
 		}
 	}

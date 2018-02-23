@@ -69,6 +69,8 @@ int solve_maze(struct maze_image *const maze)
 		goto CLEANUP;
 	}
 
+	initialise_sp_queue(sp);
+
 	unsigned dest_distance = find_shortest_path(o, sp);
 
 	if (dest_distance != 0)
@@ -80,7 +82,15 @@ int solve_maze(struct maze_image *const maze)
 		while (!sp_queue_empty(sp))
 		{
 			struct sp_queue_elem *const curr_elem = sp_remove_elem(sp);
+
+			if (curr_elem == NULL)
+			{
+				fprintf(stderr, "solve_maze: Removing element from queue failed!\n");
+				exit(EXIT_FAILURE);
+			}
+
 			printf("%u\t", curr_elem->elem);
+			fflush(stdout);
 			free(curr_elem);
 		}
 

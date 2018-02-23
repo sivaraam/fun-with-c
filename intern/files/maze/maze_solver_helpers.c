@@ -497,7 +497,15 @@ int construct_shortest_path(struct openings *const o, struct sp_queue_head *cons
 
 		path_elem->elem = path_node->pixel;
 
+#ifdef KS_MAZE_SOLVER_DEBUG
+		if (sp_insert_elem(sp, path_elem))
+		{
+			fprintf(stderr, "construct_shortest_path: Inserting %u into shortest path queue failed!", path_elem->elem);
+			exit(EXIT_FAILURE);
+		}
+#else
 		sp_insert_elem(sp, path_elem);
+#endif
 
 		path_node = path_node->pi;
 	}
@@ -511,7 +519,16 @@ int construct_shortest_path(struct openings *const o, struct sp_queue_head *cons
 	}
 
 	source_elem->elem = path_node->pixel;
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	if (sp_insert_elem(sp, source_elem))
+	{
+		fprintf(stderr, "construct_shortest_path: Inserting into shortest path queue failed!");
+		exit(EXIT_FAILURE);
+	}
+#else
 	sp_insert_elem(sp, source_elem);
+#endif
 
 	return dest_dist;
 }
@@ -553,11 +570,28 @@ unsigned find_shortest_path(struct openings *const o, struct sp_queue_head *sp)
 	}
 
 	first->elem = start_node;
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	if (bfsfront_insert_elem(frontier, first))
+	{
+		fprintf(stderr, "find_shortest_path: Inserting into the BFS queue failed!\n");
+		exit(EXIT_FAILURE);
+	}
+#else
 	bfsfront_insert_elem(frontier, first);
+#endif
 
 	while (!bfsfront_queue_empty(frontier))
 	{
 		struct bfsfront_queue_elem *curr_elem = bfsfront_remove_elem(frontier);
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+		if (curr_elem == NULL)
+		{
+			fprintf(stderr, "find_shortest_path: Removing from the BFS queue failed!\n");
+			exit(EXIT_FAILURE);
+		}
+#endif
 
 		// stop expanding and just free obtained memory when,
 		//
@@ -589,7 +623,16 @@ unsigned find_shortest_path(struct openings *const o, struct sp_queue_head *sp)
 					}
 
 					adj_elem->elem = curr_adj;
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+					if (bfsfront_insert_elem(frontier, adj_elem))
+					{
+						fprintf(stderr, "find_shortest_path: Inserting into the BFS queue failed!");
+						exit(EXIT_FAILURE);
+					}
+#else
 					bfsfront_insert_elem(frontier, adj_elem);
+#endif
 
 					if (curr_adj->pixel == o->end_gate_pixel)
 					{
@@ -660,6 +703,15 @@ void colour_path(struct maze_image *const maze, struct sp_queue_head *const sp)
 	while (!sp_queue_empty(sp))
 	{
 		struct sp_queue_elem *const curr_elem = sp_remove_elem(sp);
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+		if (curr_elem == NULL)
+		{
+			fprintf(stderr, "colour_pixel: Removal fron the shortest path queue failed!\n");
+			exit(EXIT_FAILURE);
+		}
+#endif
+
 		colour_pixel(maze, curr_elem->elem);
 		free(curr_elem);
 	}

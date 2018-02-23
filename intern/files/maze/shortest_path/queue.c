@@ -7,8 +7,13 @@ void initialise_sp_queue(struct sp_queue_head *head)
 	head->last = NULL;
 }
 
-void sp_insert_elem(struct sp_queue_head *head, struct sp_queue_elem *elem)
+int sp_insert_elem(struct sp_queue_head *head, struct sp_queue_elem *elem)
 {
+	if (head == NULL || elem == NULL)
+	{
+		return 1;
+	}
+
 	elem->next = NULL;
 	if (head->last == NULL)
 	{
@@ -20,10 +25,17 @@ void sp_insert_elem(struct sp_queue_head *head, struct sp_queue_elem *elem)
 		head->last->next = elem;
 		head->last = elem;
 	}
+
+	return 0;
 }
 
 struct sp_queue_elem *sp_remove_elem(struct sp_queue_head *head)
 {
+	if (head == NULL)
+	{
+		return NULL;
+	}
+
 	// empty list
 	if (head->first == NULL)
 	{
@@ -44,7 +56,8 @@ struct sp_queue_elem *sp_remove_elem(struct sp_queue_head *head)
 
 int sp_queue_empty(struct sp_queue_head *head)
 {
-	if (head->first == NULL && head->last == NULL)
+	if (head == NULL ||
+	    (head->first == NULL && head->last == NULL))
 	{
 		return 1;
 	}

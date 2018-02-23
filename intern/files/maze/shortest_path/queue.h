@@ -28,11 +28,15 @@ void initialise_sp_queue(struct sp_queue_head *head);
 
 /**
  * Insert element at the end of the queue.
+ *
+ * Returns 0 on success and non-zero value on failure.
  */
-void sp_insert_elem(struct sp_queue_head *head, struct sp_queue_elem *elem);
+int sp_insert_elem(struct sp_queue_head *head, struct sp_queue_elem *elem);
 
 /**
- * Remove the first element from the queue.
+ * Iemove the first element from the queue.
+ *
+ * Returns NULL in case of an error.
  */
 struct sp_queue_elem *sp_remove_elem(struct sp_queue_head *head);
 

@@ -7,8 +7,13 @@ void initialise_bfsfront_queue(struct bfsfront_queue_head *head)
 	head->last = NULL;
 }
 
-void bfsfront_insert_elem(struct bfsfront_queue_head *head, struct bfsfront_queue_elem *elem)
+int bfsfront_insert_elem(struct bfsfront_queue_head *head, struct bfsfront_queue_elem *elem)
 {
+	if (head == NULL || elem == NULL)
+	{
+		return 1;
+	}
+
 	elem->next = NULL;
 	if (head->last == NULL)
 	{
@@ -20,10 +25,17 @@ void bfsfront_insert_elem(struct bfsfront_queue_head *head, struct bfsfront_queu
 		head->last->next = elem;
 		head->last = elem;
 	}
+
+	return 0;
 }
 
 struct bfsfront_queue_elem *bfsfront_remove_elem(struct bfsfront_queue_head *head)
 {
+	if (head == NULL)
+	{
+		return NULL;
+	}
+
 	// empty list
 	if (head->first == NULL)
 	{
@@ -44,7 +56,8 @@ struct bfsfront_queue_elem *bfsfront_remove_elem(struct bfsfront_queue_head *hea
 
 int bfsfront_queue_empty(struct bfsfront_queue_head *head)
 {
-	if (head->first == NULL && head->last == NULL)
+	if (head == NULL ||
+	    (head->first == NULL && head->last == NULL))
 	{
 		return 1;
 	}

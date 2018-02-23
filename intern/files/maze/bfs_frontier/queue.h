@@ -27,11 +27,15 @@ void initialise_bfsfront_queue(struct bfsfront_queue_head *head);
 
 /**
  * Insert element at the end of the queue.
+ *
+ * Returns 0 on success and non-zero value on error.
  */
-void bfsfront_insert_elem(struct bfsfront_queue_head *head, struct bfsfront_queue_elem *elem);
+int bfsfront_insert_elem(struct bfsfront_queue_head *head, struct bfsfront_queue_elem *elem);
 
 /**
  * Remove the first element from the queue.
+ *
+ * Returns NULL in case of an error (head is NULL (or) queue is empty).
  */
 struct bfsfront_queue_elem *bfsfront_remove_elem(struct bfsfront_queue_head *head);
 

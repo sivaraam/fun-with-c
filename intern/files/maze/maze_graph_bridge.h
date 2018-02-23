@@ -62,9 +62,10 @@ int remove_node(unsigned pixel);
 void delete_np_list(void);
 
 /**
- * Adds 'adj_pixel_node' as an adjacency of 'pixel_node'.
+ * Adds 'adj_pixel_node' as an adjacency of 'pixel_node' and
+ * vice versa (as the graph is undirected).
  *
- * Returns 0 on success and non-xero value on error.
+ * Returns 0 on success and non-zero value on error.
  */
 int add_adjacency(struct node *const pixel_node, struct node *const adj_pixel_node);
 

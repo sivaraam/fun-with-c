@@ -75,7 +75,8 @@ struct node *create_node(unsigned pixel)
 
 int add_adjacency(struct node *const pixel_node, struct node *const adj_pixel_node)
 {
-	return insert_adjacency(pixel_node, adj_pixel_node);
+	return insert_adjacency(pixel_node, adj_pixel_node) ||
+	       insert_adjacency(adj_pixel_node, pixel_node);
 }
 
 void delete_np_list(void)

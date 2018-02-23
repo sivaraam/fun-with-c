@@ -450,12 +450,13 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
  * Construct the shortest path from the values of the predecessor of each node
  * starting from the end node.
  *
- * Returns NULL in case of an error.
+ * Returns the distance of the end node from the start node on success and 0 in case
+ * of an error.
  */
 static
-struct sp_queue_head *construct_shortest_path(struct openings *const o)
+int construct_shortest_path(struct openings *const o, struct sp_queue_head *const sp)
 {
-	struct node * path_node = get_node(o->end_gate_pixel);
+	struct node *path_node = get_node(o->end_gate_pixel);
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	if (path_node == NULL)
@@ -465,19 +466,16 @@ struct sp_queue_head *construct_shortest_path(struct openings *const o)
 	}
 #endif
 
-	// initialize the shortest path queue
-	struct sp_queue_head *const sp = malloc(sizeof(struct sp_queue_head));
+	const unsigned dest_dist = path_node->src_dist;
 #ifdef KS_MAZE_SOLVER_DEBUG
-	printf("construct_shortest_path: Destination is %u pixels away from the source.\n", path_node->src_dist);
+	printf("construct_shortest_path: Destination is %u pixels away from the source.\n", dest_dist);
 #endif
 
 	// sanity check
 	if (sp == NULL)
 	{
-		return NULL;
+		return 0;
 	}
-
-	initialise_sp_queue(sp);
 
 	while (path_node->pi != NULL)
 	{
@@ -486,8 +484,7 @@ struct sp_queue_head *construct_shortest_path(struct openings *const o)
 
 		if (path_elem == NULL)
 		{
-			// FIXME: free the elements inserted so far
-			return NULL;
+			return 0;
 		}
 
 		path_elem->elem = path_node->pixel;
@@ -502,17 +499,16 @@ struct sp_queue_head *construct_shortest_path(struct openings *const o)
 
 	if (source_elem == NULL)
 	{
-		// FIXME: free elements inserted so far
-		return NULL;
+		return 0;
 	}
 
 	source_elem->elem = path_node->pixel;
 	sp_insert_elem(sp, source_elem);
 
-	return sp;
+	return dest_dist;
 }
 
-struct sp_queue_head *find_shortest_path(struct openings *const o)
+unsigned find_shortest_path(struct openings *const o, struct sp_queue_head *sp)
 {
 	struct node *const start_node = get_node(o->start_gate_pixel);
 
@@ -534,7 +530,7 @@ struct sp_queue_head *find_shortest_path(struct openings *const o)
 
 	if (frontier == NULL)
 	{
-		return NULL;
+		return 0;
 	}
 
 	initialise_bfsfront_queue(frontier);
@@ -607,11 +603,11 @@ CLEANUP:
 
 	if (out_of_mem)
 	{
-		return NULL;
+		return 0;
 	}
 
 	// construct the shortest path from the values of the predecessors
-	return construct_shortest_path(o);
+	return construct_shortest_path(o, sp);
 }
 
 void delete_graph(void)

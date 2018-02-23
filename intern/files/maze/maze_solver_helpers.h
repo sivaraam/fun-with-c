@@ -42,10 +42,17 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
  * Find the shortest path from the start gate node to the end gate node
  * in the graph.
  *
- * Returns the head of a queue that holds the path from the source to the
- * destination. Returns NULL in case of an error (mostly memory error).
+ * Stores the shortest path in the given queue. The queue is expected to be
+ * a pointer to a vlid queue head which has been initialized.
+ *
+ * Returns the non-negative distance of the destination from the source on
+ * success or 0 in case of failure.
+ *
+ * Note: In case of failure the queue might be partially filled. Freeing
+ * the elements in the queue (and of course the queue head) is the
+ * responsibility of the caller.
  */
-struct sp_queue_head *find_shortest_path(struct openings *const o);
+unsigned find_shortest_path(struct openings *const o, struct sp_queue_head *const sp);
 
 /**
  * Free up the memory taken up by the graph and its related structure.

@@ -5,6 +5,18 @@
 #include "maze_solver.h"
 #include "maze_solver_helpers.h"
 
+/**
+ * Free the nodes (if any) in the shortest path queue when the shortest
+ * path could not be successfully found.
+ */
+static void free_sp_queue(struct sp_queue_head *sp)
+{
+	while(!sp_queue_empty(sp))
+	{
+		free(sp_remove_elem(sp));
+	}
+}
+
 int solve_maze(struct maze_image *const maze)
 {
 	// find the padding
@@ -50,11 +62,17 @@ int solve_maze(struct maze_image *const maze)
 
 	// find the shortest path to the end node from the source node
 	// for the constructed graph
-	struct sp_queue_head *const sp = find_shortest_path(o);
+	struct sp_queue_head *const sp = malloc(sizeof(struct sp_queue_head));
 
-	if (sp != NULL)
+	if (sp == NULL)
 	{
+		return ERRMEMORY;
+	}
 
+	unsigned dest_distance = find_shortest_path(o, sp);
+
+	if (dest_distance != 0)
+	{
 #ifdef KS_MAZE_SOLVER_DEBUG_PRINT_SHORTEST_PATH
 		// Warning: This removes the items from the queue!
 		printf("Shortest path from %u to %u:\n", o->start_gate_pixel, o->end_gate_pixel);
@@ -71,13 +89,15 @@ int solve_maze(struct maze_image *const maze)
 		colour_path(maze, sp);
 #endif
 
-		// free the queue head
-		free(sp);
 	}
 	else
 	{
+		free_sp_queue(sp);
 		return ERRSHPATH;
 	}
+
+	// free the queue head
+	free(sp);
 
 	delete_graph();
 	return 0;

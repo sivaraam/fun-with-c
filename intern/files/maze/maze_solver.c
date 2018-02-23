@@ -19,6 +19,8 @@ static void free_sp_queue(struct sp_queue_head *sp)
 
 int solve_maze(struct maze_image *const maze)
 {
+	int ret_val = 0;
+
 	// find the padding
 	maze->padding = find_padding(maze->width);
 
@@ -36,7 +38,6 @@ int solve_maze(struct maze_image *const maze)
 
 	if (o == NULL)
 	{
-		fprintf(stderr, "solve_maze: Could not find openings for the given image!\n");
 		return ERROPENINGS;
 	}
 
@@ -47,7 +48,8 @@ int solve_maze(struct maze_image *const maze)
 
 	if (create_graph(maze))
 	{
-		return ERRMEMORY;
+		ret_val = ERRMEMORY;
+		goto CLEANUP;
 	}
 
 #ifdef KS_MAZE_SOLVER_DEBUG
@@ -57,7 +59,8 @@ int solve_maze(struct maze_image *const maze)
 	// initialize the adjacency for each node in the graph
 	if (initialize_adjacencies(maze, o))
 	{
-		return ERRMEMORY;
+		ret_val = ERRMEMORY;
+		goto CLEANUP;
 	}
 
 	// find the shortest path to the end node from the source node
@@ -66,7 +69,8 @@ int solve_maze(struct maze_image *const maze)
 
 	if (sp == NULL)
 	{
-		return ERRMEMORY;
+		ret_val = ERRMEMORY;
+		goto CLEANUP;
 	}
 
 	unsigned dest_distance = find_shortest_path(o, sp);
@@ -93,12 +97,14 @@ int solve_maze(struct maze_image *const maze)
 	else
 	{
 		free_sp_queue(sp);
-		return ERRSHPATH;
+		ret_val = ERRSHPATH;
+		goto CLEANUP;
 	}
 
 	// free the queue head
 	free(sp);
 
+CLEANUP:
 	delete_graph();
-	return 0;
+	return ret_val;
 }

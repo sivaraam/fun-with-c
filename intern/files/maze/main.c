@@ -3,6 +3,7 @@
 #include "maze_solver.h"
 
 #define DEBUG
+#define ERRWRITE 128
 
 int main(int argc, char *argv[])
 {
@@ -90,7 +91,16 @@ int main(int argc, char *argv[])
 	if (ret_val == ERRMEMORY)
 	{
 		fprintf(stderr, "Could not solve maze due to insufficient memory!\n");
-		ret_val = 1;
+		goto FREE_QUIT;
+	}
+	else if (ret_val == ERROPENINGS)
+	{
+		fprintf(stderr, "Could not find openings (start and end pixels) for the given image!\n");
+		goto FREE_QUIT;
+	}
+	else if (ret_val == ERRSHPATH)
+	{
+		fprintf(stderr, "Could not find shortest path from source to end in the given image!\n");
 		goto FREE_QUIT;
 	}
 
@@ -101,9 +111,12 @@ int main(int argc, char *argv[])
 	if (fwrite(maze->data, data_size, 1, image_file) == 0)
 	{
 		fprintf(stderr, "Could not write the solved maze successfully to the file!\n");
-		ret_val = 1;
+		ret_val = ERRWRITE;
 		goto FREE_QUIT;
 	}
+
+	printf("Successfully found the shortest path between from the source to the destination.\n");
+	printf("The solution has been written to the file.\n");
 
 FREE_QUIT:
 	// free the memory

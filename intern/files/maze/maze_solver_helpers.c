@@ -444,11 +444,13 @@ struct sp_queue_head *construct_shortest_path(struct openings *o)
 	struct node *path_node = get_node(o->end_gate_pixel);
 
 #ifdef KS_MAZE_SOLVER_DEBUG
-	unsigned path_size=0;
 #endif
 
 	// initialize the shortest path queue
 	struct sp_queue_head *sp = malloc(sizeof(struct sp_queue_head));
+#ifdef KS_MAZE_SOLVER_DEBUG
+	printf("construct_shortest_path: Destination is %u pixels away from the source.\n", path_node->src_dist);
+#endif
 
 	if (sp == NULL)
 	{
@@ -473,16 +475,7 @@ struct sp_queue_head *construct_shortest_path(struct openings *o)
 		sp_insert_elem(sp, path_elem);
 
 		path_node = path_node->pi;
-
-#ifdef KS_MAZE_SOLVER_DEBUG
-		path_size++;
-#endif
-
 	}
-
-#ifdef KS_MAZE_SOLVER_DEBUG
-	printf("construct_shortest_path: Shortest path goes through %u pixels\n", path_size);
-#endif
 
 	// insert the source node
 	struct sp_queue_elem *source_elem = malloc(sizeof(struct sp_queue_elem));

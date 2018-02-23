@@ -401,6 +401,10 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
 			n = find_end_gate_neighbours(maze, curr_pixel);
 		}
 
+#ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
+		printf("initialize_adjacencies: ");
+#endif
+
 		for (unsigned curr=0; curr<MAX_NEIGHBOURS; curr++)
 		{
 			if (n.neighbour[curr] < 0)
@@ -432,7 +436,7 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
 		}
 
 #ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
-		printf("\nTotally %u adjacencies for pixel: %u\n",
+		printf("\n initialize_adjacencies: Totally %u adjacencies for pixel: %u\n",
 			(*(np_list+clear_pixel))->pixel_node->adjlist.num,
 			curr_pixel);
 #endif

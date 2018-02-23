@@ -7,6 +7,18 @@
  *
  * The first node of the queue is expected to be the sourcee and the last
  * is expected to be the destination.
+ *
+ * Note about memory management:
+ * The memory for the queue head object and the
+ * queue element objects are expected to be managed
+ * by the end user. No explicit memory management is done
+ * internally.
+ *
+ * Therefore, the reposibilities such as obtaining valid
+ * memory for new elements (struct sp_queue_elem) to be inserted,
+ * freeing memory for the objects that have been removed
+ * from the queue, lie in the hands of the end user.
+ *
  */
 
 struct sp_queue_elem

@@ -6,6 +6,18 @@
 /**
  * A simple queue implementation that stores the BFS frontier
  * during a BFS search in a graph.
+ *
+ * Note about memory management:
+ * The memory for the queue head object and the
+ * queue element objects are expected to be managed
+ * by the end user. No explicit memory management is done
+ * internally.
+ *
+ * Therefore, the reposibilities such as obtaining valid
+ * memory for new elements (struct bfsfront_queue_elem) to be
+ * inserted, freeing memory for the objects that have been
+ * removed from the queue, lie in the hands of the end user.
+ *
  */
 
 struct bfsfront_queue_elem

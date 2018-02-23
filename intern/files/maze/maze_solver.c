@@ -43,27 +43,39 @@ int solve_maze(struct maze_image *maze)
 #endif
 
 	// initialize the adjacency for each node in the graph
-	initialize_adjacencies(maze, o);
+	if (initialize_adjacencies(maze, o))
+	{
+		return ERRMEMORY;
+	}
 
 	// find the shortest path to the end node from the source node
 	// for the constructed graph
 	struct sp_queue_head *sp = find_shortest_path(o);
 
-#ifdef KS_MAZE_SOLVER_DEBUG_PRINT_SHORTEST_PATH
-	// Warning: This removes the items from the queue!
-	printf("Shortest path from %u to %u:\n", o->start_gate_pixel, o->end_gate_pixel);
-
-	while (!sp_queue_empty(sp))
+	if (sp != NULL)
 	{
-		struct sp_queue_elem *curr_elem = sp_remove_elem(sp);
-		printf("%u\t", curr_elem->elem);
-		free(curr_elem);
-	}
 
-	printf("\n");
+#ifdef KS_MAZE_SOLVER_DEBUG_PRINT_SHORTEST_PATH
+		// Warning: This removes the items from the queue!
+		printf("Shortest path from %u to %u:\n", o->start_gate_pixel, o->end_gate_pixel);
+
+		while (!sp_queue_empty(sp))
+		{
+			struct sp_queue_elem *curr_elem = sp_remove_elem(sp);
+			printf("%u\t", curr_elem->elem);
+			free(curr_elem);
+		}
+
+		printf("\n");
 #else
-	colour_path(maze, sp);
+		colour_path(maze, sp);
 #endif
+
+	}
+	else
+	{
+		return ERRSHPATH;
+	}
 
 	delete_graph();
 	return 0;

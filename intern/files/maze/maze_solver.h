@@ -7,6 +7,7 @@
 
 #define ERROPENINGS 1
 #define ERRMEMORY 2
+#define ERRSHPATH 4
 
 // Type of each byte in the maze
 typedef unsigned char maze_type;

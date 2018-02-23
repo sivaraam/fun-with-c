@@ -71,6 +71,8 @@ int solve_maze(struct maze_image *maze)
 		colour_path(maze, sp);
 #endif
 
+		// free the queue head
+		free(sp);
 	}
 	else
 	{

@@ -473,7 +473,14 @@ struct sp_queue_head *construct_shortest_path(struct openings *o)
 
 	// insert the source node
 	struct sp_queue_elem *source_elem = malloc(sizeof(struct sp_queue_elem));
-	source_elem->elem = o->start_gate_pixel;
+
+	if (source_elem == NULL)
+	{
+		// FIXME: free elements inserted so far
+		return NULL;
+	}
+
+	source_elem->elem = path_node->pixel;
 	sp_insert_elem(sp, source_elem);
 
 	return sp;
@@ -502,7 +509,8 @@ struct sp_queue_head *find_shortest_path(struct openings *o)
 
 	if (first == NULL)
 	{
-		return NULL;
+		out_of_mem = true;
+		goto CLEANUP;
 	}
 
 	first->elem = start_node;
@@ -556,6 +564,10 @@ struct sp_queue_head *find_shortest_path(struct openings *o)
 
 		free(curr_elem);
 	}
+
+CLEANUP:
+	// free the queue head
+	free(frontier);
 
 	if (out_of_mem)
 	{

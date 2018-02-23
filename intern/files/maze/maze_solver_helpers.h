@@ -27,14 +27,14 @@ void print_ascii_maze(struct maze_image *maze);
  * Create the graph nodes for each clear pixel in the maze image.
  * Also sets the number of clear pixels in the given maze object.
  *
- * Returns 0 on success and non-zero value on error.
+ * Returns 0 on success and non-zero value on error (mostly memory error).
  */
 int create_graph(struct maze_image *maze);
 
 /**
  * Initialize the adjacency vertices for node in the clear pixel graph.
  *
- * Returns 0 on success and non-zero value on error.
+ * Returns 0 on success and non-zero value on error (mostly memroy error).
  */
 int initialize_adjacencies(struct maze_image *maze, struct openings *o);
 
@@ -43,7 +43,7 @@ int initialize_adjacencies(struct maze_image *maze, struct openings *o);
  * in the graph.
  *
  * Returns the head of a queue that holds the path from the source to the
- * destination.
+ * destination. Returns NULL in case of an error (mostly memory error).
  */
 struct sp_queue_head *find_shortest_path(struct openings *o);
 
@@ -58,7 +58,8 @@ void delete_graph(void);
 
 /**
  * Colour the pixels corresponding to the shortest path with a colour other
- * than black and white.
+ * than black and white. Expects a pointer to a valid 'struct sp_queue_head'
+ * object.
  */
 void colour_path(struct maze_image *maze, struct sp_queue_head *sp);
 

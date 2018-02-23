@@ -412,9 +412,19 @@ int initialize_adjacencies(struct maze_image *maze, struct openings *o)
 			printf("%ld\t", n.neighbour[curr]);
 #endif
 
+			const struct node *adj_node = get_node(n.neighbour[curr]);
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+			if (adj_node == NULL)
+			{
+				fprintf(stderr, "construct_shortest_path: Invalid pixel node.\n");
+				exit(EXIT_FAILURE);
+			}
+#endif
+
 			if (
 				add_adjacency((*(np_list+clear_pixel))->pixel_node,
-					      get_node(n.neighbour[curr]))
+					      adj_node)
 			)
 			{
 				return 1;
@@ -444,6 +454,11 @@ struct sp_queue_head *construct_shortest_path(struct openings *o)
 	struct node *path_node = get_node(o->end_gate_pixel);
 
 #ifdef KS_MAZE_SOLVER_DEBUG
+	if (path_node == NULL)
+	{
+		fprintf(stderr, "construct_shortest_path: Invalid pixel node.\n");
+		exit(EXIT_FAILURE);
+	}
 #endif
 
 	// initialize the shortest path queue
@@ -452,6 +467,7 @@ struct sp_queue_head *construct_shortest_path(struct openings *o)
 	printf("construct_shortest_path: Destination is %u pixels away from the source.\n", path_node->src_dist);
 #endif
 
+	// sanity check
 	if (sp == NULL)
 	{
 		return NULL;
@@ -495,6 +511,15 @@ struct sp_queue_head *construct_shortest_path(struct openings *o)
 struct sp_queue_head *find_shortest_path(struct openings *o)
 {
 	struct node *start_node = get_node(o->start_gate_pixel);
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	if (start_node == NULL)
+	{
+		fprintf(stderr, "construct_shortest_path: Invalid pixel node.\n");
+		exit(EXIT_FAILURE);
+	}
+#endif
+
 	bool found_dest = false, out_of_mem = false;
 
 	// initial setup

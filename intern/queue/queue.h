@@ -5,11 +5,9 @@
  * A simple queue implementation that stores some nodes
  */
 
-typedef <TO_FILL> *elem_type;
-
 struct queue_elem
 {
-	elem_type *elem;
+	<ELEM_TYPE_TO_FILL> *elem;
 	struct queue_elem *next;
 };
 

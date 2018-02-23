@@ -2,7 +2,19 @@
 #define KS_QUEUE
 
 /**
- * A simple queue implementation that stores some nodes
+ * A simple queue implementation that stores some nodes.
+ *
+ * Note about memory management:
+ * The memory for the 'struct queue_head' object and the
+ * 'struct queue_elem' objects are expected to be managed
+ * by the end user. No explicit memory management is done
+ * internally.
+ *
+ * Therefore, the reposibilities such as obtaining valid
+ * memory for new elements (struct queue_elem) to be inserted,
+ * freeing memory for the objects that have been removed
+ * from the queue, lie in the hands of the end user.
+ *
  */
 
 struct queue_elem

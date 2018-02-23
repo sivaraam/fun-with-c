@@ -68,7 +68,8 @@ int is_clear_pixel(struct maze_image *maze, unsigned pixel)
  * On success, returns the value of the pixel of the gate cast to a long.
  * If one is not found returns -1;
  */
-static long find_gate(struct maze_image *maze, unsigned start_pixel, unsigned end_pixel)
+static
+long find_gate(struct maze_image *maze, unsigned start_pixel, unsigned end_pixel)
 {
 	long gate = -1;
 
@@ -224,6 +225,7 @@ struct pixel_neighbours
  * Identifies valid clear pixel neighbours for the given "start gate" pixel and returns a valid
  * 'struct pixel_neighbours' object.
  */
+static
 struct pixel_neighbours find_start_gate_neighbours(struct maze_image *maze, unsigned sg_pixel)
 {
 
@@ -266,6 +268,7 @@ struct pixel_neighbours find_start_gate_neighbours(struct maze_image *maze, unsi
  * Identifies valid clear pixel neighbours for the given "end gate" pixel and returns a valid
  * 'struct pixel_neighbours' object.
  */
+static
 struct pixel_neighbours find_end_gate_neighbours(struct maze_image *maze, unsigned eg_pixel)
 {
 
@@ -310,6 +313,7 @@ struct pixel_neighbours find_end_gate_neighbours(struct maze_image *maze, unsign
  * 'struct pixel_neighbours' object accordingly. Pixels are not expected to be
  * border pixels (those that have fewer than 4 valid neighbours).
  */
+static
 struct pixel_neighbours find_neighbours(struct maze_image *maze, unsigned pixel)
 {
 
@@ -434,7 +438,8 @@ int initialize_adjacencies(struct maze_image *maze, struct openings *o)
  *
  * Returns NULL in case of an error.
  */
-static struct sp_queue_head *construct_shortest_path(struct openings *o)
+static
+struct sp_queue_head *construct_shortest_path(struct openings *o)
 {
 	struct node *path_node = get_node(o->end_gate_pixel);
 

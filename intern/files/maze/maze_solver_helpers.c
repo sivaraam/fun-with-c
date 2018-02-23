@@ -546,6 +546,7 @@ struct sp_queue_head *find_shortest_path(struct openings *o)
 					if (adj_elem == NULL)
 					{
 						out_of_mem = true;
+						break;
 					}
 
 					adj_elem->elem = curr_adj;

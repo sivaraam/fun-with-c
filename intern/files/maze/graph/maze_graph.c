@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "maze_graph.h"
 
-int insert_adjacency(struct node *n, struct node *adj)
+int insert_adjacency(struct node *const n, struct node *const adj)
 {
 	if (n == NULL)
 	{

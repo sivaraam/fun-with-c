@@ -45,6 +45,6 @@ struct node
  *
  * Returns 0 on sucess and non-zero value indicating error on failure.
  */
-int insert_adjacency(struct node *n, struct node *adj);
+int insert_adjacency(struct node *const n, struct node *const adj);
 
 #endif

@@ -31,7 +31,7 @@ static unsigned np_list_curr_size = 0;
 static int re_allocate_np_list(void)
 {
 	const unsigned new_np_list_size = np_list_curr_size+np_list_increment;
-	struct node_list **temp = realloc(np_list, (new_np_list_size)*sizeof(struct node_list*));
+	struct node_list **const temp = realloc(np_list, (new_np_list_size)*sizeof(struct node_list*));
 
 	if (temp == NULL)
 	{
@@ -57,7 +57,7 @@ static int re_allocate_np_list(void)
 	return 0;
 }
 
-int insert_node(unsigned pixel, struct node *n)
+int insert_node(unsigned pixel, struct node *const n)
 {
 	if (np_list_vals == np_list_curr_size)
 	{
@@ -75,7 +75,7 @@ int insert_node(unsigned pixel, struct node *n)
 
 struct node *create_node(unsigned pixel)
 {
-	struct node *n = calloc(1, sizeof(struct node));
+	struct node *const n = calloc(1, sizeof(struct node));
 
 	if (n == NULL)
 	{
@@ -129,7 +129,7 @@ struct node *get_node(unsigned pixel)
 	return NULL;
 }
 
-int add_adjacency(struct node *pixel_node, struct node *adj_pixel_node)
+int add_adjacency(struct node *const pixel_node, struct node *const adj_pixel_node)
 {
 	return insert_adjacency(pixel_node, adj_pixel_node);
 }

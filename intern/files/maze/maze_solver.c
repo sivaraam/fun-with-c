@@ -5,7 +5,7 @@
 #include "maze_solver.h"
 #include "maze_solver_helpers.h"
 
-int solve_maze(struct maze_image *maze)
+int solve_maze(struct maze_image *const maze)
 {
 	// find the padding
 	maze->padding = find_padding(maze->width);
@@ -20,7 +20,7 @@ int solve_maze(struct maze_image *maze)
 	printf("solve_maze: Size of image data: %lu\n", image_data_size);
 #endif
 
-	struct openings *o = find_openings(maze);
+	struct openings *const o = find_openings(maze);
 
 	if (o == NULL)
 	{
@@ -50,7 +50,7 @@ int solve_maze(struct maze_image *maze)
 
 	// find the shortest path to the end node from the source node
 	// for the constructed graph
-	struct sp_queue_head *sp = find_shortest_path(o);
+	struct sp_queue_head *const sp = find_shortest_path(o);
 
 	if (sp != NULL)
 	{
@@ -61,7 +61,7 @@ int solve_maze(struct maze_image *maze)
 
 		while (!sp_queue_empty(sp))
 		{
-			struct sp_queue_elem *curr_elem = sp_remove_elem(sp);
+			struct sp_queue_elem *const curr_elem = sp_remove_elem(sp);
 			printf("%u\t", curr_elem->elem);
 			free(curr_elem);
 		}

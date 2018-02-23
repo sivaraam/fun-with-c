@@ -1,13 +1,13 @@
 #include <stddef.h>
 #include "queue.h"
 
-void initialise_bfsfront_queue(struct bfsfront_queue_head *head)
+void initialise_bfsfront_queue(struct bfsfront_queue_head *const head)
 {
 	head->first = NULL;
 	head->last = NULL;
 }
 
-int bfsfront_insert_elem(struct bfsfront_queue_head *head, struct bfsfront_queue_elem *elem)
+int bfsfront_insert_elem(struct bfsfront_queue_head *const head, struct bfsfront_queue_elem *const elem)
 {
 	if (head == NULL || elem == NULL)
 	{
@@ -29,7 +29,7 @@ int bfsfront_insert_elem(struct bfsfront_queue_head *head, struct bfsfront_queue
 	return 0;
 }
 
-struct bfsfront_queue_elem *bfsfront_remove_elem(struct bfsfront_queue_head *head)
+struct bfsfront_queue_elem *bfsfront_remove_elem(struct bfsfront_queue_head *const head)
 {
 	if (head == NULL)
 	{
@@ -42,7 +42,7 @@ struct bfsfront_queue_elem *bfsfront_remove_elem(struct bfsfront_queue_head *hea
 		return NULL;
 	}
 
-	struct bfsfront_queue_elem *first_elem = head->first;
+	struct bfsfront_queue_elem *const first_elem = head->first;
 	head->first = first_elem->next;
 
 	// last node of list
@@ -54,7 +54,7 @@ struct bfsfront_queue_elem *bfsfront_remove_elem(struct bfsfront_queue_head *hea
 	return first_elem;
 }
 
-int bfsfront_queue_empty(struct bfsfront_queue_head *head)
+int bfsfront_queue_empty(struct bfsfront_queue_head *const head)
 {
 	if (head == NULL ||
 	    (head->first == NULL && head->last == NULL))

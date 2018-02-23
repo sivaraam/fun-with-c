@@ -34,7 +34,7 @@ struct node *create_node(unsigned pixel);
  *
  * Returns 0 on success and non-zero value on failure.
  */
-int insert_node(unsigned pixel, struct node *n);
+int insert_node(unsigned pixel, struct node *const n);
 
 /**
  * Remove the coressponding 'struct node_list' entry from the 'np_list'
@@ -63,6 +63,6 @@ struct  node *get_node(unsigned pixel);
  *
  * Returns 0 on success and non-xero value on error.
  */
-int add_adjacency(struct node *pixel_node, struct node *adj_pixel_node);
+int add_adjacency(struct node *const pixel_node, struct node *const adj_pixel_node);
 
 #endif

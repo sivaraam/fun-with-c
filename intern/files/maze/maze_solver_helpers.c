@@ -16,7 +16,7 @@
  * Returns non-zero value if the given pixel in the maze is a hurdle pixel.
  * Else returns 0.
  */
-int is_hurdle_pixel(struct maze_image *maze, unsigned pixel)
+int is_hurdle_pixel(struct maze_image *const maze, unsigned pixel)
 {
 
 #ifdef KS_MAZE_SOLVER_DEBUG
@@ -27,7 +27,7 @@ int is_hurdle_pixel(struct maze_image *maze, unsigned pixel)
 	}
 #endif
 
-	unsigned char *pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
+	unsigned char *const pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
 
 	if ((*pixel_byte&HURDLE_PIXEL) == HURDLE_PIXEL) // It's enough to check one byte for now
 	{
@@ -41,7 +41,7 @@ int is_hurdle_pixel(struct maze_image *maze, unsigned pixel)
  * Returns non-zero value if the given pixel in the maze is a clear pixel.
  * Else returns 0.
  */
-int is_clear_pixel(struct maze_image *maze, unsigned pixel)
+int is_clear_pixel(struct maze_image *const maze, unsigned pixel)
 {
 
 #ifdef KS_MAZE_SOLVER_DEBUG
@@ -52,7 +52,7 @@ int is_clear_pixel(struct maze_image *maze, unsigned pixel)
 	}
 #endif
 
-	unsigned char *pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
+	unsigned char *const pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
 
 	if ((*pixel_byte&CLEAR_PIXEL) == CLEAR_PIXEL) // It's enough to check one byte for now
 	{
@@ -69,7 +69,7 @@ int is_clear_pixel(struct maze_image *maze, unsigned pixel)
  * If one is not found returns -1;
  */
 static
-long find_gate(struct maze_image *maze, unsigned start_pixel, unsigned end_pixel)
+long find_gate(struct maze_image *const maze, unsigned start_pixel, unsigned end_pixel)
 {
 	long gate = -1;
 
@@ -80,7 +80,7 @@ long find_gate(struct maze_image *maze, unsigned start_pixel, unsigned end_pixel
 	// find the pixel of the start gate
 	for (unsigned pixel = start_pixel; pixel<=end_pixel; pixel++)
 	{
-		unsigned char *pixel_ptr = maze->data+get_pixel_offset(maze->width, maze->padding, pixel);
+		unsigned char *const pixel_ptr = maze->data+get_pixel_offset(maze->width, maze->padding, pixel);
 
 		if ((*pixel_ptr&CLEAR_PIXEL) == CLEAR_PIXEL)
 		{
@@ -108,9 +108,9 @@ long find_gate(struct maze_image *maze, unsigned start_pixel, unsigned end_pixel
 	return gate;
 }
 
-struct openings *find_openings(struct maze_image *maze)
+struct openings *find_openings(struct maze_image *const maze)
 {
-	struct openings *o = malloc(sizeof(struct openings));
+	struct openings *const o = malloc(sizeof(struct openings));
 
 	if (o == NULL)
 	{
@@ -131,7 +131,7 @@ struct openings *find_openings(struct maze_image *maze)
 }
 
 #ifdef KS_MAZE_SOLVER_DEBUG
-void print_ascii_maze(struct maze_image *maze)
+void print_ascii_maze(struct maze_image *const maze)
 {
 	for (unsigned pixel=0; pixel<maze->width*maze->height; pixel++)
 	{
@@ -159,7 +159,7 @@ void print_ascii_maze(struct maze_image *maze)
 }
 #endif
 
-int create_graph(struct maze_image *maze)
+int create_graph(struct maze_image *const maze)
 {
 	unsigned clear_pixels=0;
 
@@ -173,7 +173,7 @@ int create_graph(struct maze_image *maze)
 		if (is_clear_pixel(maze, pixel))
 		{
 			// create the node
-			struct node *n = create_node(pixel);
+			struct node *const n = create_node(pixel);
 
 			if (n == NULL)
 			{
@@ -226,7 +226,7 @@ struct pixel_neighbours
  * 'struct pixel_neighbours' object.
  */
 static
-struct pixel_neighbours find_start_gate_neighbours(struct maze_image *maze, unsigned sg_pixel)
+struct pixel_neighbours find_start_gate_neighbours(struct maze_image *const maze, unsigned sg_pixel)
 {
 
 #ifdef KS_MAZE_SOLVER_DEBUG
@@ -269,7 +269,7 @@ struct pixel_neighbours find_start_gate_neighbours(struct maze_image *maze, unsi
  * 'struct pixel_neighbours' object.
  */
 static
-struct pixel_neighbours find_end_gate_neighbours(struct maze_image *maze, unsigned eg_pixel)
+struct pixel_neighbours find_end_gate_neighbours(struct maze_image *const maze, unsigned eg_pixel)
 {
 
 #ifdef KS_MAZE_SOLVER_DEBUG
@@ -314,7 +314,7 @@ struct pixel_neighbours find_end_gate_neighbours(struct maze_image *maze, unsign
  * border pixels (those that have fewer than 4 valid neighbours).
  */
 static
-struct pixel_neighbours find_neighbours(struct maze_image *maze, unsigned pixel)
+struct pixel_neighbours find_neighbours(struct maze_image *const maze, unsigned pixel)
 {
 
 #ifdef KS_MAZE_SOLVER_DEBUG
@@ -373,7 +373,7 @@ struct pixel_neighbours find_neighbours(struct maze_image *maze, unsigned pixel)
 	return pn;
 }
 
-int initialize_adjacencies(struct maze_image *maze, struct openings *o)
+int initialize_adjacencies(struct maze_image *const maze, struct openings *const o)
 {
 	for (unsigned clear_pixel=0; clear_pixel<np_list_vals; clear_pixel++)
 	{
@@ -412,7 +412,7 @@ int initialize_adjacencies(struct maze_image *maze, struct openings *o)
 			printf("%ld\t", n.neighbour[curr]);
 #endif
 
-			const struct node *adj_node = get_node(n.neighbour[curr]);
+			struct node *const adj_node = get_node(n.neighbour[curr]);
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 			if (adj_node == NULL)
@@ -449,9 +449,9 @@ int initialize_adjacencies(struct maze_image *maze, struct openings *o)
  * Returns NULL in case of an error.
  */
 static
-struct sp_queue_head *construct_shortest_path(struct openings *o)
+struct sp_queue_head *construct_shortest_path(struct openings *const o)
 {
-	struct node *path_node = get_node(o->end_gate_pixel);
+	struct node * path_node = get_node(o->end_gate_pixel);
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	if (path_node == NULL)
@@ -462,7 +462,7 @@ struct sp_queue_head *construct_shortest_path(struct openings *o)
 #endif
 
 	// initialize the shortest path queue
-	struct sp_queue_head *sp = malloc(sizeof(struct sp_queue_head));
+	struct sp_queue_head *const sp = malloc(sizeof(struct sp_queue_head));
 #ifdef KS_MAZE_SOLVER_DEBUG
 	printf("construct_shortest_path: Destination is %u pixels away from the source.\n", path_node->src_dist);
 #endif
@@ -478,7 +478,7 @@ struct sp_queue_head *construct_shortest_path(struct openings *o)
 	while (path_node->pi != NULL)
 	{
 		// insert the current path node
-		struct sp_queue_elem *path_elem = malloc(sizeof(struct sp_queue_elem));
+		struct sp_queue_elem *const path_elem = malloc(sizeof(struct sp_queue_elem));
 
 		if (path_elem == NULL)
 		{
@@ -494,7 +494,7 @@ struct sp_queue_head *construct_shortest_path(struct openings *o)
 	}
 
 	// insert the source node
-	struct sp_queue_elem *source_elem = malloc(sizeof(struct sp_queue_elem));
+	struct sp_queue_elem *const source_elem = malloc(sizeof(struct sp_queue_elem));
 
 	if (source_elem == NULL)
 	{
@@ -508,9 +508,9 @@ struct sp_queue_head *construct_shortest_path(struct openings *o)
 	return sp;
 }
 
-struct sp_queue_head *find_shortest_path(struct openings *o)
+struct sp_queue_head *find_shortest_path(struct openings *const o)
 {
-	struct node *start_node = get_node(o->start_gate_pixel);
+	struct node *const start_node = get_node(o->start_gate_pixel);
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	if (start_node == NULL)
@@ -526,7 +526,7 @@ struct sp_queue_head *find_shortest_path(struct openings *o)
 	start_node->colour = GREY;
 
 	// create the frotier queue head
-	struct bfsfront_queue_head *frontier = malloc(sizeof(struct bfsfront_queue_head));
+	struct bfsfront_queue_head *const frontier = malloc(sizeof(struct bfsfront_queue_head));
 
 	if (frontier == NULL)
 	{
@@ -536,7 +536,7 @@ struct sp_queue_head *find_shortest_path(struct openings *o)
 	initialise_bfsfront_queue(frontier);
 
 	// insert the start node into the frontier
-	struct bfsfront_queue_elem *first = malloc(sizeof(struct bfsfront_queue_elem));
+	struct bfsfront_queue_elem *const first = malloc(sizeof(struct bfsfront_queue_elem));
 
 	if (first == NULL)
 	{
@@ -558,7 +558,7 @@ struct sp_queue_head *find_shortest_path(struct openings *o)
 		//
 		if (!(found_dest | out_of_mem)) {
 
-			struct node *curr = curr_elem->elem;
+			struct node *const curr = curr_elem->elem;
 
 			for (unsigned adj=0; adj<curr->adjlist.num; adj++)
 			{
@@ -572,7 +572,7 @@ struct sp_queue_head *find_shortest_path(struct openings *o)
 					curr_adj->pi = curr;
 
 					// insert the element into the frontier
-					struct bfsfront_queue_elem *adj_elem = malloc(sizeof(struct bfsfront_queue_elem));
+					struct bfsfront_queue_elem *const adj_elem = malloc(sizeof(struct bfsfront_queue_elem));
 
 					if (adj_elem == NULL)
 					{
@@ -615,7 +615,7 @@ void delete_graph(void)
 	// initially free the individual nodes
 	for (unsigned clear_pixel=0; clear_pixel<np_list_vals; clear_pixel++)
 	{
-		struct node **curr_pixel_node = &(*(np_list+clear_pixel))->pixel_node;
+		struct node **const curr_pixel_node = &(*(np_list+clear_pixel))->pixel_node;
 		free(*curr_pixel_node);
 	}
 
@@ -627,9 +627,9 @@ void delete_graph(void)
  * Colour the given pixel in the maze.
  */
 inline static
-void colour_pixel(struct maze_image *maze, unsigned pixel)
+void colour_pixel(struct maze_image *const maze, unsigned pixel)
 {
-	unsigned char *pixel_bytes = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
+	unsigned char *const pixel_bytes = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
 
 	// ordering of RGB for little-endian architecture
 	static const unsigned char colour_bytes[3] = {
@@ -644,11 +644,11 @@ void colour_pixel(struct maze_image *maze, unsigned pixel)
 	}
 }
 
-void colour_path(struct maze_image *maze, struct sp_queue_head *sp)
+void colour_path(struct maze_image *const maze, struct sp_queue_head *const sp)
 {
 	while (!sp_queue_empty(sp))
 	{
-		struct sp_queue_elem *curr_elem = sp_remove_elem(sp);
+		struct sp_queue_elem *const curr_elem = sp_remove_elem(sp);
 		colour_pixel(maze, curr_elem->elem);
 		free(curr_elem);
 	}

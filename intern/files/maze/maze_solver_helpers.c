@@ -10,8 +10,6 @@
 #include <stdio.h>
 #endif
 
-#define MAX_NEIGHBOURS 4
-
 /**
  * Returns non-zero value if the given pixel in the maze is a hurdle pixel.
  * Else returns 0.
@@ -219,11 +217,12 @@ int create_graph(struct maze_image *const maze)
  * The data structure used to hold the four possible neighbouring clear pixels
  * for a given pixel.
  *
- * The value is non-negative for a valid neighbour.
+ * The number of valid neighbours can is indicated by num.
  */
 struct pixel_neighbours
 {
-	long neighbour[4];
+	unsigned neighbour[4];
+	unsigned num;
 };
 
 /**
@@ -248,7 +247,8 @@ struct pixel_neighbours find_start_gate_neighbours(struct maze_image *const maze
 #endif
 	bottom = p+maze->width;
 
-	struct pixel_neighbours pn = { {-1L, -1L, -1L, -1L} };
+	unsigned num = 0;
+	struct pixel_neighbours pn = {0};
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	if (
@@ -264,9 +264,10 @@ struct pixel_neighbours find_start_gate_neighbours(struct maze_image *const maze
 
 	if (is_clear_pixel(maze, bottom))
 	{
-		pn.neighbour[0] = bottom;
+		pn.neighbour[num++] = bottom;
 	}
 
+	pn.num = num;
 	return pn;
 }
 /**
@@ -291,7 +292,8 @@ struct pixel_neighbours find_end_gate_neighbours(struct maze_image *const maze, 
 #endif
 	top = p - maze->width;
 
-	struct pixel_neighbours pn = { {-1L, -1L, -1L, -1L} };
+	unsigned num = 0;
+	struct pixel_neighbours pn = {0};
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	if (
@@ -307,9 +309,10 @@ struct pixel_neighbours find_end_gate_neighbours(struct maze_image *const maze, 
 
 	if (is_clear_pixel(maze, top))
 	{
-		pn.neighbour[0] = top;
+		pn.neighbour[num++] = top;
 	}
 
+	pn.num = num;
 	return pn;
 }
 
@@ -337,7 +340,8 @@ struct pixel_neighbours find_neighbours(struct maze_image *const maze, unsigned 
 	top = p - maze->width, bottom = p + maze->width,
 	left = p - 1, right = p + 1;
 
-	struct pixel_neighbours pn = { {-1L, -1L, -1L, -1L} };
+	unsigned num = 0;
+	struct pixel_neighbours pn = {0};
 
 
 #ifdef KS_MAZE_SOLVER_DEBUG
@@ -357,24 +361,26 @@ struct pixel_neighbours find_neighbours(struct maze_image *const maze, unsigned 
 
 	if (is_clear_pixel(maze, left))
 	{
-		pn.neighbour[0] = left;
+		pn.neighbour[num++] = left;
 	}
 
 	if (is_clear_pixel(maze, right))
 	{
-		pn.neighbour[1] = right;
+		pn.neighbour[num++] = right;
+
 	}
 
 	if (is_clear_pixel(maze, top))
 	{
-		pn.neighbour[2] = top;
+		pn.neighbour[num++] = top;
 	}
 
 	if (is_clear_pixel(maze, bottom))
 	{
-		pn.neighbour[3] = bottom;
+		pn.neighbour[num++] = bottom;
 	}
 
+	pn.num = num;
 	return pn;
 }
 
@@ -410,13 +416,8 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
 			printf("initialize_adjacencies: ");
 #endif
 
-			// FIXME: add 'num' member in 'struct neighbours'
-			for (unsigned curr=0; curr<MAX_NEIGHBOURS; curr++)
+			for (unsigned curr=0; curr<n.num; curr++)
 			{
-				if (n.neighbour[curr] < 0)
-				{
-					continue;
-				}
 
 #ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
 				printf("%ld\t", n.neighbour[curr]);

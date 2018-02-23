@@ -7,8 +7,15 @@ void initialise_queue(struct queue_head *head)
 	head->last = NULL;
 }
 
-void insert_elem(struct queue_head *head, struct queue_elem *elem)
+int insert_elem(struct queue_head *head, struct queue_elem *elem)
 {
+	// sanity check
+	if (head == NULL ||
+	    elem == NULL)
+	{
+		return 1;
+	}
+
 	elem->next = NULL;
 	if (head->last == NULL)
 	{
@@ -20,10 +27,17 @@ void insert_elem(struct queue_head *head, struct queue_elem *elem)
 		head->last->next = elem;
 		head->last = elem;
 	}
+
+	return 0;
 }
 
 struct queue_elem *remove_elem(struct queue_head *head)
 {
+	if (head == NULL)
+	{
+		return NULL;
+	}
+
 	// empty list
 	if (head->first == NULL)
 	{
@@ -44,7 +58,8 @@ struct queue_elem *remove_elem(struct queue_head *head)
 
 int queue_empty(struct queue_head *head)
 {
-	if (head->first == NULL && head->last == NULL)
+	if (head == NULL ||
+	    (head->first == NULL && head->last == NULL))
 	{
 		return 1;
 	}

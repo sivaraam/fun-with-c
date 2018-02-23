@@ -26,11 +26,16 @@ void initialise_queue(struct queue_head *head);
 
 /**
  * Insert element at the end of the queue.
+ *
+ * Returns 0 on success and 1 on failure.
  */
-void insert_elem(struct queue_head *head, struct queue_elem *elem);
+int insert_elem(struct queue_head *head, struct queue_elem *elem);
 
 /**
  * Remove the first element from the queue.
+ *
+ * Returns a pointer to a valid 'struct queue_elem' object on success
+ * and NULL on failure.
  */
 struct queue_elem *remove_elem(struct queue_head *head);
 

@@ -15,7 +15,7 @@ typedef unsigned char maze_type;
 struct maze_image
 {
 	maze_type *data;
-	unsigned clear_pixels;
+	unsigned pixels;
 	unsigned width;
 	unsigned height;
 	unsigned char padding:2;

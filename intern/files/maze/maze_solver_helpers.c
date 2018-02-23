@@ -20,7 +20,7 @@ int is_hurdle_pixel(struct maze_image *const maze, unsigned pixel)
 {
 
 #ifdef KS_MAZE_SOLVER_DEBUG
-	if (pixel >= maze->width*maze->height)
+	if (pixel >= maze->pixels)
 	{
 		fprintf(stderr, "is_hurdle_pixel: Invalid pixel %u\n", pixel);
 		exit(EXIT_FAILURE);
@@ -45,7 +45,7 @@ int is_clear_pixel(struct maze_image *const maze, unsigned pixel)
 {
 
 #ifdef KS_MAZE_SOLVER_DEBUG
-	if (pixel >= maze->width*maze->height)
+	if (pixel >= maze->pixels)
 	{
 		fprintf(stderr, "is_clear_pixel: Invalid pixel %u\n", pixel);
 		exit(EXIT_FAILURE);
@@ -118,7 +118,7 @@ struct openings *find_openings(struct maze_image *const maze)
 	}
 
 	long start_gate_pixel = find_gate(maze, 0, maze->width-1),
-	     end_gate_pixel = find_gate(maze, (maze->width)*(maze->height-1), maze->width*maze->height-1);
+	     end_gate_pixel = find_gate(maze, (maze->width)*(maze->height-1), maze->pixels-1);
 
 	if (start_gate_pixel == -1 || end_gate_pixel == -1)
 	{
@@ -133,7 +133,7 @@ struct openings *find_openings(struct maze_image *const maze)
 #ifdef KS_MAZE_SOLVER_DEBUG
 void print_ascii_maze(struct maze_image *const maze)
 {
-	for (unsigned pixel=0; pixel<maze->width*maze->height; pixel++)
+	for (unsigned pixel=0; pixel<maze->pixels; pixel++)
 	{
 		if (pixel%maze->width == 0)
 		{
@@ -169,14 +169,14 @@ int create_graph(struct maze_image *const maze)
 	}
 
 	// initialise the 'np_list'
-	if (initialize_np_list(maze->width*maze->height))
+	if (initialize_np_list(maze->pixels))
 	{
 		// delete the partial np list
 		delete_np_list();
 		return 1;
 	}
 
-	for (unsigned pixel=0; pixel<maze->width*maze->height; pixel++)
+	for (unsigned pixel=0; pixel<maze->pixels; pixel++)
 	{
 		if (is_clear_pixel(maze, pixel))
 		{
@@ -212,7 +212,6 @@ int create_graph(struct maze_image *const maze)
 		}
 	}
 
-	maze->clear_pixels = clear_pixels;
 	return 0;
 }
 
@@ -253,8 +252,8 @@ struct pixel_neighbours find_start_gate_neighbours(struct maze_image *const maze
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	if (
-		p > maze->width*maze->height ||
-		bottom > maze->width*maze->height
+		p > maze->pixels ||
+		bottom > maze->pixels
 	)
 	{
 		fprintf(stderr, "find_start_gate_neighbours: Invalid pixel value\n");
@@ -296,7 +295,7 @@ struct pixel_neighbours find_end_gate_neighbours(struct maze_image *const maze, 
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	if (
-		p > maze->width*maze->height ||
+		p > maze->pixels ||
 		top < 0
 	)
 	{
@@ -343,9 +342,9 @@ struct pixel_neighbours find_neighbours(struct maze_image *const maze, unsigned 
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	if (
-		p > maze->width*maze->height ||
-		left < 0 || right > maze->width*maze->height ||
-		top < 0 || bottom > maze->width*maze->height
+		p > maze->pixels ||
+		left < 0 || right > maze->pixels ||
+		top < 0 || bottom > maze->pixels
 	)
 	{
 		fprintf(stderr, "find_neighbours: Invalid pixel value\n");
@@ -381,7 +380,7 @@ struct pixel_neighbours find_neighbours(struct maze_image *const maze, unsigned 
 
 int initialize_adjacencies(struct maze_image *const maze, struct openings *const o)
 {
-	for (unsigned pixel=0; pixel<maze->width*maze->height; pixel++)
+	for (unsigned pixel=0; pixel<maze->pixels; pixel++)
 	{
 		if (is_clear_pixel(maze, pixel))
 		{
@@ -621,7 +620,7 @@ CLEANUP:
 void delete_graph(struct maze_image *maze)
 {
 	// initially free the individual nodes
-	for (unsigned pixel=0; pixel<maze->width*maze->height; pixel++)
+	for (unsigned pixel=0; pixel<maze->pixels; pixel++)
 	{
 		if (is_clear_pixel(maze, pixel))
 		{

@@ -52,10 +52,6 @@ int solve_maze(struct maze_image *const maze)
 		goto CLEANUP;
 	}
 
-#ifdef KS_MAZE_SOLVER_DEBUG
-	printf("solve_maze: Found %u clear pixels\n", maze->clear_pixels);
-#endif
-
 	// initialize the adjacency for each node in the graph
 	if (initialize_adjacencies(maze, o))
 	{

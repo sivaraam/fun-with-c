@@ -52,6 +52,8 @@ int main(int argc, char *argv[])
 		goto FREE_NODATA_QUIT;
 	}
 
+	maze->pixels = maze->width*maze->height;
+
 #ifdef DEBUG
 	printf("Image dimensions (in pixels):\n");
 	printf("width: %u\t height: %u\n", maze->width, maze->height);

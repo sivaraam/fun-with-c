@@ -56,8 +56,10 @@ unsigned find_shortest_path(struct openings *const o, struct sp_queue_head *cons
 
 /**
  * Free up the memory taken up by the graph and its related structure.
+ *
+ * maze - used to identify the clear pixels only for which the nodes are present
  */
-void delete_graph(void);
+void delete_graph(struct maze_image *maze);
 
 //
 // END FIXME

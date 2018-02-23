@@ -105,6 +105,6 @@ int solve_maze(struct maze_image *const maze)
 	free(sp);
 
 CLEANUP:
-	delete_graph();
+	delete_graph(maze);
 	return ret_val;
 }

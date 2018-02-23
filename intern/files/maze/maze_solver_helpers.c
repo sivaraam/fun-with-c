@@ -10,10 +10,12 @@
 #include <stdio.h>
 #endif
 
+#ifdef KS_MAZE_SOLVER_DEBUG
 /**
  * Returns non-zero value if the given pixel in the maze is a hurdle pixel.
  * Else returns 0.
  */
+static
 int is_hurdle_pixel(struct maze_image *const maze, unsigned pixel)
 {
 
@@ -27,18 +29,20 @@ int is_hurdle_pixel(struct maze_image *const maze, unsigned pixel)
 
 	unsigned char *const pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
 
-	if ((*pixel_byte&HURDLE_PIXEL) == HURDLE_PIXEL) // It's enough to check one byte for now
+	if ((*pixel_byte&HURDLE_PIXEL) == (*pixel_byte)) // It's enough to check one byte for now
 	{
 		return 1;
 	}
 
 	return 0;
 }
+#endif
 
 /**
  * Returns non-zero value if the given pixel in the maze is a clear pixel.
  * Else returns 0.
  */
+static
 int is_clear_pixel(struct maze_image *const maze, unsigned pixel)
 {
 

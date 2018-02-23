@@ -10,21 +10,26 @@ int insert_adjacency(struct node *const n, struct node *const adj)
 		return ERRNULL;
 	}
 
-	static const unsigned increment = 2;
+	struct adj_list_elem *list_elem = malloc(sizeof(struct adj_list_elem));
 
-	// re-allocate when necessary
-	if (n->adjlist.num % 2 == 0)
+	if (list_elem == NULL)
 	{
-		struct node **temp = realloc(n->adjlist.adjs, (n->adjlist.num+increment)*sizeof(struct node *));
-		if (temp == NULL)
-		{
-			return ERROOM;
-		}
-		n->adjlist.adjs = temp;
+		return ERROOM;
 	}
 
-	*(n->adjlist.adjs + n->adjlist.num) = adj;
-	n->adjlist.num++;
+	list_elem->adj = adj;
+	list_elem->next = NULL;
+
+	// first adjacency
+	if (n->adj_head.first == NULL)
+	{
+		n->adj_head.first = list_elem;
+	}
+	else
+	{
+		list_elem->next = n->adj_head.first;
+		n->adj_head.first = list_elem;
+	}
 
 	return 0;
 }

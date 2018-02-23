@@ -15,10 +15,18 @@ enum bfs_colour
  * The data structure to store the adjacency list
  * of the graph nodes.
  */
-struct adj_list
+struct adj_list_elem
 {
-	unsigned num; // number of adjacent nodes
-	struct node **adjs;
+	struct node *adj;
+	struct adj_list_elem *next;
+};
+
+/**
+ * The head of the adjacency list for a node.
+ */
+struct adj_list_head
+{
+	struct adj_list_elem *first;
 };
 
 /**
@@ -32,7 +40,7 @@ struct adj_list
 struct node
 {
 	unsigned pixel; // the corresponding pixel value for the node
-	struct adj_list adjlist; // the adjacency list for this node
+	struct adj_list_head adj_head; // the adjacency list for this node
 
 	// BFS related data
 	enum bfs_colour colour; // holds the colour of the node during the search

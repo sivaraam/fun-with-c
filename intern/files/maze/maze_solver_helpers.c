@@ -444,17 +444,16 @@ unsigned find_shortest_path(struct openings *const o, struct sp_queue_head *sp)
 		if (!(found_dest | out_of_mem)) {
 
 			struct node *const curr = curr_elem->elem;
+			struct adj_list_elem *curr_adj_elem = curr->adj_head.first;
 
-			for (unsigned adj=0; adj<curr->adjlist.num; adj++)
+			while (curr_adj_elem != NULL)
 			{
-				struct node *curr_adj = *(curr->adjlist.adjs + adj);
-
-				if (curr_adj->colour == WHITE)
+				if (curr_adj_elem->adj->colour == WHITE)
 				{
 					// set the attributes
-					curr_adj->colour = GREY;
-					curr_adj->src_dist = curr->src_dist+1;
-					curr_adj->pi = curr;
+					curr_adj_elem->adj->colour = GREY;
+					curr_adj_elem->adj->src_dist = curr->src_dist+1;
+					curr_adj_elem->adj->pi = curr;
 
 					// insert the element into the frontier
 					struct bfsfront_queue_elem *const adj_elem = malloc(sizeof(struct bfsfront_queue_elem));
@@ -465,7 +464,7 @@ unsigned find_shortest_path(struct openings *const o, struct sp_queue_head *sp)
 						break;
 					}
 
-					adj_elem->elem = curr_adj;
+					adj_elem->elem = curr_adj_elem->adj;
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 					if (bfsfront_insert_elem(frontier, adj_elem))
@@ -477,12 +476,14 @@ unsigned find_shortest_path(struct openings *const o, struct sp_queue_head *sp)
 					bfsfront_insert_elem(frontier, adj_elem);
 #endif
 
-					if (curr_adj->pixel == o->end_gate_pixel)
+					if (curr_adj_elem->adj->pixel == o->end_gate_pixel)
 					{
 						found_dest = true;
 						break;
 					}
 				}
+
+				curr_adj_elem = curr_adj_elem->next;
 			}
 
 			curr->colour = BLACK;

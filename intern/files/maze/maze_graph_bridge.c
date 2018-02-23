@@ -67,7 +67,7 @@ struct node *create_node(unsigned pixel)
 	}
 
 	n->pixel = pixel;
-	n->adjlist.adjs = NULL; // possibly not necessary as calloc is used, just in case
+	n->adj_head.first = NULL; // possibly not necessary as calloc is used, just in case
 	n->pi = NULL;
 
 	return n;

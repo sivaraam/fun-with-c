@@ -34,16 +34,16 @@ int solve_maze(struct maze_image *const maze)
 	printf("solve_maze: Size of image data: %lu\n", image_data_size);
 #endif
 
-	struct openings *const o = find_openings(maze);
+	struct openings *const gates = find_openings(maze);
 
-	if (o == NULL)
+	if (gates == NULL)
 	{
 		return ERROPENINGS;
 	}
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	printf("solve_maze: Start gate pixel: %u\t End gate pixel: %u\n",
-		o->start_gate_pixel, o->end_gate_pixel);
+		gates->start_gate_pixel, gates->end_gate_pixel);
 #endif
 
 	if (create_graph(maze))
@@ -53,7 +53,7 @@ int solve_maze(struct maze_image *const maze)
 	}
 
 	// initialize the adjacency for each node in the graph
-	if (initialize_adjacencies(maze, o))
+	if (initialize_adjacencies(maze, gates))
 	{
 		ret_val = ERRMEMORY;
 		goto CLEANUP;
@@ -71,13 +71,13 @@ int solve_maze(struct maze_image *const maze)
 
 	initialise_sp_queue(sp);
 
-	unsigned dest_distance = find_shortest_path(o, sp);
+	unsigned dest_distance = find_shortest_path(gates, sp);
 
 	if (dest_distance != 0)
 	{
 #ifdef KS_MAZE_SOLVER_DEBUG_PRINT_SHORTEST_PATH
 		// Warning: This removes the items from the queue!
-		printf("Shortest path from %u to %u:\n", o->start_gate_pixel, o->end_gate_pixel);
+		printf("Shortest path from %u to %u:\n", gates->start_gate_pixel, gates->end_gate_pixel);
 
 		while (!sp_queue_empty(sp))
 		{
@@ -112,5 +112,6 @@ int solve_maze(struct maze_image *const maze)
 
 CLEANUP:
 	delete_graph(maze);
+	free(gates);
 	return ret_val;
 }

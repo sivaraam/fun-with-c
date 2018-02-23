@@ -4,7 +4,8 @@
 
 int insert_adjacency(struct node *const n, struct node *const adj)
 {
-	if (n == NULL)
+	if (n == NULL ||
+	    adj == NULL)
 	{
 		return ERRNULL;
 	}

@@ -36,7 +36,7 @@ int create_graph(struct maze_image *const maze);
  *
  * Returns 0 on success and non-zero value on error (mostly memroy error).
  */
-int initialize_adjacencies(struct maze_image *const maze, struct openings *const o);
+int initialize_adjacencies(struct maze_image *const maze, struct openings *const gates);
 
 /**
  * Find the shortest path from the start gate node to the end gate node
@@ -52,7 +52,7 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
  * the elements in the queue (and of course the queue head) is the
  * responsibility of the caller.
  */
-unsigned find_shortest_path(struct openings *const o, struct sp_queue_head *const sp);
+unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *const sp);
 
 /**
  * Free up the memory taken up by the graph and its related structure.

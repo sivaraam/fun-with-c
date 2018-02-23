@@ -108,9 +108,9 @@ long find_gate(struct maze_image *const maze, unsigned start_pixel, unsigned end
 
 struct openings *find_openings(struct maze_image *const maze)
 {
-	struct openings *const o = malloc(sizeof(struct openings));
+	struct openings *const gates = malloc(sizeof(struct openings));
 
-	if (o == NULL)
+	if (gates == NULL)
 	{
 		return NULL;
 	}
@@ -123,9 +123,9 @@ struct openings *find_openings(struct maze_image *const maze)
 		return NULL;
 	}
 
-	o->start_gate_pixel = start_gate_pixel;
-	o->end_gate_pixel = end_gate_pixel;
-	return o;
+	gates->start_gate_pixel = start_gate_pixel;
+	gates->end_gate_pixel = end_gate_pixel;
+	return gates;
 }
 
 #ifdef KS_MAZE_SOLVER_DEBUG
@@ -502,6 +502,11 @@ CLEANUP:
 
 void delete_graph(struct maze_image *maze)
 {
+	if (np_list == NULL)
+	{
+		return;
+	}
+
 	// initially free the individual nodes
 	for (unsigned pixel=0; pixel<maze->pixels; pixel++)
 	{

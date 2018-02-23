@@ -41,7 +41,13 @@ int main(int argc, char *argv[])
 	}
 
 	// get the image width and height
-	fseek(image_file, width_offset, SEEK_SET); // go to the offset of the image width
+	if (fseek(image_file, width_offset, SEEK_SET)) // go to the offset of the image width
+	{
+		fprintf(stderr, "File format not as expected!\n");
+		ret_val = 1;
+		goto FREE_NODATA_QUIT;
+	}
+
 	if (
 		fread(&(maze->width), 4L, 1, image_file) == 0 ||
 		fread(&(maze->height), 4L, 1, image_file) == 0
@@ -62,7 +68,14 @@ int main(int argc, char *argv[])
 	// find the image data size
 	fseek(image_file, 0, SEEK_END);
 	const long file_size = ftell(image_file);
-	unsigned long data_size = file_size-header_size;
+	long data_size = file_size-header_size;
+
+	if (data_size < 0)
+	{
+		fprintf(stderr, "File format not as expected!\n");
+		ret_val = 1;
+		goto FREE_NODATA_QUIT;
+	}
 
 #ifdef DEBUG
 	printf("Size of image data: %lu\n", data_size);
@@ -79,7 +92,12 @@ int main(int argc, char *argv[])
 	}
 
 	// skip past the header
-	fseek(image_file, 54L, SEEK_SET);
+	if (fseek(image_file, 54L, SEEK_SET))
+	{
+		fprintf(stderr, "File format not as expected!\n");
+		ret_val = 1;
+		goto FREE_NODATA_QUIT;
+	}
 
 	// read the image
 	if (fread(maze->data, data_size, 1, image_file) == 0)
@@ -107,6 +125,7 @@ int main(int argc, char *argv[])
 	}
 
 	// seek to the start of image data
+	// This should succeed if the previous one did!
 	fseek(image_file, 54L, SEEK_SET);
 
 	// write the solution

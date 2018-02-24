@@ -517,6 +517,7 @@ void delete_graph(struct maze_image *maze)
 		if (is_clear_pixel(maze, pixel))
 		{
 			struct node *const curr_pixel_node = (*(np_list+pixel))->pixel_node;
+			free(curr_pixel_node->adjlist.adjs);
 			free(curr_pixel_node);
 		}
 	}

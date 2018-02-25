@@ -226,81 +226,242 @@ int create_graph(struct maze_image *const maze)
 	return 0;
 }
 
-int initialize_adjacencies(struct maze_image *const maze, struct openings *const gates)
+/**
+ * The data structure used to hold the four possible neighbouring clear pixels
+ * for a given pixel.
+ *
+ * The number of valid neighbours can is indicated by num.
+ */
+struct pixel_neighbours
 {
-	// start searching from the second pixel of the second row
-	// and initialize the adjacencies by checking the left and top pixels alone
-	for (unsigned height = 1; height < maze->height-1; height++)
-	{
-		for (unsigned width=1; width < maze->width - 1; width++)
-		{
-			const unsigned pixel = (maze->width) * height + width;
+	unsigned neighbour[4];
+	unsigned num;
+};
 
-			if (is_clear_pixel(maze, pixel))
-			{
-				const unsigned left = pixel - 1,
-				               top  = pixel - maze->width;
+/**
+ * Identifies valid clear pixel neighbours for the given "start gate" pixel and returns a valid
+ * 'struct pixel_neighbours' object.
+ */
+static
+struct pixel_neighbours find_start_gate_neighbours(struct maze_image *const maze, unsigned sg_pixel)
+{
 
-				if (is_clear_pixel(maze, left))
-				{
-
-#ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
-					printf("initialize_adjacencies: Found adjacencies %u and %u\n",
-					       pixel, left);
+#ifdef KS_MAZE_SOLVER_DEBUG
+	long
+#else
+	unsigned
 #endif
+	p = sg_pixel;
 
-					if (
-						add_adjacency((*(np_list+pixel))->pixel_node,
-						              (*(np_list+left))->pixel_node)
-					)
-					{
-						return 1;
-					}
-				}
-
-				if (is_clear_pixel(maze, top))
-				{
-
-#ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
-					printf("initialize_adjacencies: Found adjacencies %u and %u\n",
-					       pixel, top);
+#ifdef KS_MAZE_SOLVER_DEBUG
+	long
+#else
+	unsigned
 #endif
+	bottom = p+maze->width;
 
-					if (
-						add_adjacency((*(np_list+pixel))->pixel_node,
-						              (*(np_list+top))->pixel_node)
-					)
-					{
-						return 1;
-					}
-				}
-			}
-		}
-	}
+	unsigned num = 0;
+	struct pixel_neighbours pn = {0};
 
-	// Add adjacencies for the end pixel
-	// This depends on the observation that the pixel below the start node
-	// and the pixel above the end node should be adjacencies for sure.
-
-#ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
-	if (is_clear_pixel(maze, gates->end_gate_pixel - maze->width))
+#ifdef KS_MAZE_SOLVER_DEBUG
+	if (
+		p > maze->pixels ||
+		bottom > maze->pixels
+	)
 	{
-		printf("initialize_adjacencies: Found adjacencies %u and %u\n",
-		       gates->end_gate_pixel, gates->end_gate_pixel - maze->width);
-	}
-	else
-	{
-		fprintf(stderr, "initialize_adjacencies: Could not find adjacency for end gate pixel!\n");
+		fprintf(stderr, "find_start_gate_neighbours: Invalid pixel value\n");
+		fprintf(stderr, "find_start_gate_neighbours: p:%ld\t bottom: %ld\n", p, bottom);
 		exit(EXIT_FAILURE);
 	}
 #endif
 
+	if (is_clear_pixel(maze, bottom))
+	{
+		pn.neighbour[num++] = bottom;
+	}
+
+	pn.num = num;
+	return pn;
+}
+/**
+ * Identifies valid clear pixel neighbours for the given "end gate" pixel and returns a valid
+ * 'struct pixel_neighbours' object.
+ */
+static
+struct pixel_neighbours find_end_gate_neighbours(struct maze_image *const maze, unsigned eg_pixel)
+{
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	long
+#else
+	unsigned
+#endif
+	p = eg_pixel;
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	long
+#else
+	unsigned
+#endif
+	top = p - maze->width;
+
+	unsigned num = 0;
+	struct pixel_neighbours pn = {0};
+
+#ifdef KS_MAZE_SOLVER_DEBUG
 	if (
-		add_adjacency((*(np_list + gates->end_gate_pixel))->pixel_node,
-		              (*(np_list + gates->end_gate_pixel - maze->width))->pixel_node)
+		p > maze->pixels ||
+		top < 0
 	)
 	{
-		return 1;
+		fprintf(stderr, "find_end_gate_neighbours: Invalid pixel value\n");
+		fprintf(stderr, "find_end_gate_neighbours: p: %ld\t top: %ld\n", p, top);
+		exit(EXIT_FAILURE);
+	}
+#endif
+
+	if (is_clear_pixel(maze, top))
+	{
+		pn.neighbour[num++] = top;
+	}
+
+	pn.num = num;
+	return pn;
+}
+
+/**
+ * Identifiies neighbouring clear pixels for the given pixel and returns a valid
+ * 'struct pixel_neighbours' object accordingly. Pixels are not expected to be
+ * border pixels (those that have fewer than 4 valid neighbours).
+ */
+static
+struct pixel_neighbours find_neighbours(struct maze_image *const maze, unsigned pixel)
+{
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	long
+#else
+	unsigned
+#endif
+	p = pixel;
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	long
+#else
+	unsigned
+#endif
+	top = p - maze->width, bottom = p + maze->width,
+	left = p - 1, right = p + 1;
+
+	unsigned num = 0;
+	struct pixel_neighbours pn = {0};
+
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	if (
+		p > maze->pixels ||
+		left < 0 || right > maze->pixels ||
+		top < 0 || bottom > maze->pixels
+	)
+	{
+		fprintf(stderr, "find_neighbours: Invalid pixel value\n");
+		fprintf(stderr, "find_neighbours: p: %ld\t left: %ld\t right: %ld\t "
+				"top: %ld\t bottom: %ld\n",
+			p, left, right, top, bottom);
+		exit(EXIT_FAILURE);
+	}
+#endif
+
+	if (is_clear_pixel(maze, left))
+	{
+		pn.neighbour[num++] = left;
+	}
+
+	if (is_clear_pixel(maze, right))
+	{
+		pn.neighbour[num++] = right;
+
+	}
+
+	if (is_clear_pixel(maze, top))
+	{
+		pn.neighbour[num++] = top;
+	}
+
+	if (is_clear_pixel(maze, bottom))
+	{
+		pn.neighbour[num++] = bottom;
+	}
+
+	pn.num = num;
+	return pn;
+}
+
+int initialize_adjacencies(struct maze_image *const maze, struct openings *const gates)
+{
+	for (unsigned pixel=0; pixel<maze->pixels; pixel++)
+	{
+		if (is_clear_pixel(maze, pixel))
+		{
+			struct pixel_neighbours n;
+
+			// special case gates for simplicity
+			if (
+				pixel != gates->start_gate_pixel &&
+				pixel != gates->end_gate_pixel
+			)
+			{
+				// normal pixel
+				n = find_neighbours(maze, pixel);
+			}
+			else if (pixel == gates->start_gate_pixel)
+			{
+				// start gate_pixel
+				n = find_start_gate_neighbours(maze, pixel);
+			}
+			else
+			{
+				// end gate pixel
+				n = find_end_gate_neighbours(maze, pixel);
+			}
+
+#ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
+			printf("initialize_adjacencies: ");
+#endif
+
+			for (unsigned curr=0; curr<n.num; curr++)
+			{
+
+#ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
+				printf("%ld\t", n.neighbour[curr]);
+#endif
+
+				struct node *const adj_node = (*(np_list+n.neighbour[curr]))->pixel_node;
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+				if (adj_node == NULL)
+				{
+					fprintf(stderr, "construct_shortest_path: Invalid pixel node.\n");
+					exit(EXIT_FAILURE);
+				}
+#endif
+
+				if (
+					add_adjacency((*(np_list+pixel))->pixel_node,
+					              adj_node)
+				)
+				{
+					return 1;
+				}
+			}
+
+#ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
+			printf("\n initialize_adjacencies: Totally %u adjacencies for pixel: %u\n",
+				(*(np_list+pixel))->pixel_node->adjlist.num,
+				pixel);
+#endif
+
+		}
 	}
 
 	return 0;

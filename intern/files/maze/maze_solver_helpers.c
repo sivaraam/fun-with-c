@@ -308,7 +308,7 @@ struct pixel_neighbours find_neighbours(struct maze_image *const maze, unsigned 
 
 int initialize_adjacencies(struct maze_image *const maze, struct openings *const gates)
 {
-	for (unsigned width=1; width<maze->width-1; width++)
+	for (unsigned width=0; width<maze->width; width++)
 	{
 		for (unsigned height=1; height<maze->height-1; height++)
 		{

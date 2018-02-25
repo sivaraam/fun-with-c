@@ -67,7 +67,7 @@ int remove_adjacency(struct node *const n, struct node *const adj)
 			if (n->adjlist.num%2 == 0)
 			{
 				struct node **temp = realloc(n->adjlist.adjs, (n->adjlist.num)*sizeof(struct node *));
-				if (temp == NULL)
+				if (temp == NULL && n->adjlist.num != 0)
 				{
 					return ERRMEMORY;
 				}

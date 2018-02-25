@@ -59,6 +59,28 @@ int solve_maze(struct maze_image *const maze)
 		goto CLEANUP;
 	}
 
+	struct de_queue_head *const de_nodes = malloc(sizeof(struct de_queue_head));
+
+	if (de_nodes == NULL)
+	{
+		ret_val = ERRMEMORY;
+		goto CLEANUP;
+	}
+
+	initialise_de_queue(de_nodes);
+
+	if (find_deadend_nodes(maze, gates, de_nodes))
+	{
+		ret_val = ERRMEMORY;
+		goto CLEANUP;
+	}
+
+	if (prune_deadend_nodes(de_nodes))
+	{
+		ret_val = ERRMEMORY;
+		goto CLEANUP;
+	}
+
 	// find the shortest path to the end node from the source node
 	// for the constructed graph
 	struct sp_queue_head *const sp = malloc(sizeof(struct sp_queue_head));
@@ -107,8 +129,9 @@ int solve_maze(struct maze_image *const maze)
 		goto CLEANUP;
 	}
 
-	// free the queue head
+	// free the queue heads
 	free(sp);
+	free(de_nodes);
 
 CLEANUP:
 	delete_graph(maze);

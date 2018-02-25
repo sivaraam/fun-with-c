@@ -387,6 +387,133 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
 	return 0;
 }
 
+int find_deadend_nodes(struct maze_image *maze, struct openings *gates, struct de_queue_head *de_nodes)
+{
+	for (unsigned pixel=0; pixel<maze->pixels; pixel++)
+	{
+		if (pixel == gates->start_gate_pixel ||
+		    pixel == gates->end_gate_pixel)
+		{
+			continue;
+		}
+
+		if (is_clear_pixel(maze, pixel) && (*(np_list + pixel))->pixel_node->adjlist.num == 1)
+		{
+			struct de_queue_elem *de_node = malloc(sizeof(struct de_queue_elem));
+			if (de_node == NULL)
+			{
+				return ERRMEMORY;
+			}
+			de_node->elem = (*(np_list+pixel))->pixel_node;
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+			if (de_queue_insert_elem(de_nodes, de_node))
+			{
+				fprintf(stderr, "find_deadend_nodes: Inserting into the dead end queue failed!\n");
+				exit(EXIT_FAILURE);
+			}
+#else
+			de_queue_insert_elem(de_nodes, de_node);
+#endif
+
+		}
+	}
+
+	return 0;
+}
+
+int prune_deadend_nodes(struct de_queue_head *de_nodes)
+{
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	unsigned pruned_nodes = 0;
+#endif
+
+	while (!de_queue_empty(de_nodes))
+	{
+		struct de_queue_elem *curr_dead_node_elem = de_queue_remove_elem(de_nodes);
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+		if (curr_dead_node_elem == NULL)
+		{
+			fprintf(stderr, "prune_deadend_nodes: Removing element from dead end queue failed!\n");
+			exit(EXIT_FAILURE);
+		}
+#ifdef KS_MAZE_SOLVER_DEBUG_PRUNE_DEADEND_NODES
+		else
+		{
+			printf("prune_deadend_nodes: Pruning node %u (%p) with %u adjacencies.\n",
+			       curr_dead_node_elem->elem->pixel, curr_dead_node_elem->elem,
+			       curr_dead_node_elem->elem->adjlist.num);
+		}
+#endif
+#endif
+
+		if (curr_dead_node_elem->elem->adjlist.num == 0)
+		{
+			// the node was already pruned as a consequence of its closed neighbours
+			free(curr_dead_node_elem);
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+			pruned_nodes++;
+#endif
+
+			continue;
+		}
+		struct node *only_adj = *(curr_dead_node_elem->elem->adjlist).adjs;
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+		int remove_adj_ret_val = remove_adjacency(only_adj, curr_dead_node_elem->elem);
+		if (remove_adj_ret_val == ERRNOADJ)
+		{
+			fprintf(stderr, "prune_deadend_nodes: %u (%p) is not and adjacency of %u (%p) (ERRNOADJ)!\n",
+			                 curr_dead_node_elem->elem->pixel, curr_dead_node_elem->elem,
+			                 only_adj->pixel, only_adj);
+			exit(EXIT_FAILURE);
+		}
+		if (remove_adj_ret_val == ERRMEMORY)
+		{
+			fprintf(stderr, "prune_deadend_nodes: removing adjacency failed: memory issue (ERROOM)\n");
+			exit(EXIT_FAILURE);
+		}
+#else
+		remove_adjacency(only_adj, curr_dead_node_elem->elem);
+#endif
+
+		if (only_adj->adjlist.num == 1)
+		{
+			struct de_queue_elem *only_adj_elem = malloc(sizeof(struct de_queue_elem));
+			if (only_adj_elem == NULL)
+			{
+				return ERRNULL;
+			}
+			only_adj_elem->elem = only_adj;
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+			if (de_queue_insert_elem(de_nodes, only_adj_elem))
+			{
+				fprintf(stderr, "prune_deadend_nodes: Inserting element into dead end queue failed!\n");
+				exit(EXIT_FAILURE);
+			}
+#else
+			de_queue_insert_elem(de_nodes, only_adj_elem);
+#endif
+		}
+
+		free(curr_dead_node_elem);
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+		pruned_nodes++;
+#endif
+	}
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	printf("prune_deadend_nodes: Totally pruned %u nodes from the search space.\n", pruned_nodes);
+#endif
+
+	return 0;
+}
+
 /**
  * Construct the shortest path from the values of the predecessor of each node
  * starting from the end node.

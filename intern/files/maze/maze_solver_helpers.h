@@ -3,6 +3,7 @@
 
 #include "maze_solver.h"
 #include "shortest_path/queue.h"
+#include "deadend_nodes/queue.h"
 
 /**
  * For the given maze find the start and end gates.
@@ -37,6 +38,22 @@ int create_graph(struct maze_image *const maze);
  * Returns 0 on success and non-zero value on error (mostly memroy error).
  */
 int initialize_adjacencies(struct maze_image *const maze, struct openings *const gates);
+
+/**
+ * Identify the nodes which have only one adjacency (dead end nodes) and add them
+ * to a queue to process and prune dead end edges.
+ *
+ * Returns 0 on success and non-zero value indicating error on failure.
+ */
+int find_deadend_nodes(struct maze_image *maze, struct openings *gates, struct de_queue_head *de_nodes);
+
+/**
+ * For each node in the given queue, prune them from the search space by removing
+ * them as adjacencies and repeating it until all possible nodes have been removed.
+ *
+ * Returns 0 on success and non-zero value indicating error on failure.
+ */
+int prune_deadend_nodes(struct de_queue_head *de_nodes);
 
 /**
  * Find the shortest path from the start gate node to the end gate node

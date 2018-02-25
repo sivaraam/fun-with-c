@@ -26,4 +26,17 @@ int main(void)
 	free(base_plus_one_ptr);
 
 	char *(ch[3]);  // array of 3 pointers to characters
+
+	char *ch_p = malloc(sizeof(char));
+	char *temp = realloc(ch_p, 2*sizeof(char));
+	if (temp == NULL)
+	{
+		printf("realloc failed!\n");
+	}
+
+	char *tmp = realloc(ch_p, 0);
+	if (tmp == NULL)
+	{
+		printf("realloc returned NULL.\n");
+	}
 }

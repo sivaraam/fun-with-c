@@ -163,7 +163,9 @@ void print_ascii_maze(struct maze_image *const maze)
 
 int create_graph(struct maze_image *const maze)
 {
+#ifdef KS_MAZE_SOLVER_DEBUG
 	unsigned clear_pixels=0;
+#endif
 
 	if (maze == NULL)
 	{
@@ -210,9 +212,16 @@ int create_graph(struct maze_image *const maze)
 			printf("create_graph: node value: %u\n", n->pixel);
 #endif
 
+#ifdef KS_MAZE_SOLVER_DEBUG
 			clear_pixels++;
+#endif
+
 		}
 	}
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	printf("create_graph: Totally found %u clear pixels\n", clear_pixels);
+#endif
 
 	return 0;
 }

@@ -42,7 +42,7 @@ int remove_adjacency(struct node *const n, struct node *const adj)
 	{
 		if (*(n->adjlist.adjs + curr_adj_index) == adj)
 		{
-			for (size_t chunk=n->adjlist.num-1; chunk>curr_adj_index; chunk--)
+			for (size_t chunk=curr_adj_index+1; chunk<n->adjlist.num; chunk++)
 			{
 				*(n->adjlist.adjs + chunk - 1) = *(n->adjlist.adjs + chunk);
 			}

@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include "maze_graph.h"
 
+#ifdef KS_MAZE_SOLVER_GRAPH_DEBUG
+#include <stdio.h>
+#endif
+
 int insert_adjacency(struct node *const n, struct node *const adj)
 {
 	if (n == NULL ||
@@ -38,8 +42,21 @@ int remove_adjacency(struct node *const n, struct node *const adj)
 		return ERRNULL;
 	}
 
+#ifdef KS_MAZE_SOLVER_GRAPH_DEBUG
+	printf("remove_adjacency: searching for adjacency %u (%p) among %u adjacencies of %u (%p)\n",
+	       adj->pixel, adj, n->adjlist.num, n->pixel, n);
+#endif
+
 	for (unsigned curr_adj_index=0; curr_adj_index<n->adjlist.num; curr_adj_index++)
 	{
+
+#ifdef KS_MAZE_SOLVER_GRAPH_DEBUG
+		printf("remove_adjacency: Found adjacency %u (%p)\n",
+		       (*(n->adjlist.adjs + curr_adj_index))->pixel,
+		       *(n->adjlist.adjs + curr_adj_index));
+		fflush(stdout);
+#endif
+
 		if (*(n->adjlist.adjs + curr_adj_index) == adj)
 		{
 			for (size_t chunk=curr_adj_index+1; chunk<n->adjlist.num; chunk++)

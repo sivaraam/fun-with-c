@@ -352,7 +352,7 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
 				}
 
 #ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
-				printf("\n initialize_adjacencies: Totally %u adjacencies for pixel: %u\n",
+				printf("\ninitialize_adjacencies: Totally %u adjacencies for pixel: %u\n",
 					(*(np_list+pixel))->pixel_node->adjlist.num,
 					pixel);
 #endif

@@ -1,8 +1,10 @@
 #ifndef KS_MAZE_SOLVER_GRAPH
 #define KS_MAZE_SOLVER_GRAPH
 
+// #define KS_MAZE_SOLVER_GRAPH_DEBUG
+
 #define ERRNULL 1
-#define ERROOM  2
+#define ERRMEMORY  2
 
 enum bfs_colour
 {

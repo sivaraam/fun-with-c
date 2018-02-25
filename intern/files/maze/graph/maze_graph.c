@@ -19,7 +19,7 @@ int insert_adjacency(struct node *const n, struct node *const adj)
 		struct node **temp = realloc(n->adjlist.adjs, (n->adjlist.num+increment)*sizeof(struct node *));
 		if (temp == NULL)
 		{
-			return ERROOM;
+			return ERRMEMORY;
 		}
 		n->adjlist.adjs = temp;
 	}

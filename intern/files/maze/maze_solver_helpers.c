@@ -306,7 +306,8 @@ struct pixel_neighbours find_neighbours(struct maze_image *const maze, unsigned 
 	return pn;
 }
 
-int initialize_adjacencies(struct maze_image *const maze, struct openings *const gates)
+int initialize_adjacencies(struct maze_image *const maze, struct openings *const gates,
+                           struct de_queue_head *de_nodes)
 {
 	for (unsigned width=0; width<maze->width; width++)
 	{
@@ -351,6 +352,27 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
 					}
 				}
 
+				if ((*(np_list+pixel))->pixel_node->adjlist.num == 1)
+				{
+					struct de_queue_elem *de_node = malloc(sizeof(struct de_queue_elem));
+					if (de_node == NULL)
+					{
+						return ERRMEMORY;
+					}
+					de_node->elem = (*(np_list+pixel))->pixel_node;
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+					if (de_queue_insert_elem(de_nodes, de_node))
+					{
+						fprintf(stderr, "find_deadend_nodes: Inserting into the dead end queue failed!\n");
+						exit(EXIT_FAILURE);
+					}
+#else
+					de_queue_insert_elem(de_nodes, de_node);
+#endif
+				}
+
+
 #ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
 				printf("\ninitialize_adjacencies: Totally %u adjacencies for pixel: %u\n",
 					(*(np_list+pixel))->pixel_node->adjlist.num,
@@ -382,41 +404,6 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
 	)
 	{
 		return 1;
-	}
-
-	return 0;
-}
-
-int find_deadend_nodes(struct maze_image *maze, struct openings *gates, struct de_queue_head *de_nodes)
-{
-	for (unsigned pixel=0; pixel<maze->pixels; pixel++)
-	{
-		if (pixel == gates->start_gate_pixel ||
-		    pixel == gates->end_gate_pixel)
-		{
-			continue;
-		}
-
-		if (is_clear_pixel(maze, pixel) && (*(np_list + pixel))->pixel_node->adjlist.num == 1)
-		{
-			struct de_queue_elem *de_node = malloc(sizeof(struct de_queue_elem));
-			if (de_node == NULL)
-			{
-				return ERRMEMORY;
-			}
-			de_node->elem = (*(np_list+pixel))->pixel_node;
-
-#ifdef KS_MAZE_SOLVER_DEBUG
-			if (de_queue_insert_elem(de_nodes, de_node))
-			{
-				fprintf(stderr, "find_deadend_nodes: Inserting into the dead end queue failed!\n");
-				exit(EXIT_FAILURE);
-			}
-#else
-			de_queue_insert_elem(de_nodes, de_node);
-#endif
-
-		}
 	}
 
 	return 0;

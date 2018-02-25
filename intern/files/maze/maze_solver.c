@@ -52,13 +52,6 @@ int solve_maze(struct maze_image *const maze)
 		goto CLEANUP;
 	}
 
-	// initialize the adjacency for each node in the graph
-	if (initialize_adjacencies(maze, gates))
-	{
-		ret_val = ERRMEMORY;
-		goto CLEANUP;
-	}
-
 	struct de_queue_head *const de_nodes = malloc(sizeof(struct de_queue_head));
 
 	if (de_nodes == NULL)
@@ -69,7 +62,8 @@ int solve_maze(struct maze_image *const maze)
 
 	initialise_de_queue(de_nodes);
 
-	if (find_deadend_nodes(maze, gates, de_nodes))
+	// initialize the adjacency for each node in the graph
+	if (initialize_adjacencies(maze, gates, de_nodes))
 	{
 		ret_val = ERRMEMORY;
 		goto CLEANUP;

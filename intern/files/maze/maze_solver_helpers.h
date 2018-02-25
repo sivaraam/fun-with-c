@@ -33,19 +33,14 @@ void print_ascii_maze(struct maze_image *const maze);
 int create_graph(struct maze_image *const maze);
 
 /**
- * Initialize the adjacency vertices for node in the clear pixel graph.
+ * Initialize the adjacency vertices for node in the clear pixel graph. Also,
+ * for each node which is found to have 1 adjacency insert the node into the
+ * given dead end nodes queue.
  *
  * Returns 0 on success and non-zero value on error (mostly memroy error).
  */
-int initialize_adjacencies(struct maze_image *const maze, struct openings *const gates);
-
-/**
- * Identify the nodes which have only one adjacency (dead end nodes) and add them
- * to a queue to process and prune dead end edges.
- *
- * Returns 0 on success and non-zero value indicating error on failure.
- */
-int find_deadend_nodes(struct maze_image *maze, struct openings *gates, struct de_queue_head *de_nodes);
+int initialize_adjacencies(struct maze_image *const maze, struct openings *const gates,
+                           struct de_queue_head *de_nodes);
 
 /**
  * For each node in the given queue, prune them from the search space by removing

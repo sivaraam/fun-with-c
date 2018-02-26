@@ -217,7 +217,7 @@ int create_graph(struct maze_image *const maze)
 	return 0;
 }
 
-int initialize_adjacencies(struct maze_image *const maze, struct openings *const o)
+int initialize_adjacencies(struct maze_image *const maze, struct openings *const gates)
 {
 	// start searching from the second pixel of the second row
 	// and initialize the adjacencies by checking the left and top pixels alone
@@ -274,10 +274,10 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
 	// and the pixel above the end node should be adjacencies for sure.
 
 #ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
-	if (is_clear_pixel(maze, o->end_gate_pixel - maze->width))
+	if (is_clear_pixel(maze, gates->end_gate_pixel - maze->width))
 	{
 		printf("initialize_adjacencies: Found adjacencies %u and %u\n",
-		       o->end_gate_pixel, o->end_gate_pixel - maze->width);
+		       gates->end_gate_pixel, gates->end_gate_pixel - maze->width);
 	}
 	else
 	{
@@ -287,8 +287,8 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
 #endif
 
 	if (
-		add_adjacency((*(np_list + o->end_gate_pixel))->pixel_node,
-		              (*(np_list + o->end_gate_pixel - maze->width))->pixel_node)
+		add_adjacency((*(np_list + gates->end_gate_pixel))->pixel_node,
+		              (*(np_list + gates->end_gate_pixel - maze->width))->pixel_node)
 	)
 	{
 		return 1;
@@ -305,9 +305,9 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
  * of an error.
  */
 static
-int construct_shortest_path(struct openings *const o, struct sp_queue_head *const sp)
+int construct_shortest_path(struct openings *const gates, struct sp_queue_head *const sp)
 {
-	struct node *path_node = (*(np_list+o->end_gate_pixel))->pixel_node;
+	struct node *path_node = (*(np_list+gates->end_gate_pixel))->pixel_node;
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	if (path_node == NULL)
@@ -376,9 +376,9 @@ int construct_shortest_path(struct openings *const o, struct sp_queue_head *cons
 	return dest_dist;
 }
 
-unsigned find_shortest_path(struct openings *const o, struct sp_queue_head *sp)
+unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *sp)
 {
-	struct node *const start_node = (*(np_list+o->start_gate_pixel))->pixel_node;
+	struct node *const start_node = (*(np_list+gates->start_gate_pixel))->pixel_node;
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	if (start_node == NULL)
@@ -477,7 +477,7 @@ unsigned find_shortest_path(struct openings *const o, struct sp_queue_head *sp)
 					bfsfront_insert_elem(frontier, adj_elem);
 #endif
 
-					if (curr_adj->pixel == o->end_gate_pixel)
+					if (curr_adj->pixel == gates->end_gate_pixel)
 					{
 						found_dest = true;
 						break;
@@ -501,7 +501,7 @@ CLEANUP:
 	}
 
 	// construct the shortest path from the values of the predecessors
-	return construct_shortest_path(o, sp);
+	return construct_shortest_path(gates, sp);
 }
 
 void delete_graph(struct maze_image *maze)

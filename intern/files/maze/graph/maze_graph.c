@@ -44,7 +44,7 @@ int remove_adjacency(struct node *const n, struct node *const adj)
 
 #ifdef KS_MAZE_SOLVER_GRAPH_DEBUG
 	printf("remove_adjacency: searching for adjacency %u (%p) among %u adjacencies of %u (%p)\n",
-	       adj->pixel, adj, n->adjlist.num, n->pixel, n);
+	       adj->pixel, (void *) adj, n->adjlist.num, n->pixel, (void *) n);
 #endif
 
 	for (unsigned curr_adj_index=0; curr_adj_index<n->adjlist.num; curr_adj_index++)
@@ -53,7 +53,7 @@ int remove_adjacency(struct node *const n, struct node *const adj)
 #ifdef KS_MAZE_SOLVER_GRAPH_DEBUG
 		printf("remove_adjacency: Found adjacency %u (%p)\n",
 		       (*(n->adjlist.adjs + curr_adj_index))->pixel,
-		       *(n->adjlist.adjs + curr_adj_index));
+		       (void *) *(n->adjlist.adjs + curr_adj_index));
 		fflush(stdout);
 #endif
 

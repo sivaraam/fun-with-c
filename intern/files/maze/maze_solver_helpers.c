@@ -362,7 +362,7 @@ int prune_deadend_nodes(struct de_queue_head *de_nodes)
 		else
 		{
 			printf("prune_deadend_nodes: Pruning node %u (%p) with %u adjacencies.\n",
-			       curr_dead_node_elem->elem->pixel, curr_dead_node_elem->elem,
+			       curr_dead_node_elem->elem->pixel, (void *) curr_dead_node_elem->elem,
 			       curr_dead_node_elem->elem->adjlist.num);
 		}
 #endif
@@ -386,8 +386,8 @@ int prune_deadend_nodes(struct de_queue_head *de_nodes)
 		if (remove_adj_ret_val == ERRNOADJ)
 		{
 			fprintf(stderr, "prune_deadend_nodes: %u (%p) is not and adjacency of %u (%p) (ERRNOADJ)!\n",
-			                 curr_dead_node_elem->elem->pixel, curr_dead_node_elem->elem,
-			                 only_adj->pixel, only_adj);
+			                 curr_dead_node_elem->elem->pixel, (void *) curr_dead_node_elem->elem,
+			                 only_adj->pixel, (void *) only_adj);
 			exit(EXIT_FAILURE);
 		}
 		if (remove_adj_ret_val == ERRMEMORY)

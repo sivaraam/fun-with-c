@@ -330,7 +330,7 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
 				{
 
 #ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
-					printf("%ld\t", n.neighbour[curr]);
+					printf("%u\t", n.neighbour[curr]);
 #endif
 
 					struct node *const adj_node = (*(np_list+n.neighbour[curr]))->pixel_node;

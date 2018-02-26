@@ -23,7 +23,7 @@ extern struct node_list **np_list;
  *        This is done to give constant time access of nodes
  *        given the pixel.
  *
- * Returns 0 on success and non-zero value in case of an error.
+ * Returns 0 on success or a non-zero value in case of an error.
  *
  * Note: In case of an error the memory for already allocated
  * nodes have to be freed by the caller by calling 'delete_np_list()'.
@@ -42,7 +42,7 @@ struct node *create_node(unsigned pixel);
  * Creates a new 'struct node_list' entry into 'np_list' for the given
  * node and pixel.
  *
- * Returns 0 on success and non-zero value on failure.
+ * Returns 0 on success or a non-zero value on failure.
  */
 int insert_node(unsigned pixel, struct node *const n);
 
@@ -50,7 +50,7 @@ int insert_node(unsigned pixel, struct node *const n);
  * Remove the coressponding 'struct node_list' entry from the 'np_list'
  * for the given pixel.
  *
- * Returns 0 on success and non-zero value on failure.
+ * Returns 0 on success or a non-zero value on failure.
  *
  * TODO: Re-implement 'np_list' as a linked list to achieve this.
  */
@@ -65,7 +65,7 @@ void delete_np_list(void);
  * Adds 'adj_pixel_node' as an adjacency of 'pixel_node' and
  * vice versa (as the graph is undirected).
  *
- * Returns 0 on success and non-zero value on error.
+ * Returns 0 on success or a non-zero value on error.
  */
 int add_adjacency(struct node *const pixel_node, struct node *const adj_pixel_node);
 

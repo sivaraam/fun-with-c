@@ -404,7 +404,7 @@ int prune_deadend_nodes(struct de_queue_head *de_nodes)
 			struct de_queue_elem *only_adj_elem = malloc(sizeof(struct de_queue_elem));
 			if (only_adj_elem == NULL)
 			{
-				return ERRNULL;
+				return ERRMEMORY;
 			}
 			only_adj_elem->elem = only_adj;
 

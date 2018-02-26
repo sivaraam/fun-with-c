@@ -69,13 +69,15 @@ int solve_maze(struct maze_image *const maze)
 
 	initialise_de_queue(de_nodes);
 
-	if (find_deadend_nodes(maze, gates, de_nodes))
+	int initial_deadend_nodes = find_deadend_nodes(maze, gates, de_nodes);
+
+	if (initial_deadend_nodes < 0)
 	{
 		ret_val = ERRMEMORY;
 		goto CLEANUP;
 	}
 
-	if (prune_deadend_nodes(de_nodes))
+	if (prune_deadend_nodes(de_nodes, initial_deadend_nodes))
 	{
 		ret_val = ERRMEMORY;
 		goto CLEANUP;

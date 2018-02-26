@@ -43,7 +43,8 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
  * Identify the nodes which have only one adjacency (dead end nodes) and add them
  * to a queue to process and prune dead end edges.
  *
- * Returns 0 on success or a non-zero value indicating error on failure.
+ * Returns the number of initial deadend nodes on success or a non-zero value indicating
+ * the error on failure.
  */
 int find_deadend_nodes(struct maze_image *maze, struct openings *gates, struct de_queue_head *de_nodes);
 
@@ -53,7 +54,7 @@ int find_deadend_nodes(struct maze_image *maze, struct openings *gates, struct d
  *
  * Returns 0 on success or a non-zero value indicating error on failure.
  */
-int prune_deadend_nodes(struct de_queue_head *de_nodes);
+int prune_deadend_nodes(struct de_queue_head *de_nodes, unsigned initial_deadend_nodes);
 
 /**
  * Find the shortest path from the start gate node to the end gate node

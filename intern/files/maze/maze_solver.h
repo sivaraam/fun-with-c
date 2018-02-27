@@ -12,8 +12,6 @@
 // Type of each byte in the maze
 typedef unsigned char maze_type;
 
-static const unsigned bytes_per_pixel = 3;
-
 struct maze_image
 {
 	maze_type *data;

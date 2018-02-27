@@ -1,0 +1,9 @@
+#! /bin/bash
+
+intern_remotes=$(git ls-remote usb 'intern/*' 2>/dev/null | awk '{ print $2 }')
+
+for intern_remote in $intern_remotes
+do
+  echo "Fetching intern remote: $intern_remote"
+  git fetch usb $intern_remote:$intern_remote
+done

@@ -4,7 +4,7 @@
 #include "bmp/bmp_helpers.h"
 #include "maze_solver_helpers.h"
 #include "maze_graph_bridge.h"
-#include "bfs_frontier/queue.h"
+#include "a_star/frontier/pqueue.h"
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 #include <stdio.h>
@@ -34,11 +34,7 @@ int is_hurdle_pixel(struct maze_image *const maze, unsigned pixel)
 }
 #endif
 
-/**
- * Returns non-zero value if the given pixel in the maze is a clear pixel.
- * Else returns 0.
- */
-inline static
+inline
 int is_clear_pixel(struct maze_image *const maze, unsigned pixel)
 {
 
@@ -377,7 +373,8 @@ int construct_shortest_path(struct openings *const gates, struct sp_queue_head *
 	return dest_dist;
 }
 
-unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *sp)
+unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *sp,
+                            const unsigned *const heuristic_vector)
 {
 	struct node *const start_node = (*(np_list+gates->start_gate_pixel))->pixel_node;
 
@@ -397,17 +394,17 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 	start_node->colour = GREY;
 
 	// create the frotier queue head
-	struct bfsfront_queue_head *const frontier = malloc(sizeof(struct bfsfront_queue_head));
+	struct min_heap *const frontier = malloc(sizeof(struct min_heap));
 
 	if (frontier == NULL)
 	{
 		return 0;
 	}
 
-	initialise_bfsfront_queue(frontier);
+	initialise_min_heap(frontier);
 
 	// insert the start node into the frontier
-	struct bfsfront_queue_elem *const first = malloc(sizeof(struct bfsfront_queue_elem));
+	struct heap_elem *const first = malloc(sizeof(struct heap_elem));
 
 	if (first == NULL)
 	{
@@ -415,26 +412,27 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 		goto CLEANUP;
 	}
 
-	first->elem = start_node;
+	first->val = start_node;
+	first->key = 0;
 
 #ifdef KS_MAZE_SOLVER_DEBUG
-	if (bfsfront_insert_elem(frontier, first))
+	if (min_heap_insert(frontier, first))
 	{
-		fprintf(stderr, "find_shortest_path: Inserting into the BFS queue failed!\n");
+		fprintf(stderr, "find_shortest_path: Inserting into the queue failed!\n");
 		exit(EXIT_FAILURE);
 	}
 #else
-	bfsfront_insert_elem(frontier, first);
+	min_heap_insert(frontier, first);
 #endif
 
-	while (!bfsfront_queue_empty(frontier))
+	while (!min_heap_empty(frontier))
 	{
-		struct bfsfront_queue_elem *curr_elem = bfsfront_remove_elem(frontier);
+		struct heap_elem *const curr_elem = extract_min(frontier);
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 		if (curr_elem == NULL)
 		{
-			fprintf(stderr, "find_shortest_path: Removing from the BFS queue failed!\n");
+			fprintf(stderr, "find_shortest_path: Removing from the queue failed!\n");
 			exit(EXIT_FAILURE);
 		}
 #endif
@@ -446,7 +444,7 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 		//
 		if (!(found_dest | out_of_mem)) {
 
-			struct node *const curr = curr_elem->elem;
+			struct node *const curr = curr_elem->val;
 
 			for (unsigned adj=0; adj<curr->adjlist.num; adj++)
 			{
@@ -460,7 +458,7 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 					curr_adj->pi = curr;
 
 					// insert the element into the frontier
-					struct bfsfront_queue_elem *const adj_elem = malloc(sizeof(struct bfsfront_queue_elem));
+					struct heap_elem *const adj_elem = malloc(sizeof(struct heap_elem));
 
 					if (adj_elem == NULL)
 					{
@@ -468,16 +466,22 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 						break;
 					}
 
-					adj_elem->elem = curr_adj;
+					adj_elem->val = curr_adj;
+					adj_elem->key = curr_adj->src_dist + *(heuristic_vector+curr_adj->pixel);
+
+#ifdef KS_MAZE_SOLVER_DEBUG_FIND_SHORTEST_PATH
+					printf("find_shortest_path: heuristic: %u key: %u for pixel: %u\n",
+						*(heuristic_vector+curr_adj->pixel), adj_elem->key, curr_adj->pixel);
+#endif
 
 #ifdef KS_MAZE_SOLVER_DEBUG
-					if (bfsfront_insert_elem(frontier, adj_elem))
+					if (min_heap_insert(frontier, adj_elem))
 					{
 						fprintf(stderr, "find_shortest_path: Inserting into the BFS queue failed!");
 						exit(EXIT_FAILURE);
 					}
 #else
-					bfsfront_insert_elem(frontier, adj_elem);
+					min_heap_insert(frontier, adj_elem);
 #endif
 
 					if (curr_adj->pixel == gates->end_gate_pixel)

@@ -4,6 +4,7 @@
 #include "common.h"
 #include "maze_solver.h"
 #include "maze_solver_helpers.h"
+#include "a_star/heuristics/heuristic.h"
 
 /**
  * Free the nodes (if any) in the shortest path queue when the shortest
@@ -49,14 +50,14 @@ int solve_maze(struct maze_image *const maze)
 	if (create_graph(maze))
 	{
 		ret_val = ERRMEMORY;
-		goto CLEANUP;
+		goto CLEANUP_GRAPH;
 	}
 
 	// initialize the adjacency for each node in the graph
 	if (initialize_adjacencies(maze, gates))
 	{
 		ret_val = ERRMEMORY;
-		goto CLEANUP;
+		goto CLEANUP_GRAPH;
 	}
 
 	// find the shortest path to the end node from the source node
@@ -66,12 +67,23 @@ int solve_maze(struct maze_image *const maze)
 	if (sp == NULL)
 	{
 		ret_val = ERRMEMORY;
-		goto CLEANUP;
+		goto CLEANUP_GRAPH;
 	}
 
 	initialise_sp_queue(sp);
 
-	unsigned dest_distance = find_shortest_path(gates, sp);
+	// allocate memory for the heuristic vector
+	unsigned *const heuristic_vector = malloc(maze->pixels*sizeof(unsigned));
+
+	if (heuristic_vector == NULL)
+	{
+		ret_val = ERRMEMORY;
+		goto CLEANUP_SP;
+	}
+
+	get_manhattan_heuristic(maze, gates, heuristic_vector);
+
+	unsigned dest_distance = find_shortest_path(gates, sp, heuristic_vector);
 
 	if (dest_distance != 0)
 	{
@@ -107,10 +119,14 @@ int solve_maze(struct maze_image *const maze)
 		goto CLEANUP;
 	}
 
+CLEANUP:
+	free(heuristic_vector);
+
+CLEANUP_SP:
 	// free the queue head
 	free(sp);
 
-CLEANUP:
+CLEANUP_GRAPH:
 	delete_graph(maze);
 	free(gates);
 	return ret_val;

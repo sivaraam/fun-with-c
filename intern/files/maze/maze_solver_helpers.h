@@ -5,6 +5,12 @@
 #include "shortest_path/queue.h"
 
 /**
+ * Returns non-zero value if the given pixel in the maze is a clear pixel.
+ * Else returns 0.
+ */
+int is_clear_pixel(struct maze_image *const maze, unsigned pixel);
+
+/**
  * For the given maze find the start and end gates.
  *
  * Returns a valid 'struct openings' objct on success.
@@ -40,10 +46,16 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
 
 /**
  * Find the shortest path from the start gate node to the end gate node
- * in the graph.
+ * in the graph using the heuritic value which estimates the approxiamate
+ * cost to the destination from any clear pixel in the maze.
+ *
+ * The heuristic vector is expected to have the capacity to hold heuristics
+ * for every pixel in the maze (clear or not) i.e. it should be possible to
+ * find the heuristic value for any pixel in the maze by using the value of
+ * the pixel as the offset.
  *
  * Stores the shortest path in the given queue. The queue is expected to be
- * a pointer to a vlid queue head which has been initialized.
+ * a pointer to a valid queue head which has been initialized.
  *
  * Returns the non-negative distance of the destination from the source on
  * success or 0 in case of failure.
@@ -52,7 +64,8 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
  * the elements in the queue (and of course the queue head) is the
  * responsibility of the caller.
  */
-unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *const sp);
+unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *const sp,
+                            const unsigned *const heuristic_vector);
 
 /**
  * Free up the memory taken up by the graph and its related structure.

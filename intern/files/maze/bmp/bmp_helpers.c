@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #endif
 
-inline
 unsigned find_padding(unsigned width)
 {
   static const unsigned padding_boundary = 4;
@@ -14,7 +13,6 @@ unsigned find_padding(unsigned width)
   return padding_boundary-(row_size%4);
 }
 
-inline
 unsigned long get_pixel_offset(unsigned long width, unsigned char padding, unsigned long N)
 {
 
@@ -26,5 +24,8 @@ unsigned long get_pixel_offset(unsigned long width, unsigned char padding, unsig
   }
 #endif
 
-  return N*bytes_per_pixel+((N/width)*padding);
+  // amount of padding bytes before the pixel
+  unsigned padding_bytes = (N/width)*padding;
+
+  return N*bytes_per_pixel+padding_bytes;
 }

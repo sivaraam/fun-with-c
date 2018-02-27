@@ -15,7 +15,7 @@
  * Returns non-zero value if the given pixel in the maze is a hurdle pixel.
  * Else returns 0.
  */
-inline static
+static
 int is_hurdle_pixel(struct maze_image *const maze, unsigned pixel)
 {
 
@@ -27,14 +27,17 @@ int is_hurdle_pixel(struct maze_image *const maze, unsigned pixel)
 	}
 #endif
 
-	const unsigned char *const pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
+	unsigned char *const pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
 
-	// It's enough to check one byte for now
-	return ((*pixel_byte&HURDLE_PIXEL) == (*pixel_byte)) ? 1 :  0;
+	if ((*pixel_byte&HURDLE_PIXEL) == (*pixel_byte)) // It's enough to check one byte for now
+	{
+		return 1;
+	}
+
+	return 0;
 }
 #endif
 
-inline
 int is_clear_pixel(struct maze_image *const maze, unsigned pixel)
 {
 
@@ -46,10 +49,14 @@ int is_clear_pixel(struct maze_image *const maze, unsigned pixel)
 	}
 #endif
 
-	const unsigned char *const pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
+	unsigned char *const pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
 
-	// It's enough to check one byte for now
-	return ((*pixel_byte&CLEAR_PIXEL) == CLEAR_PIXEL) ? 1 : 0;
+	if ((*pixel_byte&CLEAR_PIXEL) == CLEAR_PIXEL) // It's enough to check one byte for now
+	{
+		return 1;
+	}
+
+	return 0;
 }
 
 /**

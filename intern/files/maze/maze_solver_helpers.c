@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "common.h"
-#include "bmp/bmp_helpers.h"
 #include "maze_solver_helpers.h"
 #include "maze_graph_bridge.h"
 #include "bfs_frontier/queue.h"
@@ -10,12 +9,27 @@
 #include <stdio.h>
 #endif
 
+/**
+ * Given the image width and the amount of padding in it gives the byte offset
+ * for Nth pixel. (Indexed from 0).
+ *
+ * width - width of the image
+ * padding - the number of bytes of padding between the rows (cannot exeeed 3)
+ * N - the pixel required
+ *     assumed to be in the range of width*height of the image
+ */
+inline static
+unsigned long get_pixel_offset(const unsigned long width, const unsigned char padding, const unsigned long N)
+{
+	return N*bytes_per_pixel + ((N/width)*padding);
+}
+
 #ifdef KS_MAZE_SOLVER_DEBUG
 /**
  * Returns non-zero value if the given pixel in the maze is a hurdle pixel.
  * Else returns 0.
  */
-static
+inline static
 int is_hurdle_pixel(struct maze_image *const maze, unsigned pixel)
 {
 
@@ -27,14 +41,10 @@ int is_hurdle_pixel(struct maze_image *const maze, unsigned pixel)
 	}
 #endif
 
-	unsigned char *const pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
+	const unsigned char *const pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
 
-	if ((*pixel_byte&HURDLE_PIXEL) == (*pixel_byte)) // It's enough to check one byte for now
-	{
-		return 1;
-	}
-
-	return 0;
+	// It's enough to check one byte for now
+	return ((*pixel_byte&HURDLE_PIXEL) == (*pixel_byte)) ? 1 : 0;
 }
 #endif
 
@@ -42,7 +52,7 @@ int is_hurdle_pixel(struct maze_image *const maze, unsigned pixel)
  * Returns non-zero value if the given pixel in the maze is a clear pixel.
  * Else returns 0.
  */
-static
+inline static
 int is_clear_pixel(struct maze_image *const maze, unsigned pixel)
 {
 
@@ -54,14 +64,10 @@ int is_clear_pixel(struct maze_image *const maze, unsigned pixel)
 	}
 #endif
 
-	unsigned char *const pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
+	const unsigned char *const pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
 
-	if ((*pixel_byte&CLEAR_PIXEL) == CLEAR_PIXEL) // It's enough to check one byte for now
-	{
-		return 1;
-	}
-
-	return 0;
+	// It's enough to check one byte for now
+	return ((*pixel_byte&CLEAR_PIXEL) == CLEAR_PIXEL) ? 1 : 0;
 }
 
 /**

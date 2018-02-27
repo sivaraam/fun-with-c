@@ -401,6 +401,8 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 		fprintf(stderr, "construct_shortest_path: Invalid pixel node.\n");
 		exit(EXIT_FAILURE);
 	}
+
+	unsigned nodes_expanded = 0;
 #endif
 
 	bool found_dest = false, out_of_mem = false;
@@ -501,10 +503,18 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 			}
 
 			curr->colour = BLACK;
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+			nodes_expanded++;
+#endif
 		}
 
 		free(curr_elem);
 	}
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	printf("find_shortest_path: Totally expanded %u nodes.\n", nodes_expanded);
+#endif
 
 CLEANUP:
 	// free the queue head

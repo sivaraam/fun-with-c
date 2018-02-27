@@ -211,3 +211,8 @@ struct heap_elem *extract_min(struct min_heap *mheap)
 
 	return min;
 }
+
+inline int min_heap_empty(struct min_heap *heap)
+{
+	return (heap->heap_size < 1) ? 1 : 0;
+}

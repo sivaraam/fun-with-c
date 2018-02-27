@@ -96,4 +96,9 @@ int min_heap_insert(struct min_heap *mheap, struct heap_elem *elem_to_insert);
  */
 struct heap_elem *extract_min(struct min_heap *mheap);
 
+/**
+ * Returns a non-zero value if the heap is empty else returns 0.
+ */
+int min_heap_empty(struct min_heap *mheap);
+
 #endif

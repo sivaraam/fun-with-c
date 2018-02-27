@@ -5,12 +5,6 @@
 #include "shortest_path/queue.h"
 
 /**
- * Returns non-zero value if the given pixel in the maze is a clear pixel.
- * Else returns 0.
- */
-int is_clear_pixel(struct maze_image *const maze, unsigned pixel);
-
-/**
  * For the given maze find the start and end gates.
  *
  * Returns a valid 'struct openings' objct on success.

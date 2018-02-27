@@ -20,6 +20,7 @@ int initialise_min_heap(struct min_heap *mheap)
 	// but you can't be sure
 	mheap->capacity = mheap->heap_size = 0;
 	mheap->elements = NULL;
+	return 0;
 }
 
 // macros to find the offsets of the parent/children nodes for a given node offset

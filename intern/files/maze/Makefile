@@ -4,9 +4,11 @@ COMPILER_FLAGS += "-Wextra"
 COMPILER_FLAGS += "-O3"
 COMPILER_FLAGS += "-Wshadow"
 
+LIBRARY_FLAGS = "-lm"
+
 BMP_LIBRARY = bmp/bmp_helpers.c
 GRAPH_LIBRARY = graph/maze_graph.c
-MY_MATH_LIBRARY = ../../my_math/math.c
+MY_MATH_LIBRARY = ../../my_math/math.c ../../my_math/sqrt.c
 A_STAR_FRONTIER_QUEUE_LIBRARY = a_star/frontier/pqueue.c ${MY_MATH_LIBRARY}
 A_STAR_HEURISTIC_LIBRARY = a_star/heuristics/heuristic.c
 SHORTEST_PATH_QUEUE_LIBRARY = shortest_path/queue.c

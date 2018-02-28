@@ -27,4 +27,11 @@
 void get_manhattan_heuristic(struct maze_image *maze, struct openings *gates,
                              unsigned *heuristic_values);
 
+/**
+ * For every clear pixels in the maze, initializes the heuristic vector with the
+ * euclidean distance to the destination
+ */
+void get_euclidean_heuristic(struct maze_image *maze, struct openings *gates,
+                             unsigned *heuristic_values);
+
 #endif

@@ -101,7 +101,7 @@ int solve_maze(struct maze_image *const maze)
 	printf("solve_maze: Progress: Heuristic value generation for the pixels ..\n");
 #endif
 
-	get_manhattan_heuristic(maze, gates, heuristic_vector);
+	get_euclidean_heuristic(maze, gates, heuristic_vector);
 
 #ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
 	printf("solve_maze: Progress: Heuristic value generation completed.\n");

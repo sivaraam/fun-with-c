@@ -31,6 +31,18 @@ unsigned m_dist(const int x1, const int y1,
 	return math_abs(x2-x1)+math_abs(y2-y1);
 }
 
+static inline
+unsigned e_dist(const int x1, const int y1,
+                const int x2, const int y2)
+{
+
+#ifdef KS_MAZE_SOLVER_DEBUG_EUCLIDEAN_DISTANCE
+	printf("e_dist: x1: %d, y1: %d; x2: %d, y2: %d\n", x1, y1, x2, y2);
+#endif
+
+	return math_sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+}
+
 typedef unsigned (*heuristic_generator) (const int x1, const int x2, const int y1, const int y2);
 
 void get_heuristic_helper(struct maze_image *maze, struct openings *gates,
@@ -80,4 +92,10 @@ void get_manhattan_heuristic(struct maze_image *maze, struct openings *gates,
                              unsigned *heuristic_values)
 {
 	get_heuristic_helper(maze, gates, heuristic_values, m_dist);
+}
+
+void get_euclidean_heuristic(struct maze_image *maze, struct openings *gates,
+                             unsigned *heuristic_values)
+{
+	get_heuristic_helper(maze, gates, heuristic_values, e_dist);
 }

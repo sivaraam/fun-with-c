@@ -1,0 +1,27 @@
+#! /bin/bash
+# Script to run all test inputs for a given executable
+
+TOTAL_TEST_CASES=8
+
+if [ $# -lt 1 ]
+then
+    echo "Missing required argument: maze solver executable"
+    exit 1
+elif [ $# -gt 1 ]
+then
+    echo "Required only one argument: maze solver executable"
+    exit 1
+fi
+
+# Replace existing test inputs
+./replace_tests
+
+for test in `seq $TOTAL_TEST_CASES`
+do
+	if !(time "./$1" "test_inputs/BMP$test.bmp")
+	then
+		echo "Test case '$test' failed!"
+		exit 1
+	fi
+	echo
+done

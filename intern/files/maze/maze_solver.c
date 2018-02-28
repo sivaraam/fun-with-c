@@ -47,11 +47,23 @@ int solve_maze(struct maze_image *const maze)
 		gates->start_gate_pixel, gates->end_gate_pixel);
 #endif
 
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Graph creation for the maze ...\n");
+#endif
+
 	if (create_graph(maze))
 	{
 		ret_val = ERRMEMORY;
 		goto CLEANUP_GRAPH;
 	}
+
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Graph generated successfully for the maze.\n");
+#endif
+
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Adjacency initialization for the graph ..\n");
+#endif
 
 	// initialize the adjacency for each node in the graph
 	if (initialize_adjacencies(maze, gates))
@@ -59,6 +71,10 @@ int solve_maze(struct maze_image *const maze)
 		ret_val = ERRMEMORY;
 		goto CLEANUP_GRAPH;
 	}
+
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Adjacencies initialized successfully for the graph.\n");
+#endif
 
 	// find the shortest path to the end node from the source node
 	// for the constructed graph
@@ -81,12 +97,29 @@ int solve_maze(struct maze_image *const maze)
 		goto CLEANUP_SP;
 	}
 
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Heuristic value generation for the pixels ..\n");
+#endif
+
 	get_manhattan_heuristic(maze, gates, heuristic_vector);
+
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Heuristic value generation completed.\n");
+#endif
+
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Shortest path to destination using the graph ..\n");
+#endif
 
 	unsigned dest_distance = find_shortest_path(gates, sp, heuristic_vector);
 
 	if (dest_distance != 0)
 	{
+
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Shortest path generated successfully.\n");
+#endif
+
 #ifdef KS_MAZE_SOLVER_DEBUG_PRINT_SHORTEST_PATH
 		// Warning: This removes the items from the queue!
 		printf("Shortest path from %u to %u:\n", gates->start_gate_pixel, gates->end_gate_pixel);
@@ -108,7 +141,17 @@ int solve_maze(struct maze_image *const maze)
 
 		printf("\n");
 #else
+
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Colour the shortest path ..\n");
+#endif
+
 		colour_path(maze, sp);
+
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Colouring of shortest path completed.\n");
+#endif
+
 #endif
 
 	}

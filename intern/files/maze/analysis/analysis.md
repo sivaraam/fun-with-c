@@ -23,7 +23,6 @@ This document captures an analysis of different aspects of using different algor
 |   7   |         2001\*2001         |    2000001        |       49.95        |          24668                |
 |   8   |         4001\*4001         |    8000001        |       49.98        |          62544                |
 
-
 ## Running time
 
 * Unit: second(s)

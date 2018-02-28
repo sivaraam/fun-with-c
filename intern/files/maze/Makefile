@@ -4,7 +4,7 @@ COMPILER_FLAGS += "-Wextra"
 COMPILER_FLAGS += "-O3"
 COMPILER_FLAGS += "-Wshadow"
 
-LIBRARY_FLAGS = "-lm"
+LINKER_FLAGS = "-lm"
 
 BMP_LIBRARY = bmp/bmp_helpers.c
 GRAPH_LIBRARY = graph/maze_graph.c
@@ -20,4 +20,4 @@ LIBRARIES += ${A_STAR_HEURISTIC_LIBRARY}
 LIBRARIES += ${SHORTEST_PATH_QUEUE_LIBRARY}
 
 maze_solver.out: *.c ${LIBRARIES}
-	gcc ${COMPILER_FLAGS} $^ -o $@
+	gcc ${COMPILER_FLAGS} $^ -o $@ ${LINKER_FLAGS}

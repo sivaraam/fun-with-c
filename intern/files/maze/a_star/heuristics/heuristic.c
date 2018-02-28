@@ -1,3 +1,4 @@
+#include <math.h>
 #include "heuristic.h"
 #include "../../common.h"
 #include "../../maze_solver_helpers.h"
@@ -40,7 +41,7 @@ unsigned e_dist(const int x1, const int y1,
 	printf("e_dist: x1: %d, y1: %d; x2: %d, y2: %d\n", x1, y1, x2, y2);
 #endif
 
-	return math_sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+	return sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
 }
 
 typedef unsigned (*heuristic_generator) (const int x1, const int x2, const int y1, const int y2);

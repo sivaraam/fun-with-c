@@ -89,7 +89,7 @@ int solve_maze(struct maze_image *const maze)
 	initialise_sp_queue(sp);
 
 	// allocate memory for the heuristic vector
-	unsigned *const heuristic_vector = malloc(maze->pixels*sizeof(unsigned));
+	double *const heuristic_vector = malloc(maze->pixels*sizeof(double));
 
 	if (heuristic_vector == NULL)
 	{

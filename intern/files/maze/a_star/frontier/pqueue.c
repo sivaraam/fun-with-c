@@ -42,7 +42,7 @@ inline static void swap_nodes(struct heap_elem **m, struct heap_elem **n)
  *
  * Returns 0 on success and non-zero value on failure.
  */
-static int heap_decrease_key(struct min_heap *mheap, size_t elem_offset, unsigned new_key)
+static int heap_decrease_key(struct min_heap *mheap, size_t elem_offset, double new_key)
 {
 #ifdef KS_PRIORITY_QUEUE_DEBUG
 	if (mheap == NULL)

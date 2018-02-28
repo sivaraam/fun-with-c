@@ -42,7 +42,7 @@
  */
 struct heap_elem
 {
-	unsigned key;
+	double key;
 	struct node *val;
 };
 

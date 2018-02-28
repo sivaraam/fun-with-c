@@ -374,7 +374,7 @@ int construct_shortest_path(struct openings *const gates, struct sp_queue_head *
 }
 
 unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *sp,
-                            const unsigned *const heuristic_vector)
+                            const double *const heuristic_vector)
 {
 	struct node *const start_node = (*(np_list+gates->start_gate_pixel))->pixel_node;
 
@@ -470,7 +470,7 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 					adj_elem->key = curr_adj->src_dist + *(heuristic_vector+curr_adj->pixel);
 
 #ifdef KS_MAZE_SOLVER_DEBUG_FIND_SHORTEST_PATH
-					printf("find_shortest_path: heuristic: %u key: %u for pixel: %u\n",
+					printf("find_shortest_path: heuristic: %lf key: %lf for pixel: %u\n",
 						*(heuristic_vector+curr_adj->pixel), adj_elem->key, curr_adj->pixel);
 #endif
 

@@ -25,6 +25,6 @@
  * the manhattan distance to the destination.
  */
 void get_manhattan_heuristic(struct maze_image *maze, struct openings *gates,
-                             unsigned *heuristic_values);
+                             double *heuristic_values);
 
 #endif

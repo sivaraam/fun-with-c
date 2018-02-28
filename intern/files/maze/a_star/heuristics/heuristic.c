@@ -38,9 +38,9 @@ inline unsigned m_dist(const int x1, const int y1,
  * This is used to biasi the heuristic slightky for paths that are near the straight line
  * from the source to the destination.
  */
-inline int straight_line_weight(const int x1, const int y1,
-                                const int start_x, const int start_y,
-                                const int goal_x, const int goal_y)
+inline double straight_line_weight(const int x1, const int y1,
+                                   const int start_x, const int start_y,
+                                   const int goal_x, const int goal_y)
 {
 	const int dx1 = x1 - goal_x, dy1 = y1 - goal_y,
 	          dx2 = start_x - goal_x, dy2 = start_y - goal_y;
@@ -49,7 +49,7 @@ inline int straight_line_weight(const int x1, const int y1,
 }
 
 void get_manhattan_heuristic(struct maze_image *maze, struct openings *gates,
-                             unsigned *heuristic_values)
+                             double *heuristic_values)
 {
 	const unsigned m_width = maze->width,
 	               start_x = x(gates->start_gate_pixel, m_width),

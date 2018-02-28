@@ -65,7 +65,7 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
  * responsibility of the caller.
  */
 unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *const sp,
-                            const unsigned *const heuristic_vector);
+                            const double *const heuristic_vector);
 
 /**
  * Free up the memory taken up by the graph and its related structure.

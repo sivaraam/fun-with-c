@@ -6,27 +6,7 @@
 #include <stdio.h>
 #endif
 
-#include "sqrt.h"
-
-/**
-  * Returns minimum of two 'doubles'
-  */
-double my_max(double a, double b) {
-	if (a>b)
-		return a;
-	else
-		return b;
-}
-
-/**
-  * Returns the absolute value of a double
-  */
-double my_fabs(double a) {
-	if (a < 0.0) {
-		return a*(-1.0);
-	}
-	return a;
-}
+#include "math.h"
 
 /*
  * Try to do a binary search to find the square root of the
@@ -44,13 +24,13 @@ double bs_sqrt(double num, double delta) {
 		return num;
 
 	double low = 0;
-	double high = my_max(num, 1.0); // to handle inputs in range (0,1)
+	double high = math_max(num, 1.0); // to handle inputs in range (0,1)
 #ifdef MY_SQRT_DEBUG
 	unsigned loop_count = 0;
 #endif
 
 	double guess = (low+high)/2.0;
-	while (my_fabs(guess*guess-(double)num) >= delta && guess <= num) {
+	while (math_fabs(guess*guess-(double)num) >= delta && guess <= num) {
 #ifdef MY_SQRT_DEBUG
 		loop_count++;
 		printf("loop count: %u\n", loop_count);
@@ -80,7 +60,7 @@ double bs_sqrt(double num, double delta) {
 
 
 /* TODO: Handle inputs that for which square root can't be approximated within delta */
-double my_sqrt(double num) {
+double math_sqrt(double num) {
 	if (num < 0)
 		return MY_EINVALID_INPUT;
 	return bs_sqrt(num, 1.0/1024.0);

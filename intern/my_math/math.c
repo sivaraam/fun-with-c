@@ -26,3 +26,17 @@ double math_floor(double m)
 		}
 	}
 }
+
+double math_max(double a, double b) {
+	if (a>b)
+		return a;
+	else
+		return b;
+}
+
+double math_fabs(double a) {
+	if (a < 0.0) {
+		return a*(-1.0);
+	}
+	return a;
+}

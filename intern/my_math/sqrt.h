@@ -1,5 +1,5 @@
-#ifndef MT_SQRT
-#define MT_SQRT
+#ifndef MY_SQRT
+#define MY_SQRT
 #define MY_EINVALID_INPUT -1111
 
 /**
@@ -11,6 +11,6 @@
   *	non-negative value - square root
   *	negative value     - MY_EINVALID_INPUT
   */
-double my_sqrt(double num);
+double math_sqrt(double num);
 
 #endif

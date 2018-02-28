@@ -6,7 +6,7 @@
 #include "maze_graph_bridge.h"
 #include "a_star/frontier/pqueue.h"
 
-#ifdef KS_MAZE_SOLVER_DEBUG
+#if defined KS_MAZE_SOLVER_DEBUG || defined KS_MAZE_SOLVER_DEBUG_FIND_SHORTEST_PATH
 #include <stdio.h>
 #endif
 

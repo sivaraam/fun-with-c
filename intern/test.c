@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -27,4 +28,12 @@ int main(void) {
 	printf("unsigned short: %hu\n", val);
 	printf("signed short: %hd\n", s_val);
 	printf("signed short (cast): %hd\n", sc_val);
+
+	// comparison between signed and unsigned
+	unsigned u_val = INT_MAX;
+	u_val++;
+	if (u_val > INT_MAX)
+	{
+		printf("%u doesn't fit in an int\n", u_val);
+	}
 }

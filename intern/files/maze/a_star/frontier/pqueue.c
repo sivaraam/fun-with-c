@@ -36,6 +36,18 @@ void swap_nodes(struct heap_elem **const m, struct heap_elem **const n)
 	*n = swap_temp;
 }
 
+inline static
+int check_swap_condition(struct min_heap *const mheap,
+                         const unsigned first_offset, const unsigned second_offset)
+{
+	return (
+	        (*(mheap->elements + first_offset))->key < (*(mheap->elements + second_offset))->key ||
+	        (
+	         (*(mheap->elements + first_offset))->key == (*(mheap->elements + second_offset))->key &&
+	         (*(mheap->elements + first_offset))->tie_breaker < (*(mheap->elements + second_offset))->tie_breaker
+	        )
+	       );
+}
 /**
  * Decrease the key value of the element in the given offset to the
  * given value and ensure the min-heap property is maintained in the
@@ -74,15 +86,7 @@ static int heap_decrease_key(struct min_heap *const mheap, size_t elem_offset, u
 	(*(mheap->elements + elem_offset))->key = new_key;
 
 	// ensure the heap order property is maintained
-	while (elem_offset>1 &&
-	       (
-	        (*(mheap->elements + elem_offset))->key < (*(mheap->elements + PARENT(elem_offset)))->key ||
-	        (
-	         (*(mheap->elements + elem_offset))->key == (*(mheap->elements + PARENT(elem_offset)))->key &&
-	         (*(mheap->elements + elem_offset))->tie_breaker < (*(mheap->elements + PARENT(elem_offset)))->tie_breaker
-	        )
-	       )
-	      )
+	while (elem_offset>1 && check_swap_condition(mheap, elem_offset, PARENT(elem_offset)))
 	{
 		// swap the current element and its parent
 		swap_nodes((mheap->elements + elem_offset), (mheap->elements + PARENT(elem_offset)));
@@ -164,30 +168,14 @@ void min_heapify(struct min_heap *const mheap, size_t elem_offset)
 		smallest_prev = smallest;
 
 		// check if the left child is smaller than the current node
-		if (left <= mheap->heap_size &&
-		    (
-		     (*(mheap->elements + left))->key < (*(mheap->elements + smallest))->key ||
-		     (
-		      (*(mheap->elements + left))->key == (*(mheap->elements + smallest))->key &&
-		      (*(mheap->elements + left))->tie_breaker < (*(mheap->elements + smallest))->tie_breaker
-		     )
-		    )
-		   )
+		if (left <= mheap->heap_size && check_swap_condition(mheap, left, smallest))
 		{
 			smallest = left;
 		}
 
 		// FIXME: convert the redundant condition into a function or MACRO
 		// check if the right child is smaller than the previous smallest
-		if (right <= mheap->heap_size &&
-		    (
-		     (*(mheap->elements + right))->key < (*(mheap->elements + smallest))->key ||
-		     (
-		      (*(mheap->elements + right))->key == (*(mheap->elements + smallest))->key &&
-		      (*(mheap->elements + right))->tie_breaker < (*(mheap->elements + smallest))->tie_breaker
-		     )
-		    )
-		   )
+		if (right <= mheap->heap_size && check_swap_condition(mheap, right, smallest))
 		{
 			smallest = right;
 		}

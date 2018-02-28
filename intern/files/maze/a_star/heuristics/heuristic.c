@@ -30,12 +30,32 @@ inline unsigned m_dist(const int x1, const int y1,
 	return math_abs(x2-x1)+math_abs(y2-y1);
 }
 
+/**
+ * Computes a weight that indicates the amount to which the given pixel is away
+ * from the striaght line drawn fomr the source to the destination. A higher weight
+ * indicates the pixel is far away from the line.
+ *
+ * This is used to biasi the heuristic slightky for paths that are near the straight line
+ * from the source to the destination.
+ */
+inline int straight_line_weight(const int x1, const int y1,
+                                const int start_x, const int start_y,
+                                const int goal_x, const int goal_y)
+{
+	const int dx1 = x1 - goal_x, dy1 = y1 - goal_y,
+	          dx2 = start_x - goal_x, dy2 = start_y - goal_y;
+
+	return math_abs(dx1*dy2 - dx2*dy1)*0.001;
+}
+
 void get_manhattan_heuristic(struct maze_image *maze, struct openings *gates,
                              unsigned *heuristic_values)
 {
 	const unsigned m_width = maze->width,
-	               goal_x = x(gates->end_gate_pixel, m_width),
-	               goal_y = y(gates->end_gate_pixel, m_width);
+	               start_x = x(gates->start_gate_pixel, m_width),
+	               start_y = y(gates->start_gate_pixel, m_width),
+	               goal_x  = x(gates->end_gate_pixel, m_width),
+	               goal_y  = y(gates->end_gate_pixel, m_width);
 
 	// loop range is optimized based on the fact that there are no valid pixels
 	// except the start and end gate in the boundary
@@ -47,9 +67,12 @@ void get_manhattan_heuristic(struct maze_image *maze, struct openings *gates,
 			if (is_clear_pixel(maze, curr_pixel))
 			{
 
+				const unsigned curr_x = x(curr_pixel, m_width), curr_y = y(curr_pixel, m_width);
 #ifdef KS_MAZE_SOLVER_DEBUG
-				if (x(curr_pixel, width) > INT_MAX ||
-				    y(curr_pixel, width) > INT_MAX ||
+				if (curr_x > INT_MAX ||
+				    curr_y > INT_MAX ||
+				    start_x > INT_MAX ||
+				    start_y > INT_MAX ||
 				    goal_x > INT_MAX ||
 				    goal_y > INT_MAX)
 				{
@@ -63,9 +86,10 @@ void get_manhattan_heuristic(struct maze_image *maze, struct openings *gates,
 				printf("get_manhattan_heuristic: finding manhattan distance for pixel: %u\n", curr_pixel);
 #endif
 
-				*(heuristic_values + curr_pixel) =
-				    m_dist(x(curr_pixel, m_width), y(curr_pixel, m_width),
-				           goal_x, goal_y);
+				*(heuristic_values + curr_pixel) = m_dist(curr_x, curr_y, goal_x, goal_y) +
+				                                   straight_line_weight(curr_x, curr_y,
+				                                                        start_x, start_y,
+				                                                        goal_x, goal_y);
 			}
 		}
 	}

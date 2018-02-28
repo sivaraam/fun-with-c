@@ -37,7 +37,7 @@ struct maze_image
  *
  * (width, height) - dimension of the BMP image
  *
- * Returns 0 on success and a non-zero value indicating the error on failure.
+ * Returns 0 on success or a non-zero value indicating the error on failure.
  * Returns the solved maze in the input itself. Setting the path in a distinct color.
  */
 int solve_maze(struct maze_image *const maze);

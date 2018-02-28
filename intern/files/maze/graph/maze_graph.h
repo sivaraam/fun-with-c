@@ -5,6 +5,7 @@
 
 #define ERRNULL 1
 #define ERRMEMORY  2
+#define ERRNOADJ 4
 
 enum bfs_colour
 {
@@ -45,8 +46,15 @@ struct node
 /**
  * Insert adj as an adjacent node of n.
  *
- * Returns 0 on sucess and non-zero value indicating error on failure.
+ * Returns 0 on sucess or a non-zero value indicating error on failure.
  */
 int insert_adjacency(struct node *const n, struct node *const adj);
+
+/**
+ * Remove adj from the list of adjacencies of n.
+ *
+ * Returns 0 on success or a non-zero value indicating error on failure.
+ */
+int remove_adjacency(struct node *const n, struct node *const adj);
 
 #endif

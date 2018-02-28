@@ -3,6 +3,7 @@
 
 #include "maze_solver.h"
 #include "shortest_path/queue.h"
+#include "deadend_nodes/queue.h"
 
 /**
  * Returns non-zero value if the given pixel in the maze is a clear pixel.
@@ -33,16 +34,32 @@ void print_ascii_maze(struct maze_image *const maze);
  * Create the graph nodes for each clear pixel in the maze image.
  * Also sets the number of clear pixels in the given maze object.
  *
- * Returns 0 on success and non-zero value on error (mostly memory error).
+ * Returns 0 on success or a non-zero value on error (mostly memory error).
  */
 int create_graph(struct maze_image *const maze);
 
 /**
  * Initialize the adjacency vertices for node in the clear pixel graph.
  *
- * Returns 0 on success and non-zero value on error (mostly memroy error).
+ * Returns 0 on success or a non-zero value on error (mostly memroy error).
  */
 int initialize_adjacencies(struct maze_image *const maze, struct openings *const gates);
+
+/**
+ * Identify the nodes which have only one adjacency (dead end nodes) and add them
+ * to a queue to process and prune dead end edges.
+ *
+ * Returns 0 on success or a non-zero value indicating error on failure.
+ */
+int find_deadend_nodes(struct maze_image *maze, struct openings *gates, struct de_queue_head *de_nodes);
+
+/**
+ * For each node in the given queue, prune them from the search space by removing
+ * them as adjacencies and repeating it until all possible nodes have been removed.
+ *
+ * Returns 0 on success or a non-zero value indicating error on failure.
+ */
+int prune_deadend_nodes(struct de_queue_head *de_nodes);
 
 /**
  * Find the shortest path from the start gate node to the end gate node

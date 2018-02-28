@@ -76,6 +76,36 @@ int solve_maze(struct maze_image *const maze)
 	printf("solve_maze: Progress: Adjacencies initialized successfully for the graph.\n");
 #endif
 
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Prune dead nodes ..\n");
+#endif
+
+	struct de_queue_head *const de_nodes = malloc(sizeof(struct de_queue_head));
+
+	if (de_nodes == NULL)
+	{
+		ret_val = ERRMEMORY;
+		goto CLEANUP_GRAPH;
+	}
+
+	initialise_de_queue(de_nodes);
+
+	if (find_deadend_nodes(maze, gates, de_nodes))
+	{
+		ret_val = ERRMEMORY;
+		goto CLEANUP_DE;
+	}
+
+	if (prune_deadend_nodes(de_nodes))
+	{
+		ret_val = ERRMEMORY;
+		goto CLEANUP_DE;
+	}
+
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Pruned dead end nodes successfully.\n");
+#endif
+
 	// find the shortest path to the end node from the source node
 	// for the constructed graph
 	struct sp_queue_head *const sp = malloc(sizeof(struct sp_queue_head));
@@ -83,7 +113,7 @@ int solve_maze(struct maze_image *const maze)
 	if (sp == NULL)
 	{
 		ret_val = ERRMEMORY;
-		goto CLEANUP_GRAPH;
+		goto CLEANUP_DE;
 	}
 
 	initialise_sp_queue(sp);
@@ -166,8 +196,12 @@ CLEANUP:
 	free(heuristic_vector);
 
 CLEANUP_SP:
-	// free the queue head
+	// free the shortest path queue head
 	free(sp);
+
+CLEANUP_DE:
+	// free the dead nodes queeu head
+	free(de_nodes);
 
 CLEANUP_GRAPH:
 	delete_graph(maze);

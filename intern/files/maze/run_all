@@ -3,13 +3,17 @@
 
 TOTAL_TEST_CASES=8
 
-if [ $# -lt 1 ]
+if (test $# -lt 1)
 then
     echo "Missing required argument: maze solver executable"
     exit 1
-elif [ $# -gt 1 ]
+elif (test $# -gt 1)
 then
     echo "Required only one argument: maze solver executable"
+    exit 1
+elif !(test -x "./$1")
+then
+    echo "Invalid executable"
     exit 1
 fi
 

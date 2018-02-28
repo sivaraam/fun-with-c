@@ -2,6 +2,7 @@
 #define KS_MAZE_SOLVER_COMMON
 
 /* low volume debug info */
+#define KS_MAZE_SOLVER_DEBUG
 #define KS_MAZE_SOLVER_DEBUG_PROGRESS
 // #define KS_MAZE_SOLVER_DEBUG_PRINT_SHORTEST_PATH
 

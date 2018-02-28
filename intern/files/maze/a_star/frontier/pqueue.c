@@ -9,7 +9,7 @@
 
 #define ERRBADNEWKEY 2
 
-int initialise_min_heap(struct min_heap *mheap)
+int initialise_min_heap(struct min_heap *const mheap)
 {
 	if (mheap == NULL)
 	{
@@ -28,9 +28,10 @@ int initialise_min_heap(struct min_heap *mheap)
 #define LEFT(i) (2*(i))
 #define RIGHT(i) ( 2 * (i) + 1)
 
-inline static void swap_nodes(struct heap_elem **m, struct heap_elem **n)
+inline static
+void swap_nodes(struct heap_elem **const m, struct heap_elem **const n)
 {
-	struct heap_elem *swap_temp = *m;
+	struct heap_elem *const swap_temp = *m;
 	*m = *n;
 	*n = swap_temp;
 }
@@ -42,7 +43,7 @@ inline static void swap_nodes(struct heap_elem **m, struct heap_elem **n)
  *
  * Returns 0 on success and non-zero value on failure.
  */
-static int heap_decrease_key(struct min_heap *mheap, size_t elem_offset, unsigned new_key)
+static int heap_decrease_key(struct min_heap *const mheap, size_t elem_offset, unsigned new_key)
 {
 #ifdef KS_PRIORITY_QUEUE_DEBUG
 	if (mheap == NULL)
@@ -93,7 +94,7 @@ static int heap_decrease_key(struct min_heap *mheap, size_t elem_offset, unsigne
 	return 0;
 }
 
-int min_heap_insert(struct min_heap *mheap, struct heap_elem *elem)
+int min_heap_insert(struct min_heap *const mheap, struct heap_elem *const elem)
 {
 	if (mheap == NULL || elem == NULL)
 	{
@@ -137,7 +138,7 @@ int min_heap_insert(struct min_heap *mheap, struct heap_elem *elem)
 /**
  * Ensures the heap order property is maintained for the sub-heap rooted at 'elem_offset'.
  */
-void min_heapify(struct min_heap *mheap, size_t elem_offset)
+void min_heapify(struct min_heap *const mheap, size_t elem_offset)
 {
 
 #ifdef KS_PRIORITY_QUEUE_DEBUG
@@ -200,7 +201,7 @@ void min_heapify(struct min_heap *mheap, size_t elem_offset)
 	} while (smallest != smallest_prev);
 }
 
-struct heap_elem *extract_min(struct min_heap *mheap)
+struct heap_elem *extract_min(struct min_heap *const mheap)
 {
 	if (mheap == NULL)
 	{
@@ -235,7 +236,7 @@ struct heap_elem *extract_min(struct min_heap *mheap)
 	return min;
 }
 
-inline int min_heap_empty(struct min_heap *heap)
+inline int min_heap_empty(struct min_heap *const heap)
 {
 	return (heap->heap_size < 1) ? 1 : 0;
 }

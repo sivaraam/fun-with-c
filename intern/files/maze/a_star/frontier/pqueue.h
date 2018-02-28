@@ -86,14 +86,14 @@ struct min_heap
  *
  * Returns 0 on success or a non-zero value indicating erro on failure.
  */
-int initialise_min_heap(struct min_heap *mheap);
+int initialise_min_heap(struct min_heap *const mheap);
 
 /**
  * Insert a node into the given min-heap.
  *
  * Returns 0 on success or a non-zero value indicating the error on failure.
  */
-int min_heap_insert(struct min_heap *mheap, struct heap_elem *elem_to_insert);
+int min_heap_insert(struct min_heap *const mheap, struct heap_elem *const elem_to_insert);
 
 /**
  * Returns the heap element with the minimum value (key) among all the elements
@@ -101,11 +101,11 @@ int min_heap_insert(struct min_heap *mheap, struct heap_elem *elem_to_insert);
  *
  * Returns a pointer to a valid heap element on success or returns NULL on failure.
  */
-struct heap_elem *extract_min(struct min_heap *mheap);
+struct heap_elem *extract_min(struct min_heap *const mheap);
 
 /**
  * Returns a non-zero value if the heap is empty else returns 0.
  */
-int min_heap_empty(struct min_heap *mheap);
+int min_heap_empty(struct min_heap *const mheap);
 
 #endif

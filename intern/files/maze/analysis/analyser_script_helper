@@ -1,0 +1,35 @@
+#! /usr/bin/env python3
+# Script to generate statistic values for analysing run time of maze solver
+# using A-star and BFS.
+
+import readline
+
+bfs_timings = [0.003, 0.005, 0.002, 0.010, 0.031, 0.625, 0.537, 2.376]
+observed = [0.001, 0.001, 0.002, 0.012, 0.033, 0.822, 0.667, 3.103]
+
+def bfs_is_faster_by(image_num, cmp_time):
+	diff_time = cmp_time - bfs_timings[image_num]
+	return (diff_time/cmp_time)*100
+
+print("BFS is faster than A-star (euclidean distance) by:")
+for i in range(0, 8):
+    print("Image", i, ":", bfs_is_faster_by(i, observed[i]))
+print()
+
+total_nodes = [43, 100, 801, 20692, 82724, 2006882, 2000001, 8000001]
+observed_expansion = [28, 74, 771, 10559, 47091, 1568188, 857383, 6079769]
+bfs_expanded = [36, 88, 780, 13866, 70167, 1949485, 918257, 6201755]
+
+def percent_nodes_expanded(image_num, observed_expansion):
+	return (observed_expansion/total_nodes[image_num])*100
+
+def percent_nodes_less_expanded_a_star(image_num, expanded_nodes):
+	diff_nodes = bfs_expanded[image_num] - expanded_nodes
+	return (diff_nodes/bfs_expanded[image_num])*100
+
+print("A-star expands X% nodes of total nodes which is less than BFS by X%")
+
+for i in range(0,8):
+    print("Percentage :", percent_nodes_expanded(i, observed_expansion[i]), '\t',  "Less than BFS by :", percent_nodes_less_expanded_a_star(i, observed_expansion[i]))
+
+readline.write_history_file('history')

@@ -3,6 +3,8 @@
 
 #include "../../graph/maze_graph.h"
 
+// #define KS_PRIORITY_QUEUE_DEBUG
+
 /**
  * The priority queue that holds the frontier used during the A-star search algorithm.
  *
@@ -43,6 +45,7 @@
 struct heap_elem
 {
 	unsigned key;
+	unsigned tie_breaker;
 	struct node *val;
 };
 

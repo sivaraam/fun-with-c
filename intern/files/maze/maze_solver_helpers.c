@@ -414,6 +414,7 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 
 	first->val = start_node;
 	first->key = 0;
+	first->tie_breaker = 0;
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	if (min_heap_insert(frontier, first))
@@ -468,9 +469,10 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 
 					adj_elem->val = curr_adj;
 					adj_elem->key = curr_adj->src_dist + *(heuristic_vector+curr_adj->pixel);
+					adj_elem->tie_breaker = *(heuristic_vector+curr_adj->pixel);
 
 #ifdef KS_MAZE_SOLVER_DEBUG_FIND_SHORTEST_PATH
-					printf("find_shortest_path: heuristic: %u key: %u for pixel: %u\n",
+					printf("find_shortest_path: heuristic (tie breaker): %u key: %u for pixel: %u\n",
 						*(heuristic_vector+curr_adj->pixel), adj_elem->key, curr_adj->pixel);
 #endif
 

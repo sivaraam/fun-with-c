@@ -74,7 +74,14 @@ static int heap_decrease_key(struct min_heap *mheap, size_t elem_offset, unsigne
 
 	// ensure the heap order property is maintained
 	while (elem_offset>1 &&
-	       (*(mheap->elements + elem_offset))->key < (*(mheap->elements + PARENT(elem_offset)))->key)
+	       (
+	        (*(mheap->elements + elem_offset))->key < (*(mheap->elements + PARENT(elem_offset)))->key ||
+	        (
+	         (*(mheap->elements + elem_offset))->key == (*(mheap->elements + PARENT(elem_offset)))->key &&
+	         (*(mheap->elements + elem_offset))->tie_breaker < (*(mheap->elements + PARENT(elem_offset)))->tie_breaker
+	        )
+	       )
+	      )
 	{
 		// swap the current element and its parent
 		swap_nodes((mheap->elements + elem_offset), (mheap->elements + PARENT(elem_offset)));
@@ -157,14 +164,29 @@ void min_heapify(struct min_heap *mheap, size_t elem_offset)
 
 		// check if the left child is smaller than the current node
 		if (left <= mheap->heap_size &&
-		    (*(mheap->elements + left))->key < (*(mheap->elements + smallest))->key)
+		    (
+		     (*(mheap->elements + left))->key < (*(mheap->elements + smallest))->key ||
+		     (
+		      (*(mheap->elements + left))->key == (*(mheap->elements + smallest))->key &&
+		      (*(mheap->elements + left))->tie_breaker < (*(mheap->elements + smallest))->tie_breaker
+		     )
+		    )
+		   )
 		{
 			smallest = left;
 		}
 
+		// FIXME: convert the redundant condition into a function or MACRO
 		// check if the right child is smaller than the previous smallest
 		if (right <= mheap->heap_size &&
-		    (*(mheap->elements + right))->key < (*(mheap->elements + smallest))->key)
+		    (
+		     (*(mheap->elements + right))->key < (*(mheap->elements + smallest))->key ||
+		     (
+		      (*(mheap->elements + right))->key == (*(mheap->elements + smallest))->key &&
+		      (*(mheap->elements + right))->tie_breaker < (*(mheap->elements + smallest))->tie_breaker
+		     )
+		    )
+		   )
 		{
 			smallest = right;
 		}

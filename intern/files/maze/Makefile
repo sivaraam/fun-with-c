@@ -2,6 +2,7 @@ COMPILER_FLAGS = "-Wall"
 COMPILER_FLAGS += "-Wpedantic"
 COMPILER_FLAGS += "-Wextra"
 COMPILER_FLAGS += "-O3"
+COMPILER_FLAGS += "-Wshadow"
 
 BMP_LIBRARY = bmp/bmp_helpers.c
 GRAPH_LIBRARY = graph/maze_graph.c

@@ -20,23 +20,16 @@ void print_ascii_maze(struct maze_image *const maze);
 #endif
 
 //
-// FIXME: Think about moving these to imaze_graph_bridge.
+// FIXME: Think about moving these to maze_graph_bridge.
 //
 
 /**
- * Create the graph nodes for each clear pixel in the maze image.
- * Also sets the number of clear pixels in the given maze object.
+ * Create the graph nodes for each clear pixel in the maze image and initialise
+ * the adjacency list for the node.
  *
  * Returns 0 on success and non-zero value on error (mostly memory error).
  */
 int create_graph(struct maze_image *const maze);
-
-/**
- * Initialize the adjacency vertices for node in the clear pixel graph.
- *
- * Returns 0 on success and non-zero value on error (mostly memroy error).
- */
-int initialize_adjacencies(struct maze_image *const maze);
 
 /**
  * Find the shortest path from the start gate node to the end gate node

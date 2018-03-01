@@ -64,13 +64,6 @@ int solve_maze(struct maze_image *const maze)
 		goto CLEANUP;
 	}
 
-	// initialize the adjacency for each node in the graph
-	if (initialize_adjacencies(maze))
-	{
-		ret_val = ERRMEMORY;
-		goto CLEANUP;
-	}
-
 	// find the shortest path to the end node from the source node
 	// for the constructed graph
 	struct sp_queue_head *const sp = malloc(sizeof(struct sp_queue_head));
@@ -116,7 +109,6 @@ int solve_maze(struct maze_image *const maze)
 	{
 		free_sp_queue(sp);
 		ret_val = ERRSHPATH;
-		goto CLEANUP;
 	}
 
 	// free the queue head

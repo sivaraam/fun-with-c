@@ -25,6 +25,10 @@ unsigned long get_pixel_offset(const unsigned long width, const unsigned char pa
 }
 
 #ifdef KS_MAZE_SOLVER_DEBUG
+#include <limits.h>
+#endif
+
+#ifdef KS_MAZE_SOLVER_DEBUG
 /**
  * Returns non-zero value if the given pixel in the maze is a hurdle pixel.
  * Else returns 0.
@@ -165,130 +169,125 @@ void print_ascii_maze(struct maze_image *const maze)
 
 int create_graph(struct maze_image *const maze)
 {
-#ifdef KS_MAZE_SOLVER_DEBUG
-	unsigned clear_pixels=0;
-#endif
 
 	if (maze == NULL)
 	{
 		return 1;
 	}
 
-	for (unsigned pixel=0; pixel<maze->pixels; pixel++)
+#ifdef KS_MAZE_SOLVER_DEBUG
+	printf("solve_maze: sizeof(struct node): %zu\n", sizeof(struct node));
+
+	unsigned clear_pixels=0;
+#endif
+
+	for (unsigned curr_row = 0; curr_row < maze->height; curr_row++)
 	{
-		if (is_clear_pixel(maze, pixel))
+		for (unsigned curr_col = 0; curr_col < maze->width; curr_col++)
 		{
-			// create the node
-			struct node *const n = create_node(pixel);
+			const unsigned curr_pixel = (curr_row * maze->width) + curr_col;
 
-			if (n == NULL)
+			if (is_clear_pixel(maze, curr_pixel))
 			{
+				/* Create the node */
+				struct node *const n = calloc(1, sizeof(struct node));
 
+				if (n == NULL)
+				{
 #ifdef KS_MAZE_SOLVER_DEBUG_CREATE_GRAPH
-				fprintf(stderr, "create_graph: 'create_node' failed for pixel: %u\n", pixel);
+					fprintf(stderr, "create_graph: 'create_node' failed for pixel: %u\n", curr_pixel);
 #endif
 
-				return 1;
-			}
+					return 1;
+				}
 
-			// insert the node into the 'np_list'
-			if (insert_node(pixel, n))
-			{
+				n->pixel = curr_pixel;
+				n->adjlist.adjs = NULL; // possibly not necessary as calloc is used, just in case
+				n->pi = NULL;
 
-#ifdef KS_MAZE_SOLVER_DEBUG_CREATE_GRAPH
-				fprintf(stderr, "create_graph: 'insert_node' failed for pixel: %u\n", pixel);
-#endif
-
-				return 1;
-			}
+				// insert the node into the 'np_list'
+				if (insert_node(curr_pixel, n))
+				{
 
 #ifdef KS_MAZE_SOLVER_DEBUG_CREATE_GRAPH
-			printf("create_graph: node value: %u\n", n->pixel);
-			fflush(stdout);
+					fprintf(stderr, "create_graph: 'insert_node' failed for pixel: %u\n", curr_pixel);
 #endif
+
+					return 1;
+				}
+
+#ifdef KS_MAZE_SOLVER_DEBUG_CREATE_GRAPH
+				printf("create_graph: node value: %u\n", n->pixel);
+#endif
+
+				/* Initialise adjacencies */
+
+				// This is not an issue for the start pixel which is in the first row as the
+				// is_clear_pixel() funtion would return 0 for out-of-bound values.
+				const unsigned left = curr_pixel - 1,
+				               top  = curr_pixel - maze->width;
+
+				if (is_clear_pixel(maze, left))
+				{
+
+#ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
+					printf("initialize_adjacencies: Found adjacencies %u and %u\n",
+					       curr_pixel, left);
+#endif
+
+					// optimize this using a node_list "cache"
+					struct node *const left_adj_node = get_node(left);
 
 #ifdef KS_MAZE_SOLVER_DEBUG
-			clear_pixels++;
+					if (left_adj_node == NULL)
+					{
+						fprintf(stderr, "initialize_adjacencies: Invalid left node: %u for current clear pixel: %u\n",
+						        left, curr_pixel);
+						exit(EXIT_FAILURE);
+					}
 #endif
 
+					if (add_adjacency(n, left_adj_node))
+					{
+						return 1;
+					}
+				}
+
+				if (is_clear_pixel(maze, top))
+				{
+
+#ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
+					printf("initialize_adjacencies: Found adjacencies %u and %u\n",
+					       curr_pixel, top);
+#endif
+
+					struct node *const top_adj_node = get_node(top);
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+					if (top_adj_node == NULL)
+					{
+						fprintf(stderr, "initialize_adjacencies: Invalid top node: %u for current clear pixel: %u\n",
+						        top, curr_pixel);
+						exit(EXIT_FAILURE);
+					}
+#endif
+
+					if (add_adjacency(n, top_adj_node))
+					{
+						return 1;
+					}
+				}
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+				clear_pixels++;
+#endif
+			}
 		}
 	}
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	printf("create_graph: Totally found %u clear pixels\n", clear_pixels);
 #endif
-
-	return 0;
-}
-
-int initialize_adjacencies(struct maze_image *const maze)
-{
-	for (unsigned clear_pixel=0; clear_pixel<np_list_vals; clear_pixel++)
-	{
-		const unsigned curr_pixel = (*(np_list+clear_pixel))->pixel;
-
-		// This is not an issue for the start pixel which is in the first row as the
-		// is_clear_pixel() funtion would return 0 for out-of-bound values.
-		const unsigned left = curr_pixel - 1,
-		               top  = curr_pixel - maze->width;
-
-		if (is_clear_pixel(maze, left))
-		{
-
-			struct node *const left_adj_node = get_node(left);
-
-
-#ifdef KS_MAZE_SOLVER_DEBUG
-			if (left_adj_node == NULL)
-			{
-				fprintf(stderr, "initialize_adjacencies: Invalid left node: %u for current clear pixel: %u\n",
-				        left, curr_pixel);
-				exit(EXIT_FAILURE);
-			}
-#endif
-
-#ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
-			printf("initialize_adjacencies: Found adjacencies %u and %u\n",
-			       curr_pixel, left);
-#endif
-
-			if (
-				add_adjacency((*(np_list+clear_pixel))->pixel_node,
-				              left_adj_node)
-			)
-			{
-				return 1;
-			}
-		}
-
-		if (is_clear_pixel(maze, top))
-		{
-
-			struct node *const top_adj_node = get_node(top);
-
-#ifdef KS_MAZE_SOLVER_DEBUG
-			if (top_adj_node == NULL)
-			{
-				fprintf(stderr, "initialize_adjacencies: Invalid top node: %u for current clear pixel: %u\n",
-				        top, curr_pixel);
-				exit(EXIT_FAILURE);
-			}
-#endif
-
-#ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
-			printf("initialize_adjacencies: Found adjacencies %u and %u\n",
-			       curr_pixel, top);
-#endif
-
-			if (
-				add_adjacency((*(np_list+clear_pixel))->pixel_node,
-				              top_adj_node)
-			)
-			{
-				return 1;
-			}
-		}
-	}
 
 	return 0;
 }
@@ -389,7 +388,7 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 	bool found_dest = false, out_of_mem = false;
 
 	// initial setup
-	start_node->colour = GREY;
+	start_node->colour = IN_FRONTIER;
 
 	// create the frotier queue head
 	struct bfsfront_queue_head *const frontier = malloc(sizeof(struct bfsfront_queue_head));
@@ -447,10 +446,10 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 			{
 				struct node *curr_adj = *(curr->adjlist.adjs + adj);
 
-				if (curr_adj->colour == WHITE)
+				if (curr_adj->colour == NOT_VISITED)
 				{
 					// set the attributes
-					curr_adj->colour = GREY;
+					curr_adj->colour = IN_FRONTIER;
 					curr_adj->src_dist = curr->src_dist+1;
 					curr_adj->pi = curr;
 
@@ -483,7 +482,7 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 				}
 			}
 
-			curr->colour = BLACK;
+			curr->colour = VISITIED;
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 			nodes_expanded++;

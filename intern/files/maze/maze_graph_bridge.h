@@ -19,15 +19,6 @@ extern struct node_list **np_list;
  */
 extern unsigned np_list_vals;
 
-
-/**
- * Helper function to creates a valid 'struct node' object for the
- * given pixel and initializes its values to the defaults.
- *
- * Returns NULL in case of an error.
- */
-struct node *create_node(unsigned pixel);
-
 /**
  * Creates a new 'struct node_list' entry into 'np_list' for the given
  * node and pixel.

@@ -66,7 +66,7 @@ int solve_maze(struct maze_image *const maze)
 #endif
 
 	// initialize the adjacency for each node in the graph
-	if (initialize_adjacencies(maze, gates))
+	if (initialize_adjacencies(maze))
 	{
 		ret_val = ERRMEMORY;
 		goto CLEANUP_GRAPH;
@@ -170,7 +170,7 @@ CLEANUP_SP:
 	free(sp);
 
 CLEANUP_GRAPH:
-	delete_graph(maze);
+	delete_graph();
 	free(gates);
 	return ret_val;
 }

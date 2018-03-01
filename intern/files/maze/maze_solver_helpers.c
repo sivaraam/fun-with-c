@@ -38,13 +38,10 @@ inline
 int is_clear_pixel(struct maze_image *const maze, unsigned pixel)
 {
 
-#ifdef KS_MAZE_SOLVER_DEBUG
 	if (pixel >= maze->pixels)
 	{
-		fprintf(stderr, "is_clear_pixel: Invalid pixel %u\n", pixel);
-		exit(EXIT_FAILURE);
+		return 0;
 	}
-#endif
 
 	const unsigned char *const pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
 
@@ -160,14 +157,6 @@ int create_graph(struct maze_image *const maze)
 		return 1;
 	}
 
-	// initialise the 'np_list'
-	if (initialize_np_list(maze->pixels))
-	{
-		// delete the partial np list
-		delete_np_list();
-		return 1;
-	}
-
 	for (unsigned pixel=0; pixel<maze->pixels; pixel++)
 	{
 		if (is_clear_pixel(maze, pixel))
@@ -198,6 +187,7 @@ int create_graph(struct maze_image *const maze)
 
 #ifdef KS_MAZE_SOLVER_DEBUG_CREATE_GRAPH
 			printf("create_graph: node value: %u\n", n->pixel);
+			fflush(stdout);
 #endif
 
 #ifdef KS_MAZE_SOLVER_DEBUG
@@ -214,81 +204,72 @@ int create_graph(struct maze_image *const maze)
 	return 0;
 }
 
-int initialize_adjacencies(struct maze_image *const maze, struct openings *const gates)
+int initialize_adjacencies(struct maze_image *const maze)
 {
-	// start searching from the second pixel of the second row
-	// and initialize the adjacencies by checking the left and top pixels alone
-	for (unsigned height = 1; height < maze->height-1; height++)
+	for (unsigned clear_pixel=0; clear_pixel<np_list_vals; clear_pixel++)
 	{
-		for (unsigned width=1; width < maze->width - 1; width++)
+		const unsigned curr_pixel = (*(np_list+clear_pixel))->pixel;
+
+		// This is not an issue for the start pixel which is in the first row as the
+		// is_clear_pixel() funtion would return 0 for out-of-bound values.
+		const unsigned left = curr_pixel - 1,
+		               top  = curr_pixel - maze->width;
+
+		if (is_clear_pixel(maze, left))
 		{
-			const unsigned pixel = (maze->width) * height + width;
 
-			if (is_clear_pixel(maze, pixel))
+#ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
+			printf("initialize_adjacencies: Found adjacencies %u and %u\n",
+			       curr_pixel, left);
+#endif
+
+			struct node *const left_node = get_node(left);
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+			if (left_node == NULL)
 			{
-				const unsigned left = pixel - 1,
-				               top  = pixel - maze->width;
-
-				if (is_clear_pixel(maze, left))
-				{
-
-#ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
-					printf("initialize_adjacencies: Found adjacencies %u and %u\n",
-					       pixel, left);
+				fprintf(stderr, "initialize_adjacencies: Invalid left node: %u for current clear pixel: %u\n",
+				        left, curr_pixel);
+				exit(EXIT_FAILURE);
+			}
 #endif
 
-					if (
-						add_adjacency((*(np_list+pixel))->pixel_node,
-						              (*(np_list+left))->pixel_node)
-					)
-					{
-						return 1;
-					}
-				}
-
-				if (is_clear_pixel(maze, top))
-				{
-
-#ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
-					printf("initialize_adjacencies: Found adjacencies %u and %u\n",
-					       pixel, top);
-#endif
-
-					if (
-						add_adjacency((*(np_list+pixel))->pixel_node,
-						              (*(np_list+top))->pixel_node)
-					)
-					{
-						return 1;
-					}
-				}
+			if (
+				add_adjacency((*(np_list+clear_pixel))->pixel_node,
+				              left_node)
+			)
+			{
+				return 1;
 			}
 		}
-	}
 
-	// Add adjacencies for the end pixel
-	// This depends on the observation that the pixel below the start node
-	// and the pixel above the end node should be adjacencies for sure.
+		if (is_clear_pixel(maze, top))
+		{
 
 #ifdef KS_MAZE_SOLVER_DEBUG_INITIALIZE_ADJACENCIES
-	if (is_clear_pixel(maze, gates->end_gate_pixel - maze->width))
-	{
-		printf("initialize_adjacencies: Found adjacencies %u and %u\n",
-		       gates->end_gate_pixel, gates->end_gate_pixel - maze->width);
-	}
-	else
-	{
-		fprintf(stderr, "initialize_adjacencies: Could not find adjacency for end gate pixel!\n");
-		exit(EXIT_FAILURE);
-	}
+			printf("initialize_adjacencies: Found adjacencies %u and %u\n",
+			       curr_pixel, top);
 #endif
 
-	if (
-		add_adjacency((*(np_list + gates->end_gate_pixel))->pixel_node,
-		              (*(np_list + gates->end_gate_pixel - maze->width))->pixel_node)
-	)
-	{
-		return 1;
+			struct node *const top_node = get_node(top);
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+			if (top_node == NULL)
+			{
+				fprintf(stderr, "initialize_adjacencies: Invalid top node: %u for current clear pixel: %u\n",
+				        top, curr_pixel);
+				exit(EXIT_FAILURE);
+			}
+#endif
+
+			if (
+				add_adjacency((*(np_list+clear_pixel))->pixel_node,
+				              top_node)
+			)
+			{
+				return 1;
+			}
+		}
 	}
 
 	return 0;
@@ -304,7 +285,7 @@ int initialize_adjacencies(struct maze_image *const maze, struct openings *const
 static
 int construct_shortest_path(struct openings *const gates, struct sp_queue_head *const sp)
 {
-	struct node *path_node = (*(np_list+gates->end_gate_pixel))->pixel_node;
+	struct node *path_node = get_node(gates->end_gate_pixel);
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	if (path_node == NULL)
@@ -376,7 +357,7 @@ int construct_shortest_path(struct openings *const gates, struct sp_queue_head *
 unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *sp,
                             const unsigned *const heuristic_vector)
 {
-	struct node *const start_node = (*(np_list+gates->start_gate_pixel))->pixel_node;
+	struct node *const start_node = get_node(gates->start_gate_pixel);
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	if (start_node == NULL)
@@ -521,7 +502,7 @@ CLEANUP:
 	return construct_shortest_path(gates, sp);
 }
 
-void delete_graph(struct maze_image *maze)
+void delete_graph(void)
 {
 	if (np_list == NULL)
 	{
@@ -529,14 +510,10 @@ void delete_graph(struct maze_image *maze)
 	}
 
 	// initially free the individual nodes
-	for (unsigned pixel=0; pixel<maze->pixels; pixel++)
+	for (unsigned clear_pixel=0; clear_pixel<np_list_vals; clear_pixel++)
 	{
-		if (is_clear_pixel(maze, pixel))
-		{
-			struct node *const curr_pixel_node = (*(np_list+pixel))->pixel_node;
-			free(curr_pixel_node->adjlist.adjs);
-			free(curr_pixel_node);
-		}
+		struct node *const curr_pixel_node = (*(np_list+clear_pixel))->pixel_node;
+		free(curr_pixel_node);
 	}
 
 	// now delete the np_list itself

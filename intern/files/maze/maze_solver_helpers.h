@@ -7,6 +7,9 @@
 /**
  * Returns non-zero value if the given pixel in the maze is a clear pixel.
  * Else returns 0.
+ *
+ * Note: An out-of-bound pixel is "not" considered to be a clear pixel.
+ *       (This is done to simplify adjacency initialization logic)
  */
 int is_clear_pixel(struct maze_image *const maze, unsigned pixel);
 
@@ -42,7 +45,7 @@ int create_graph(struct maze_image *const maze);
  *
  * Returns 0 on success and non-zero value on error (mostly memroy error).
  */
-int initialize_adjacencies(struct maze_image *const maze, struct openings *const gates);
+int initialize_adjacencies(struct maze_image *const maze);
 
 /**
  * Find the shortest path from the start gate node to the end gate node
@@ -69,10 +72,8 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 
 /**
  * Free up the memory taken up by the graph and its related structure.
- *
- * maze - used to identify the clear pixels only for which the nodes are present
  */
-void delete_graph(struct maze_image *maze);
+void delete_graph(void);
 
 //
 // END FIXME

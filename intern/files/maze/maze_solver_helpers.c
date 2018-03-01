@@ -39,7 +39,14 @@ int is_hurdle_pixel(struct maze_image *const maze, unsigned pixel)
 }
 #endif
 
-inline
+/**
+ * Returns non-zero value if the given pixel in the maze is a clear pixel.
+ * Else returns 0.
+ *
+ * Note: An out-of-bound pixel is "not" considered to be a clear pixel.
+ *       (This is done to simplify adjacency initialization logic)
+ */
+inline static
 int is_clear_pixel(struct maze_image *const maze, unsigned pixel)
 {
 

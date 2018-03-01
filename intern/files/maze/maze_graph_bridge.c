@@ -73,22 +73,6 @@ int insert_node(unsigned pixel, struct node *const n)
 	return 0;
 }
 
-struct node *create_node(unsigned pixel)
-{
-	struct node *const n = calloc(1, sizeof(struct node));
-
-	if (n == NULL)
-	{
-		return NULL;
-	}
-
-	n->pixel = pixel;
-	n->adjlist.adjs = NULL; // possibly not necessary as calloc is used, just in case
-	n->pi = NULL;
-
-	return n;
-}
-
 struct node *get_node(unsigned pixel)
 {
 

@@ -4,7 +4,6 @@
 #include "common.h"
 #include "maze_solver.h"
 #include "maze_solver_helpers.h"
-#include "a_star/heuristics/heuristic.h"
 
 /**
  * Free the nodes (if any) in the shortest path queue when the shortest
@@ -51,7 +50,7 @@ int solve_maze(struct maze_image *const maze)
 	printf("solve_maze: Progress: Graph creation for the maze ...\n");
 #endif
 
-	if (create_graph(maze))
+	if (create_graph(maze, gates))
 	{
 		ret_val = ERRMEMORY;
 		goto CLEANUP_GRAPH;
@@ -59,21 +58,6 @@ int solve_maze(struct maze_image *const maze)
 
 #ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
 	printf("solve_maze: Progress: Graph generated successfully for the maze.\n");
-#endif
-
-#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
-	printf("solve_maze: Progress: Adjacency initialization for the graph ..\n");
-#endif
-
-	// initialize the adjacency for each node in the graph
-	if (initialize_adjacencies(maze))
-	{
-		ret_val = ERRMEMORY;
-		goto CLEANUP_GRAPH;
-	}
-
-#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
-	printf("solve_maze: Progress: Adjacencies initialized successfully for the graph.\n");
 #endif
 
 	// find the shortest path to the end node from the source node
@@ -88,30 +72,11 @@ int solve_maze(struct maze_image *const maze)
 
 	initialise_sp_queue(sp);
 
-	// allocate memory for the heuristic vector
-	unsigned *const heuristic_vector = malloc(maze->pixels*sizeof(unsigned));
-
-	if (heuristic_vector == NULL)
-	{
-		ret_val = ERRMEMORY;
-		goto CLEANUP_SP;
-	}
-
-#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
-	printf("solve_maze: Progress: Heuristic value generation for the pixels ..\n");
-#endif
-
-	get_manhattan_heuristic(maze, gates, heuristic_vector);
-
-#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
-	printf("solve_maze: Progress: Heuristic value generation completed.\n");
-#endif
-
 #ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
 	printf("solve_maze: Progress: Shortest path to destination using the graph ..\n");
 #endif
 
-	unsigned dest_distance = find_shortest_path(gates, sp, heuristic_vector);
+	unsigned dest_distance = find_shortest_path(gates, sp);
 
 	if (dest_distance != 0)
 	{
@@ -163,9 +128,6 @@ int solve_maze(struct maze_image *const maze)
 	}
 
 CLEANUP:
-	free(heuristic_vector);
-
-CLEANUP_SP:
 	// free the queue head
 	free(sp);
 

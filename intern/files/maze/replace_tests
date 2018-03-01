@@ -1,4 +1,10 @@
 #! /bin/bash
 
-rm -rf test_inputs/
-cp -r test_inputs.bak/ test_inputs/
+TOTAL_TEST_CASES=10
+
+rm -f test_inputs/*.bmp
+
+for i in `seq $TOTAL_TEST_CASES`
+do
+    cp test_inputs.bak/BMP$i.bmp test_inputs/
+done

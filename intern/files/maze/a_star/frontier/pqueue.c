@@ -173,7 +173,6 @@ void min_heapify(struct min_heap *const mheap, size_t elem_offset)
 			smallest = left;
 		}
 
-		// FIXME: convert the redundant condition into a function or MACRO
 		// check if the right child is smaller than the previous smallest
 		if (right <= mheap->heap_size && check_swap_condition(mheap, right, smallest))
 		{

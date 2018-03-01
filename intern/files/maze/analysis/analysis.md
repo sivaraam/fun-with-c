@@ -22,7 +22,9 @@ This document captures an analysis of different aspects of using different algor
 |   6   |         1940\*2001         |    2006882        |       51.70        |           4572                |
 |   7   |         2001\*2001         |    2000001        |       49.95        |          24668                |
 |   8   |         4001\*4001         |    8000001        |       49.98        |          62544                |
-
+|   9   |         6001\*6001         |   18642114        |       51.77        |            NA                 |
+|  10   |        10001\*10001        |   50000001        |       49.99        |            NA                 |
+|  11   |        15001\*15001        |      NA           |         NA         |            NA                 |
 
 ## Running time
 
@@ -44,7 +46,6 @@ This document captures an analysis of different aspects of using different algor
 | 6     |           0.625            |             0.746                        |           16.22                      |
 | 7     |           0.537            |             0.649                        |           17.25                      |
 | 8     |           2.376            |             2.976                        |           20.16                      |
-
 
 ## Node expansion
 

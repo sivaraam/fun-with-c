@@ -8,6 +8,3 @@
 
 # Ignore the sync file used to update backup copies
 sync
-
-# Ignore the test_input directory for the maze
-intern/files/maze/test_inputs

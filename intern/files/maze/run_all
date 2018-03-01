@@ -5,7 +5,7 @@ TOTAL_TEST_CASES=9
 DEFAULT_EXEC="./maze_solver.out"
 MAX_ARGS=2
 
-if (test $# -lt 1)
+if (test $# -lt 1) || (test "$1" == "")
 then
     echo "Falling back to default executable: $DEFAULT_EXEC"
     EXEC="$DEFAULT_EXEC"

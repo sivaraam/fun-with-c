@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "common.h"
+#include "bmp/bmp_helpers.h"
 #include "maze_solver_helpers.h"
 #include "maze_graph_bridge.h"
 #include "bfs_frontier/queue.h"
@@ -8,21 +9,6 @@
 #ifdef KS_MAZE_SOLVER_DEBUG
 #include <stdio.h>
 #endif
-
-/**
- * Given the image width and the amount of padding in it gives the byte offset
- * for Nth pixel. (Indexed from 0).
- *
- * width - width of the image
- * padding - the number of bytes of padding between the rows (cannot exeeed 3)
- * N - the pixel required
- *     assumed to be in the range of width*height of the image
- */
-inline static
-unsigned long get_pixel_offset(const unsigned long width, const unsigned char padding, const unsigned long N)
-{
-	return N*bytes_per_pixel + ((N/width)*padding);
-}
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 #include <limits.h>
@@ -45,7 +31,7 @@ int is_hurdle_pixel(struct maze_image *const maze, unsigned pixel)
 	}
 #endif
 
-	const unsigned char *const pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
+	const unsigned char *const pixel_byte = maze->data + pixel;
 
 	// It's enough to check one byte for now
 	return ((*pixel_byte&HURDLE_PIXEL) == (*pixel_byte)) ? 1 : 0;
@@ -64,7 +50,7 @@ int is_clear_pixel(struct maze_image *const maze, unsigned pixel)
 		return 0;
 	}
 
-	const unsigned char *const pixel_byte = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
+	const unsigned char *const pixel_byte = maze->data + pixel;
 
 	// It's enough to check one byte for now
 	return ((*pixel_byte&CLEAR_PIXEL) == CLEAR_PIXEL) ? 1 : 0;
@@ -88,7 +74,7 @@ long find_gate(struct maze_image *const maze, unsigned start_pixel, unsigned end
 	// find the pixel of the start gate
 	for (unsigned pixel = start_pixel; pixel<=end_pixel; pixel++)
 	{
-		unsigned char *const pixel_ptr = maze->data+get_pixel_offset(maze->width, maze->padding, pixel);
+		unsigned char *const pixel_ptr = maze->data + pixel;
 
 		if ((*pixel_ptr&CLEAR_PIXEL) == CLEAR_PIXEL)
 		{
@@ -534,19 +520,11 @@ void delete_graph(void)
 inline static
 void colour_pixel(struct maze_image *const maze, unsigned pixel)
 {
-	unsigned char *const pixel_bytes = maze->data + get_pixel_offset(maze->width, maze->padding, pixel);
+	unsigned char *const pixel_byte = maze->data + pixel;
 
-	// ordering of RGB for little-endian architecture
-	static const unsigned char colour_bytes[3] = {
-	   0x00, // blue,
-	   0x00, // green
-	   0xFF //red
-	};
+	static const unsigned char colour_byte = 0x77;
 
-	for (unsigned byte=0; byte<PIXEL_BYTES; byte++)
-	{
-		*(pixel_bytes + byte) = colour_bytes[byte];
-	}
+	*(pixel_byte) = colour_byte;
 }
 
 void colour_path(struct maze_image *const maze, struct sp_queue_head *const sp)

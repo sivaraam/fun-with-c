@@ -1,21 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "common.h"
+#include "bmp/bmp_helpers.h"
 #include "maze_solver.h"
 #include "maze_solver_helpers.h"
-
-/**
-* Find the number of bytes of possible padding
-* for a BMP image given its width.
-*/
-static inline
-unsigned find_padding(unsigned width)
-{
-  static const unsigned padding_boundary = 4;
-  const unsigned row_size = width*bytes_per_pixel;
-
-  return padding_boundary-(row_size%4);
-}
 
 /**
  * Free the nodes (if any) in the shortest path queue when the shortest

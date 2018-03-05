@@ -36,4 +36,9 @@ int main(void) {
 	{
 		printf("%u doesn't fit in an int\n", u_val);
 	}
+
+	// test freeing a const pointer
+	char *const char_ptr = malloc(sizeof(1));
+	*char_ptr = '8';
+	free(char_ptr);
 }

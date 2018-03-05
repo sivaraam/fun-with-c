@@ -4,10 +4,10 @@
 
 import readline
 
-total_observations = 8
+total_observations = 9
 
-bfs_timings = [0.003, 0.005, 0.002, 0.010, 0.031, 0.625, 0.537, 2.376]
-observed = [0.001, 0.001, 0.001, 0.012, 0.033, 0.644, 0.473, 2.406]
+bfs_timings = [0.003, 0.005, 0.002, 0.010, 0.031, 0.625, 0.537, 2.376, 6.848]
+observed = [0.001, 0.001, 0.001, 0.012, 0.033, 0.644, 0.473, 2.406, 9.332]
 
 def bfs_is_faster_by(image_num, cmp_time):
 	diff_time = cmp_time - bfs_timings[image_num]
@@ -18,9 +18,9 @@ for i in range(0, total_observations):
     print("Image", i, ":", round(bfs_is_faster_by(i, observed[i]), 2))
 print()
 
-total_nodes = [43, 100, 801, 20692, 82724, 2006882, 2000001, 8000001]
-observed_expansion = [23, 72, 770, 10069, 39707, 1248103, 837282, 6023391]
-bfs_expanded = [36, 88, 780, 13866, 70167, 1949485, 918257, 6201755]
+total_nodes = [43, 100, 801, 20692, 82724, 2006882, 2000001, 8000001, 18642114]
+observed_expansion = [23, 72, 770, 10069, 39707, 1248103, 837282, 6023391, 18636058]
+bfs_expanded = [36, 88, 780, 13866, 70167, 1949485, 918257, 6201755, 18642106]
 
 def percent_nodes_expanded(image_num, observed_expansion):
 	return (observed_expansion/total_nodes[image_num])*100

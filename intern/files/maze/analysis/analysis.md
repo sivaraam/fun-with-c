@@ -23,7 +23,7 @@ This document captures an analysis of different aspects of using different algor
 |   7   |         2001\*2001         |    2000001        |       49.95        |          24668                |
 |   8   |         4001\*4001         |    8000001        |       49.98        |          62544                |
 |   9   |         6001\*6001         |   18642114        |       51.77        |          19194                |
-|  10   |        10001\*10001        |   50000001        |       49.99        |            NA                 |
+|  10   |        10001\*10001        |   50000001        |       49.99        |         173778                |
 |  11   |        15001\*15001        |      NA           |         NA         |            NA                 |
 
 ## Running time
@@ -62,4 +62,4 @@ This document captures an analysis of different aspects of using different algor
 | 7     |         918257 (45.19)            |                      837282 (41.86)                  |                   8.82                          |
 | 8     |        6201755 (77.52)            |                     6023391 (75.29)                  |                   2.88                          |
 | 9     |       18642106 (100.00)           |                    18636058 (75.29)                  |                   0.03                          |
-| 10    |               NA                  |                    18636058 (99.97)                  |                     NA                          |
+| 10    |               NA                  |                              NA                      |                     NA                          |

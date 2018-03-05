@@ -23,7 +23,7 @@ This document captures an analysis of different aspects of using different algor
 |   7   |         2001\*2001         |    2000001        |       49.95        |          24668                |
 |   8   |         4001\*4001         |    8000001        |       49.98        |          62544                |
 |   9   |         6001\*6001         |   18642114        |       51.77        |          19194                |
-|  10   |        10001\*10001        |   50000001        |       49.99        |         173778                |
+|  10   |        10001\*10001        |   50000001        |       49.99        |            NA                 |
 |  11   |        15001\*15001        |      NA           |         NA         |            NA                 |
 
 ## Running time
@@ -46,7 +46,7 @@ This document captures an analysis of different aspects of using different algor
 | 6     |           0.625            |             0.644                        |            2.95                      |
 | 7     |           0.537            |             0.473                        |          -13.53                      |
 | 8     |           2.376            |             2.406                        |            1.25                      |
-| 9     |            NA              |             9.332                        |             NA                       |
+| 9     |           6.848            |             9.332                        |           26.62                      |
 | 10    |            NA              |              NA                          |             NA                       |
 
 ## Node expansion
@@ -61,5 +61,5 @@ This document captures an analysis of different aspects of using different algor
 | 6     |       19494985 (97.14)            |                     1248103 (62.19)                  |                  35.98                          |
 | 7     |         918257 (45.19)            |                      837282 (41.86)                  |                   8.82                          |
 | 8     |        6201755 (77.52)            |                     6023391 (75.29)                  |                   2.88                          |
-| 9     |               NA                  |                    18636058 (75.29)                  |                     NA                          |
+| 9     |       18642106 (100.00)           |                    18636058 (75.29)                  |                   0.03                          |
 | 10    |               NA                  |                    18636058 (99.97)                  |                     NA                          |

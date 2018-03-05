@@ -1,6 +1,6 @@
 #! /bin/bash
 
-TOTAL_TEST_CASES=10
+TOTAL_TEST_CASES=9
 
 # see if the number of tests to replace is given
 if (test $# -gt 1)

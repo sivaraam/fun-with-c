@@ -29,7 +29,7 @@ then
 fi
 
 # Replace existing test inputs
-./replace_tests
+./replace_tests $TOTAL_TEST_CASES
 
 for test in `seq $TOTAL_TEST_CASES`
 do

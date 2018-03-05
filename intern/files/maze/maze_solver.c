@@ -1,21 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "bmp/bmp_helpers.h"
 #include "common.h"
 #include "maze_solver.h"
 #include "maze_solver_helpers.h"
-
-/**
-* Find the number of bytes of possible padding
-* for a BMP image given its width.
-*/
-static inline
-unsigned find_padding(unsigned width)
-{
-  static const unsigned padding_boundary = 4;
-  const unsigned row_size = width*bytes_per_pixel;
-
-  return padding_boundary-(row_size%4);
-}
 
 /**
  * Free the nodes (if any) in the shortest path queue when the shortest
@@ -58,18 +46,19 @@ int solve_maze(struct maze_image *const maze)
 		gates->start_gate_pixel, gates->end_gate_pixel);
 #endif
 
-	if (create_graph(maze))
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Graph creation for the maze ...\n");
+#endif
+
+	if (create_graph(maze, gates))
 	{
 		ret_val = ERRMEMORY;
-		goto CLEANUP;
+		goto CLEANUP_GRAPH;
 	}
 
-	// initialize the adjacency for each node in the graph
-	if (initialize_adjacencies(maze, gates))
-	{
-		ret_val = ERRMEMORY;
-		goto CLEANUP;
-	}
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Graph generated successfully for the maze.\n");
+#endif
 
 	// find the shortest path to the end node from the source node
 	// for the constructed graph
@@ -78,15 +67,24 @@ int solve_maze(struct maze_image *const maze)
 	if (sp == NULL)
 	{
 		ret_val = ERRMEMORY;
-		goto CLEANUP;
+		goto CLEANUP_GRAPH;
 	}
 
 	initialise_sp_queue(sp);
+
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Shortest path to destination using the graph ..\n");
+#endif
 
 	unsigned dest_distance = find_shortest_path(gates, sp);
 
 	if (dest_distance != 0)
 	{
+
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Shortest path generated successfully.\n");
+#endif
+
 #ifdef KS_MAZE_SOLVER_DEBUG_PRINT_SHORTEST_PATH
 		// Warning: This removes the items from the queue!
 		printf("Shortest path from %u to %u:\n", gates->start_gate_pixel, gates->end_gate_pixel);
@@ -108,7 +106,17 @@ int solve_maze(struct maze_image *const maze)
 
 		printf("\n");
 #else
+
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Colour the shortest path ..\n");
+#endif
+
 		colour_path(maze, sp);
+
+#ifdef KS_MAZE_SOLVER_DEBUG_PROGRESS
+	printf("solve_maze: Progress: Colouring of shortest path completed.\n");
+#endif
+
 #endif
 
 	}
@@ -119,11 +127,12 @@ int solve_maze(struct maze_image *const maze)
 		goto CLEANUP;
 	}
 
+CLEANUP:
 	// free the queue head
 	free(sp);
 
-CLEANUP:
-	delete_graph(maze);
+CLEANUP_GRAPH:
+	delete_graph();
 	free(gates);
 	return ret_val;
 }

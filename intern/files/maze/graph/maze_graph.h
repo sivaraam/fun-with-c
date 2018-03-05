@@ -6,11 +6,11 @@
 #define ERRNULL 1
 #define ERRMEMORY  2
 
-enum bfs_colour
+enum search_status
 {
-	WHITE,
-	GREY,
-	BLACK
+	NOT_VISITED,
+	IN_FRONTIER,
+	VISITIED
 };
 
 /**
@@ -33,13 +33,12 @@ struct adj_list
  */
 struct node
 {
-	unsigned pixel; // the corresponding pixel value for the node
+	unsigned pixel;          // the corresponding pixel value for the node
+	unsigned src_dist;       // distance of the node from the source node
+	unsigned heuristic;      // the heuristic value that approximates cost to reach destination
+	enum search_status colour;      // holds the colour of the node during the search
+	struct node *pi;         // predecessor of the node in a path
 	struct adj_list adjlist; // the adjacency list for this node
-
-	// BFS related data
-	enum bfs_colour colour; // holds the colour of the node during the search
-	unsigned src_dist; // distance of the node from the source node
-	struct node *pi; // predecessor of the node
 };
 
 /**

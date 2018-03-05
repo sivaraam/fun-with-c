@@ -15,28 +15,9 @@ struct node_list
 extern struct node_list **np_list;
 
 /**
- * One time allocation of memory for the 'np_list'.
- *
- * size - size is generally 1 plus the maximum pixel value that
- *        would be accessed using the np_list.
- *
- *        This is done to give constant time access of nodes
- *        given the pixel.
- *
- * Returns 0 on success and non-zero value in case of an error.
- *
- * Note: In case of an error the memory for already allocated
- * nodes have to be freed by the caller by calling 'delete_np_list()'.
+ * Tracks the number of entries in 'np_list'
  */
-int initialize_np_list(size_t size);
-
-/**
- * Helper function to creates a valid 'struct node' object for the
- * given pixel and initializes its values to the defaults.
- *
- * Returns NULL in case of an error.
- */
-struct node *create_node(unsigned pixel);
+extern unsigned np_list_vals;
 
 /**
  * Creates a new 'struct node_list' entry into 'np_list' for the given
@@ -61,7 +42,14 @@ int remove_node(unsigned pixel);
  */
 void delete_np_list(void);
 
-/**
+/*
+ * Gives the pointer to the graph node that represents the given pixel.
+ *
+ * Returns NULL if there is no node for the given pixel.
+ */
+struct  node *get_node(unsigned pixel);
+
+/*
  * Adds 'adj_pixel_node' as an adjacency of 'pixel_node' and
  * vice versa (as the graph is undirected).
  *

@@ -20,30 +20,24 @@ void print_ascii_maze(struct maze_image *const maze);
 #endif
 
 //
-// FIXME: Think about moving these to imaze_graph_bridge.
+// FIXME: Think about moving these to maze_graph_bridge.
 //
 
 /**
- * Create the graph nodes for each clear pixel in the maze image.
- * Also sets the number of clear pixels in the given maze object.
+ * Create the graph nodes for each clear pixel in the maze image and initialise
+ * the adjacency list and heuristic values for the node.
  *
  * Returns 0 on success and non-zero value on error (mostly memory error).
  */
-int create_graph(struct maze_image *const maze);
-
-/**
- * Initialize the adjacency vertices for node in the clear pixel graph.
- *
- * Returns 0 on success and non-zero value on error (mostly memroy error).
- */
-int initialize_adjacencies(struct maze_image *const maze, struct openings *const gates);
+int create_graph(struct maze_image *const maze, struct openings *const gates);
 
 /**
  * Find the shortest path from the start gate node to the end gate node
- * in the graph.
+ * in the graph using the heuritic value which estimates the approxiamate
+ * cost to the destination from any clear pixel in the maze.
  *
  * Stores the shortest path in the given queue. The queue is expected to be
- * a pointer to a vlid queue head which has been initialized.
+ * a pointer to a valid queue head which has been initialized.
  *
  * Returns the non-negative distance of the destination from the source on
  * success or 0 in case of failure.
@@ -56,10 +50,8 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 
 /**
  * Free up the memory taken up by the graph and its related structure.
- *
- * maze - used to identify the clear pixels only for which the nodes are present
  */
-void delete_graph(struct maze_image *maze);
+void delete_graph(void);
 
 //
 // END FIXME

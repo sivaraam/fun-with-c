@@ -1,9 +1,88 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "maze_solver.h"
+#include "bmp/bmp_helpers.h"
 
 #define DEBUG
+// #define DEBUG_EXPAND_DATA
+
 #define ERRWRITE 128
+
+/**
+ * Keeps only the first byte of every pixel and throws away the remaining bytes.
+ * This shrinks the image size and simplifies the access to the pixel data.
+ */
+void shrink_image(struct maze_image *maze)
+{
+	unsigned padding_adjustment = 0;
+	for (unsigned curr_row = 0; curr_row<maze->height; curr_row++)
+	{
+		for (unsigned curr_col = 0; curr_col<maze->width; curr_col++)
+		{
+			const unsigned curr_pixel = (curr_row*maze->width + curr_col);
+			*(maze->data + curr_pixel) = *(maze->data + bytes_per_pixel*curr_pixel + padding_adjustment);
+		}
+		padding_adjustment += maze->padding;
+	}
+}
+
+void expand_data(struct maze_image *maze)
+{
+	unsigned expanded_offset = maze->pixels*bytes_per_pixel + maze->padding*maze->height - 1;
+
+	unsigned curr_row = maze->height;
+	do
+	{
+		curr_row--;
+
+		const unsigned char padding_byte = 0x00;
+
+		// fill in the padding
+		for (unsigned curr_padding_byte = 0; curr_padding_byte<maze->padding; curr_padding_byte++)
+		{
+
+#ifdef DEBUG
+			if (expanded_offset > maze->pixels*bytes_per_pixel + maze->padding*maze->height)
+			{
+				fprintf(stderr, "expand_data: Assumption that 'expanded_offset' always has the correct offset failed!\n");
+				exit(EXIT_FAILURE);
+			}
+#endif
+
+			*(maze->data + expanded_offset--) = padding_byte;
+		}
+
+		unsigned curr_col = maze->width;
+		do
+		{
+			curr_col--;
+
+			const unsigned shrunk_pixel_offset = (curr_row*maze->width + curr_col);
+
+#ifdef DEBUG_EXPAND_DATA
+			printf("expand_data: expanding data for pixel: %u; expanded_offset: %u;\n",
+			       shrunk_pixel_offset, expanded_offset);
+#endif
+
+			// expand the pixel bytes
+			for (unsigned pixel_byte = 0; pixel_byte<bytes_per_pixel; pixel_byte++)
+			{
+
+#ifdef DEBUG
+				if (expanded_offset > maze->pixels*bytes_per_pixel + maze->padding*maze->height)
+				{
+					fprintf(stderr, "expand_data: Assumption that 'expanded_offset' always has the correct offset failed!\n");
+					exit(EXIT_FAILURE);
+				}
+#endif
+
+				*(maze->data + expanded_offset--) = *(maze->data + shrunk_pixel_offset);
+			}
+
+		} while (curr_col != 0);
+
+	} while (curr_row != 0);
+}
 
 int main(int argc, char *argv[])
 {
@@ -60,6 +139,9 @@ int main(int argc, char *argv[])
 
 	maze->pixels = maze->width*maze->height;
 
+	// find the padding
+	maze->padding = find_padding(maze->width);
+
 #ifdef DEBUG
 	printf("Image dimensions (in pixels):\n");
 	printf("width: %u\t height: %u\n", maze->width, maze->height);
@@ -107,6 +189,28 @@ int main(int argc, char *argv[])
 		goto FREE_QUIT;
 	}
 
+	// throw away the unnecessary parts of the image
+	shrink_image(maze);
+
+	// reduce the image size after shrinking
+	unsigned char *shrunk_data = realloc(maze->data, maze->pixels*sizeof(unsigned char));
+	if (shrunk_data == NULL)
+	{
+		// Fail in case we couldn't shrink the memro (!?) to avoid unnecessarry overhead of function
+		// calls to identify the offset of a pixel in the data.
+		//
+		// If that overhead is not an issue, we could pass a function pointer to 'solve_maze' indicating
+		// how to find the pixel offset and thus handling this failure graciously.
+		fprintf(stderr, "Shrinking image data failed!\n");
+		ret_val = 1;
+		goto FREE_QUIT;
+	}
+	else
+	{
+		maze->data = shrunk_data;
+		shrunk_data = NULL;
+	}
+
 	ret_val = solve_maze(maze);
 	if (ret_val == ERRMEMORY)
 	{
@@ -127,6 +231,24 @@ int main(int argc, char *argv[])
 	// seek to the start of image data
 	// This should succeed if the previous one did!
 	fseek(image_file, 54L, SEEK_SET);
+
+	// expand the memory to expand the data to BMP format
+	unsigned char *expanded_data = realloc(maze->data, data_size);
+	if (expanded_data == NULL)
+	{
+		// we have to fail because we are allowed to use fwrite only once
+		// So, the fallback technique of directly expanding in file is not possible.
+		fprintf(stderr, "Expanding image failed!\n");
+		ret_val = 1;
+		goto FREE_QUIT;
+	}
+	else
+	{
+		maze->data = expanded_data;
+		expanded_data = NULL;
+	}
+
+	expand_data(maze);
 
 	// write the solution
 	if (fwrite(maze->data, data_size, 1, image_file) == 0)

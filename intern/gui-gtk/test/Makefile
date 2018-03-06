@@ -9,8 +9,8 @@ GCC = gcc
 GTK3_COMPILER_FLAGS = `pkg-config --cflags gtk+-3.0`
 GTK3_LIBRARIES = `pkg-config --libs gtk+-3.0`
 
-exmaple.out: example.c
+gui-example.out: example.c
 	${GCC} ${GTK3_COMPILER_FLAGS} ${COMPILER_FLAGS} $^ -o $@ ${GTK3_LIBRARIES}
 
-button.out: button.c
+gui-button.out: button.c
 	${GCC} ${GTK3_COMPILER_FLAGS} ${COMPILER_FLAGS} $^ -o $@ ${GTK3_LIBRARIES}

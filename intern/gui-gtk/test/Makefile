@@ -14,3 +14,6 @@ gui-example.out: example.c
 
 gui-button.out: button.c
 	${GCC} ${GTK3_COMPILER_FLAGS} ${COMPILER_FLAGS} -o $@ $^ ${GTK3_LIBRARIES}
+
+gui-switch.out: switch.c
+	${GCC} ${GTK3_COMPILER_FLAGS} ${COMPILER_FLAGS} -o $@ $^ ${GTK3_LIBRARIES}

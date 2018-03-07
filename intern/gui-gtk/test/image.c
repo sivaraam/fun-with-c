@@ -35,12 +35,55 @@ gboolean motion_notify_event_cb (GtkWidget *widget,
 }
 
 static
+void drag_begin_cb (GtkGestureDrag *drag,
+                    gdouble offset_x,
+                    gdouble offset_y,
+                    gpointer user_data)
+{
+	gint drag_start_x = round (offset_x), drag_start_y = round (offset_y);
+
+	g_print ("drag_begin_cb: Start point: Got        x: %lf\t y:%lf\n", offset_x, offset_y);
+	g_print ("drag_begin_cb: Start point: Rounded to x: %d\ty: %d\n", drag_start_x, drag_start_y);
+}
+
+static
+void drag_end_cb (GtkGestureDrag *drag,
+                  gdouble offset_x,
+                  gdouble offset_y,
+                  gpointer user_data)
+{
+	gdouble d_drag_start_x = 0.0, d_drag_start_y = 0.0;
+
+	gint drag_end_offset_x = round (offset_x), drag_end_offset_y = round (offset_y),
+	     drag_start_x = 0, drag_start_y = 0;
+
+	g_print ("drag_end_cb: End point: Got        x: %lf\t y: %lf\n", offset_x, offset_y);
+	g_print ("drag_end_cb: End point: Rounded to x: %d\t y: %d\n", drag_end_offset_x, drag_end_offset_y);
+
+	if (gtk_gesture_drag_get_start_point (drag, &d_drag_start_x, &d_drag_start_y))
+	{
+		drag_start_x = round (d_drag_start_x), drag_start_y = round (d_drag_start_y);
+
+		g_print ("drag_end_cb: Start point: Got        x: %lf\t y:%lf\n", d_drag_start_x, d_drag_start_y);
+		g_print ("drag_end_cb: Start point: Rounded to x: %d\ty: %d\n", drag_start_x, drag_start_y);
+
+		g_print ("drag_end_cb: End point: Actual x: %d, y: %d\n", drag_start_x + drag_end_offset_x,
+		                                                          drag_start_y + drag_end_offset_y);
+	}
+	else
+	{
+		g_print ("drag_end_cb: Could not get start point!\n");
+	}
+}
+
+static
 void activate(GtkApplication *app,
               gpointer user_data)
 {
 	GtkWidget *window = NULL;
 	GtkWidget *grid = NULL;
 	GtkWidget *grid_event_box = NULL;
+	GtkGesture *grid_drag_gesture = NULL;
 	GtkWidget *image = NULL;
 	GtkWidget *image_1 = NULL;
 	GdkPixbuf *image_buf = NULL;
@@ -91,6 +134,11 @@ void activate(GtkApplication *app,
 
 		/* Listen to the motion events over the grid to analyse what we get */
 		g_signal_connect (grid_event_box, "motion-notify-event", G_CALLBACK (motion_notify_event_cb), window);
+
+		/* Attach a drag gesture to the event box */
+		grid_drag_gesture = gtk_gesture_drag_new (grid_event_box);
+		g_signal_connect (grid_drag_gesture, "drag-begin", G_CALLBACK (drag_begin_cb), NULL);
+		g_signal_connect (grid_drag_gesture, "drag-end", G_CALLBACK (drag_end_cb), NULL);
 
 		gtk_widget_set_events (grid_event_box, gtk_widget_get_events (grid_event_box)
 	                                     | GDK_POINTER_MOTION_MASK);

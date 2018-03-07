@@ -48,6 +48,8 @@ void activate(GtkApplication *app,
 
 		gtk_grid_attach (GTK_GRID (grid), image, 0, 0, 1, 1);
 		gtk_grid_attach (GTK_GRID (grid), image_1, 1, 0, 1, 1);
+
+		g_assert (image_1 == gtk_grid_get_child_at (GTK_GRID (grid), 1, 0));
 	}
 	else
 	{

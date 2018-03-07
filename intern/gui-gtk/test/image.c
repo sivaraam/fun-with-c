@@ -72,14 +72,14 @@ static
 void activate(GtkApplication *app,
               gpointer user_data)
 {
-	GtkWidget *window = NULL;
-	GtkWidget *grid = NULL;
-	GtkWidget *grid_event_box = NULL;
-	GtkGesture *grid_drag_gesture = NULL;
-	GtkWidget *image = NULL;
-	GtkWidget *image_1 = NULL;
-	GdkPixbuf *image_buf = NULL;
-	GdkPixbuf *image_buf_copy = NULL;
+	GtkWidget *window;
+	GtkWidget *grid;
+	GtkWidget *grid_event_box;
+	GtkGesture *grid_drag_gesture;
+	GtkWidget *image;
+	GtkWidget *image_1;
+	GdkPixbuf *image_buf;
+	GdkPixbuf *image_buf_copy;
 	GError *image_buf_load_error = NULL;
 	static const char *image_path = "../../files/maze/test_inputs.bak/BMP1.bmp";
 
@@ -144,7 +144,7 @@ void activate(GtkApplication *app,
 
 int main(int argc, char *argv[])
 {
-	GtkApplication *app = NULL;
+	GtkApplication *app;
 	int status = 0;
 
 	app = gtk_application_new ("com.ks.example", G_APPLICATION_FLAGS_NONE);

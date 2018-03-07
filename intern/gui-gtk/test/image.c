@@ -11,12 +11,12 @@ static
 void activate(GtkApplication *app,
               gpointer user_data)
 {
-	GtkWidget *window;
-	GtkWidget *grid;
-	GtkWidget *image;
-	GtkWidget *image_1;
-	GdkPixbuf *image_buf;
-	GdkPixbuf *image_buf_copy;
+	GtkWidget *window = NULL;
+	GtkWidget *grid = NULL;
+	GtkWidget *image = NULL;
+	GtkWidget *image_1 = NULL;
+	GdkPixbuf *image_buf = NULL;
+	GdkPixbuf *image_buf_copy = NULL;
 	GError *image_buf_load_error = NULL;
 	static const char *image_path = "../../files/maze/test_inputs.bak/BMP1.bmp";
 
@@ -66,8 +66,8 @@ void activate(GtkApplication *app,
 
 int main(int argc, char *argv[])
 {
-	GtkApplication *app;
-	int status;
+	GtkApplication *app = NULL;
+	int status = 0;
 
 	app = gtk_application_new ("com.ks.example", G_APPLICATION_FLAGS_NONE);
 	g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);

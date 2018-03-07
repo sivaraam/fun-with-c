@@ -9,14 +9,6 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
 static
-void getsize (GtkWidget *widget,
-              GtkAllocation *allocation,
-              gpointer data)
-{
-	g_print ("grid: width: %d; height: %d\n", allocation->width, allocation->height);
-}
-
-static
 gboolean motion_notify_event_cb (GtkWidget *widget,
                                  GdkEventMotion *event,
                                  GtkWidget *window)
@@ -113,17 +105,14 @@ void activate(GtkApplication *app,
 	/* Attach images to the grid if successful */
 	if (image_buf_load_error == NULL)
 	{
-		g_assert (image_buf != NULL);
-
 		image = gtk_image_new_from_pixbuf (image_buf);
 		image_1 = gtk_image_new_from_pixbuf (image_buf_copy);
 
 		gtk_grid_attach (GTK_GRID (grid), image, 0, 0, 1, 1);
 		gtk_grid_attach (GTK_GRID (grid), image_1, 1, 0, 1, 1);
 
+		// ensure gtk_grid_get_child_at() works as intended
 		g_assert (image_1 == gtk_grid_get_child_at (GTK_GRID (grid), 1, 0));
-
-		g_signal_connect (grid, "size-allocate", G_CALLBACK (getsize), NULL);
 
 		/* Attach an event box to the grid to receive events */
 		grid_event_box = gtk_event_box_new ();
@@ -145,9 +134,6 @@ void activate(GtkApplication *app,
 	}
 	else
 	{
-		// Report error to user, and free error
-		g_assert (image_buf == NULL);
-
 		g_print("Loading image failed with error : %s\n", image_buf_load_error->message);
 		g_error_free (image_buf_load_error);
 	}

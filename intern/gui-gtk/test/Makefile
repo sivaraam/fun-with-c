@@ -26,3 +26,6 @@ gui-key-press-gobject.out: key_press_handler_gobject.c
 
 gui-scribble-area.out: scribble_area.c
 	${GCC} ${GTK3_COMPILER_FLAGS} ${COMPILER_FLAGS} -o $@ $^ ${GTK3_LIBRARIES}
+
+gui-image.out: image.c
+	${GCC} ${GTK3_COMPILER_FLAGS} ${COMPILER_FLAGS} -o $@ $^ ${GTK3_LIBRARIES}

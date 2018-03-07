@@ -8,6 +8,14 @@
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
+/**
+ * Grid cell constants
+ */
+static gint grid_cell_side = 106;
+static gint total_cells = 2;
+static gint grid_cells_horizontal = 1;
+static gint grid_cells_vertical = 1;
+
 static
 gboolean motion_notify_event_cb (GtkWidget *widget,
                                  GdkEventMotion *event,
@@ -26,6 +34,22 @@ gboolean motion_notify_event_cb (GtkWidget *widget,
 	return FALSE;
 }
 
+/**
+ * Given the grid window relative (x, y) coordinates,
+ * finds the corresonding (left, top) values which can
+ * be used to index the widget found at (x, y) in the grid.
+ *
+ * Assumes that each widget are squares and have a constant
+ * 'length' in the sides which is pre-determined.
+ */
+static
+void get_grid_left_top(gint x, gint y,
+                       gint *left, gint *top)
+{
+	*left = x/grid_cell_side;
+	*top = y/grid_cell_side;
+}
+
 static
 void drag_begin_cb (GtkGestureDrag *drag,
                     gdouble offset_x,
@@ -38,16 +62,29 @@ void drag_begin_cb (GtkGestureDrag *drag,
 	g_print ("drag_begin_cb: Start point: Rounded to x: %d\ty: %d\n", drag_start_x, drag_start_y);
 }
 
+/**
+ * Replace the image in the grid cell corresponding to the destination
+ * with the image in the grid cell corresponding to the source.
+ *
+ * Ignore in case the grid cell is out of bounds.
+ */
 static
 void drag_end_cb (GtkGestureDrag *drag,
                   gdouble offset_x,
                   gdouble offset_y,
-                  gpointer user_data)
+                  GtkGrid *grid)
 {
+	GtkWidget *image_at_dest;
+	GtkWidget *image_at_start;
+	GdkPixbuf *image_buf_at_start;
 	gdouble d_drag_start_x = 0.0, d_drag_start_y = 0.0;
-
 	gint drag_end_offset_x = round (offset_x), drag_end_offset_y = round (offset_y),
+	     drag_end_x= 0, drag_end_y = 0,
 	     drag_start_x = 0, drag_start_y = 0;
+
+	/* Coordinates to manipulate images in the grid */
+	gint source_left = 0, source_top = 0,
+	     dest_left = 0, dest_top = 0;
 
 	g_print ("drag_end_cb: End point: Got        x: %lf\t y: %lf\n", offset_x, offset_y);
 	g_print ("drag_end_cb: End point: Rounded to x: %d\t y: %d\n", drag_end_offset_x, drag_end_offset_y);
@@ -59,8 +96,32 @@ void drag_end_cb (GtkGestureDrag *drag,
 		g_print ("drag_end_cb: Start point: Got        x: %lf\t y:%lf\n", d_drag_start_x, d_drag_start_y);
 		g_print ("drag_end_cb: Start point: Rounded to x: %d\ty: %d\n", drag_start_x, drag_start_y);
 
-		g_print ("drag_end_cb: End point: Actual x: %d, y: %d\n", drag_start_x + drag_end_offset_x,
-		                                                          drag_start_y + drag_end_offset_y);
+		drag_end_x = drag_start_x + drag_end_offset_x;
+		drag_end_y = drag_start_y + drag_end_offset_y;
+		g_print ("drag_end_cb: End point: Actual x: %d, y: %d\n", drag_end_x,
+		                                                          drag_end_y);
+
+		/* Swap the image in the squares */
+		get_grid_left_top (drag_start_x, drag_start_y, &source_left, &source_top);
+		get_grid_left_top (drag_end_x, drag_end_y, &dest_left, &dest_top);
+
+		/* Update only if (left, top) is within bounds */
+		if (source_left < total_cells &&
+		    source_top < total_cells &&
+		    dest_top < total_cells &&
+		    dest_left < total_cells)
+		{
+			image_at_start = gtk_grid_get_child_at (grid, source_left, source_top);
+			image_at_dest = gtk_grid_get_child_at (grid, dest_left, dest_top);
+
+			g_assert (image_at_dest != NULL && image_at_start != NULL);
+
+			image_buf_at_start = gtk_image_get_pixbuf(GTK_IMAGE (image_at_start));
+
+			g_assert (image_buf_at_start != NULL);
+
+			gtk_image_set_from_pixbuf (GTK_IMAGE (image_at_dest), image_buf_at_start);
+		}
 	}
 	else
 	{
@@ -88,6 +149,7 @@ void activate(GtkApplication *app,
 	window = gtk_application_window_new (app);
 	gtk_window_set_title (GTK_WINDOW (window), "Image window");
 	gtk_container_set_border_width (GTK_CONTAINER (window), 10);
+	gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
 
 	/* Create the grid to hold multiple images */
 	grid = gtk_grid_new();
@@ -110,8 +172,8 @@ void activate(GtkApplication *app,
 		wq_image = gtk_image_new_from_pixbuf (wq_image_buf);
 		bh_image = gtk_image_new_from_pixbuf (bh_image_buf);
 
-		gtk_grid_attach (GTK_GRID (grid), wq_image, 0, 0, 1, 1);
-		gtk_grid_attach (GTK_GRID (grid), bh_image, 1, 0, 1, 1);
+		gtk_grid_attach (GTK_GRID (grid), wq_image, 0, 0, grid_cells_horizontal, grid_cells_vertical);
+		gtk_grid_attach (GTK_GRID (grid), bh_image, 1, 0, grid_cells_horizontal, grid_cells_vertical);
 
 		// ensure gtk_grid_get_child_at() works as intended
 		g_assert (bh_image == gtk_grid_get_child_at (GTK_GRID (grid), 1, 0));
@@ -129,7 +191,7 @@ void activate(GtkApplication *app,
 		/* Attach a drag gesture to the event box */
 		grid_drag_gesture = gtk_gesture_drag_new (grid_event_box);
 		g_signal_connect (grid_drag_gesture, "drag-begin", G_CALLBACK (drag_begin_cb), NULL);
-		g_signal_connect (grid_drag_gesture, "drag-end", G_CALLBACK (drag_end_cb), NULL);
+		g_signal_connect (grid_drag_gesture, "drag-end", G_CALLBACK (drag_end_cb), GTK_GRID (grid));
 
 		gtk_widget_set_events (grid_event_box, gtk_widget_get_events (grid_event_box)
 	                                     | GDK_POINTER_MOTION_MASK);
@@ -144,6 +206,10 @@ void activate(GtkApplication *app,
 		g_print("Loading image failed with error : %s\n", bh_image_buf_load_error->message);
 		g_error_free (bh_image_buf_load_error);
 	}
+
+	// unref the pixbuf buffers
+	g_object_unref (wq_image_buf);
+	g_object_unref (bh_image_buf);
 
 	gtk_widget_show_all (window);
 }

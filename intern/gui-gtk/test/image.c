@@ -139,13 +139,13 @@ void activate(GtkApplication *app,
 	GtkWidget *grid;
 	GtkWidget *grid_event_box;
 	GtkGesture *grid_drag_gesture;
-	GtkWidget *wq_image;
-	GtkWidget *bh_image;
-	GdkPixbuf *wq_image_buf;
-	GdkPixbuf *bh_image_buf;
-	GError *wq_image_buf_load_error = NULL, *bh_image_buf_load_error = NULL;
-	static const char *white_queen_path = "images/white_queen(106x106).bmp",
-	                  *black_horse_path = "images/black_horse(106x106).bmp";
+	GdkPixbuf *white_square_buf;
+	GdkPixbuf *wking_buf;
+	GdkPixbuf *bking_buf;
+
+	static const char *white_square_path = "images/white_square_background.bmp",
+	                  *white_king_path = "images/white_king__transparent.bmp",
+	                  *black_king_path = "images/black_king__transparent.bmp";
 
 	/* Create the window */
 	window = gtk_application_window_new (app);
@@ -159,26 +159,29 @@ void activate(GtkApplication *app,
 	gtk_grid_set_column_homogeneous (GTK_GRID (grid), TRUE);
 
 	/* Create the GdkPixbuf object for the images that are to be loaded */
-	wq_image_buf = gdk_pixbuf_new_from_file (white_queen_path, &wq_image_buf_load_error);
-	bh_image_buf = gdk_pixbuf_new_from_file (black_horse_path, &bh_image_buf_load_error);
-
-	g_assert ((wq_image_buf == NULL && wq_image_buf_load_error != NULL) ||
-	          (wq_image_buf != NULL && wq_image_buf_load_error == NULL));
-
-	g_assert ((bh_image_buf == NULL && bh_image_buf_load_error != NULL) ||
-	          (bh_image_buf != NULL && bh_image_buf_load_error == NULL));
+	white_square_buf = gdk_pixbuf_new_from_file (white_square_path, NULL);
+	wking_buf = gdk_pixbuf_new_from_file (white_king_path, NULL);
+	bking_buf = gdk_pixbuf_new_from_file (black_king_path, NULL);
 
 	/* Attach images to the grid if successful */
-	if (wq_image_buf_load_error == NULL || bh_image_buf_load_error == NULL)
+	if (white_square_buf != NULL && wking_buf != NULL && bking_buf != NULL)
 	{
-		wq_image = gtk_image_new_from_pixbuf (wq_image_buf);
-		bh_image = gtk_image_new_from_pixbuf (bh_image_buf);
+		GtkWidget *white_square_image, *white_square_image_1;
+		GtkWidget *wking_image;
+		GtkWidget *bking_image;
 
-		gtk_grid_attach (GTK_GRID (grid), wq_image, 0, 0, grid_cells_horizontal, grid_cells_vertical);
-		gtk_grid_attach (GTK_GRID (grid), bh_image, 1, 0, grid_cells_horizontal, grid_cells_vertical);
+		white_square_image = gtk_image_new_from_pixbuf (white_square_buf);
+		white_square_image_1 = gtk_image_new_from_pixbuf (white_square_buf);
+		wking_image = gtk_image_new_from_pixbuf (wking_buf);
+		bking_image = gtk_image_new_from_pixbuf (bking_buf);
+
+		gtk_grid_attach (GTK_GRID (grid), wking_image, 0, 0, grid_cells_horizontal, grid_cells_vertical);
+		gtk_grid_attach (GTK_GRID (grid), white_square_image, 0, 0, grid_cells_horizontal, grid_cells_vertical);
+		gtk_grid_attach (GTK_GRID (grid), bking_image, 1, 0, grid_cells_horizontal, grid_cells_vertical);
+		gtk_grid_attach (GTK_GRID (grid), white_square_image_1, 1, 0, grid_cells_horizontal, grid_cells_vertical);
 
 		// ensure gtk_grid_get_child_at() works as intended
-		g_assert (bh_image == gtk_grid_get_child_at (GTK_GRID (grid), 1, 0));
+		g_assert (white_square_image_1 == gtk_grid_get_child_at (GTK_GRID (grid), 1, 0));
 
 		/* Attach an event box to the grid to receive events */
 		grid_event_box = gtk_event_box_new ();
@@ -198,20 +201,15 @@ void activate(GtkApplication *app,
 		gtk_widget_set_events (grid_event_box, gtk_widget_get_events (grid_event_box)
 	                                     | GDK_POINTER_MOTION_MASK);
 	}
-	else if (wq_image_buf_load_error != NULL)
-	{
-		g_print("Loading image failed with error : %s\n", wq_image_buf_load_error->message);
-		g_error_free (wq_image_buf_load_error);
-	}
 	else
 	{
-		g_print("Loading image failed with error : %s\n", bh_image_buf_load_error->message);
-		g_error_free (bh_image_buf_load_error);
+		g_print("Loading image failed with error!\n");
 	}
 
 	// unref the pixbuf buffers
-	g_object_unref (wq_image_buf);
-	g_object_unref (bh_image_buf);
+	g_object_unref (white_square_buf);
+	g_object_unref (wking_buf);
+	g_object_unref (bking_buf);
 
 	gtk_widget_show_all (window);
 }

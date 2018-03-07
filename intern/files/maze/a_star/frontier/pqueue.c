@@ -43,8 +43,9 @@ int check_swap_condition(struct min_heap *const mheap,
 	return (
 	        (*(mheap->elements + first_offset))->key < (*(mheap->elements + second_offset))->key ||
 	        (
+	         /* Use the heuristic value of the node (val) to break ties */
 	         (*(mheap->elements + first_offset))->key == (*(mheap->elements + second_offset))->key &&
-	         (*(mheap->elements + first_offset))->tie_breaker < (*(mheap->elements + second_offset))->tie_breaker
+	         (*(mheap->elements + first_offset))->val->heuristic < (*(mheap->elements + second_offset))->val->heuristic
 	        )
 	       );
 }
@@ -105,12 +106,12 @@ int min_heap_insert(struct min_heap *const mheap, struct heap_elem *const elem)
 		return ERRNULL;
 	}
 
-	static const size_t increment = 20;
+	static const unsigned increment = 20;
 
 	// allocate memory to store the element if the heap doesn't have enough
 	if (mheap->heap_size == mheap->capacity)
 	{
-		const size_t new_size = mheap->capacity + increment;
+		const unsigned new_size = mheap->capacity + increment;
 
 #ifdef KS_PRIORITY_QUEUE_DEBUG
 		printf("min_heap_insert: re-allocating memory to store heap elements. new_size: %zu\n", new_size);

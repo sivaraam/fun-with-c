@@ -13,6 +13,7 @@ enum search_status
 	VISITIED
 };
 
+#pragma pack(push, 4)
 /**
  * The data structure to store the adjacency list
  * of the graph nodes.
@@ -40,6 +41,7 @@ struct node
 	struct node *pi;         // predecessor of the node in a path
 	struct adj_list adjlist; // the adjacency list for this node
 };
+#pragma pack(pop)
 
 /**
  * Insert adj as an adjacent node of n.

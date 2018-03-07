@@ -33,6 +33,7 @@
 #define ERRMEMORY 2
 #define ERRHEAP 4
 
+#pragma pack(push, 4)
 /**
  * A heap element.
  *
@@ -45,9 +46,9 @@
 struct heap_elem
 {
 	unsigned key;
-	unsigned tie_breaker;
 	struct node *val;
 };
+#pragma pack(pop)
 
 /**
  * The data structure that represents a min heap.
@@ -76,8 +77,8 @@ struct heap_elem
  */
 struct min_heap
 {
-	size_t heap_size;
-	size_t capacity;
+	unsigned heap_size;
+	unsigned capacity;
 	struct heap_elem **elements;
 };
 

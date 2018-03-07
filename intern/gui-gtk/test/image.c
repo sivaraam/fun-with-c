@@ -74,23 +74,21 @@ void drag_end_cb (GtkGestureDrag *drag,
                   gdouble offset_y,
                   GtkGrid *grid)
 {
-	GtkWidget *image_at_dest;
-	GtkWidget *image_at_start;
-	GdkPixbuf *image_buf_at_start;
+	gint drag_end_offset_x = round (offset_x), drag_end_offset_y = round (offset_y);
 	gdouble d_drag_start_x = 0.0, d_drag_start_y = 0.0;
-	gint drag_end_offset_x = round (offset_x), drag_end_offset_y = round (offset_y),
-	     drag_end_x= 0, drag_end_y = 0,
-	     drag_start_x = 0, drag_start_y = 0;
-
-	/* Coordinates to manipulate images in the grid */
-	gint source_left = 0, source_top = 0,
-	     dest_left = 0, dest_top = 0;
 
 	g_print ("drag_end_cb: End point: Got        x: %lf\t y: %lf\n", offset_x, offset_y);
 	g_print ("drag_end_cb: End point: Rounded to x: %d\t y: %d\n", drag_end_offset_x, drag_end_offset_y);
 
 	if (gtk_gesture_drag_get_start_point (drag, &d_drag_start_x, &d_drag_start_y))
 	{
+		gint drag_end_x= 0, drag_end_y = 0,
+		     drag_start_x = 0, drag_start_y = 0;
+
+		/* Coordinates to manipulate images in the grid */
+		gint source_left = 0, source_top = 0,
+		     dest_left = 0, dest_top = 0;
+
 		drag_start_x = round (d_drag_start_x), drag_start_y = round (d_drag_start_y);
 
 		g_print ("drag_end_cb: Start point: Got        x: %lf\t y:%lf\n", d_drag_start_x, d_drag_start_y);
@@ -111,6 +109,10 @@ void drag_end_cb (GtkGestureDrag *drag,
 		    dest_top < total_cells &&
 		    dest_left < total_cells)
 		{
+			GtkWidget *image_at_dest;
+			GtkWidget *image_at_start;
+			GdkPixbuf *image_buf_at_start;
+
 			image_at_start = gtk_grid_get_child_at (grid, source_left, source_top);
 			image_at_dest = gtk_grid_get_child_at (grid, dest_left, dest_top);
 

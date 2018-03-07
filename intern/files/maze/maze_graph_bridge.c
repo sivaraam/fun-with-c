@@ -57,7 +57,7 @@ static int re_allocate_np_list(void)
 	return 0;
 }
 
-int insert_node(unsigned pixel, struct node *const n)
+int insert_node(struct node *const n)
 {
 	if (np_list_vals == np_list_curr_size)
 	{
@@ -67,7 +67,6 @@ int insert_node(unsigned pixel, struct node *const n)
 		}
 	}
 
-	(*(np_list+np_list_vals))->pixel = pixel;
 	(*(np_list+np_list_vals))->pixel_node = n;
 	np_list_vals++;
 	return 0;
@@ -85,7 +84,7 @@ struct node *get_node(unsigned pixel)
 	while (first_clear <= last_clear)
 	{
 		const unsigned mid_clear = (first_clear+last_clear)/2,
-				curr_pixel = (*(np_list+mid_clear))->pixel;
+				curr_pixel = (*(np_list+mid_clear))->pixel_node->pixel;
 
 #ifdef KS_MAZE_SOLVER_DEBUG_GET_NODE
 		printf("Searching at position %u for pixel %u. Position pixel: %u.\n", mid_clear, pixel, curr_pixel);

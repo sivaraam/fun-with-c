@@ -21,11 +21,13 @@
  *
  */
 
+#pragma pack(push, 4)
 struct sp_queue_elem
 {
 	unsigned elem;
 	struct sp_queue_elem *next;
 };
+#pragma pack(pop)
 
 struct sp_queue_head
 {

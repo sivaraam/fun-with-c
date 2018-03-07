@@ -218,7 +218,7 @@ int create_graph(struct maze_image *const maze, struct openings *gates)
 				n->pi = NULL;
 
 				// insert the node into the 'np_list'
-				if (insert_node(curr_pixel, n))
+				if (insert_node(n))
 				{
 
 #ifdef KS_MAZE_SOLVER_DEBUG_CREATE_GRAPH
@@ -453,7 +453,6 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 
 	first->val = start_node;
 	first->key = start_node->heuristic;
-	first->tie_breaker = start_node->heuristic;
 
 #ifdef KS_MAZE_SOLVER_DEBUG
 	if (min_heap_insert(frontier, first))
@@ -508,7 +507,6 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 
 					adj_elem->val = curr_adj;
 					adj_elem->key = curr_adj->src_dist + curr_adj->heuristic;
-					adj_elem->tie_breaker = curr_adj->heuristic;
 
 #ifdef KS_MAZE_SOLVER_DEBUG_FIND_SHORTEST_PATH
 					printf("find_shortest_path: heuristic (tie breaker): %u key: %u for pixel: %u\n",

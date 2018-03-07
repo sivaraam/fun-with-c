@@ -5,7 +5,6 @@
 
 struct node_list
 {
-	unsigned pixel;
 	struct node *pixel_node;
 };
 
@@ -21,11 +20,11 @@ extern unsigned np_list_vals;
 
 /**
  * Creates a new 'struct node_list' entry into 'np_list' for the given
- * node and pixel.
+ * node.
  *
  * Returns 0 on success and non-zero value on failure.
  */
-int insert_node(unsigned pixel, struct node *const n);
+int insert_node(struct node *const n);
 
 /**
  * Remove the coressponding 'struct node_list' entry from the 'np_list'

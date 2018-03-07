@@ -184,8 +184,11 @@ int create_graph(struct maze_image *const maze, struct openings *gates)
 	const unsigned goal_row = gates->end_gate_pixel/maze->width,
 	               goal_col = gates->end_gate_pixel%maze->width;
 
+
 #ifdef KS_MAZE_SOLVER_DEBUG
-	printf("solve_maze: sizeof(struct node): %zu\n", sizeof(struct node));
+	printf("create_graph: sizeof(struct node): %zu\n", sizeof(struct node));
+	printf("create_graph: sizeof(struct adj_list): %zu\n", sizeof(struct adj_list));
+	printf("create_graph: sizeof(struct node_list): %zu\n", sizeof(struct node_list));
 
 	unsigned clear_pixels=0;
 #endif
@@ -346,6 +349,8 @@ int construct_shortest_path(struct openings *const gates, struct sp_queue_head *
 
 	const unsigned dest_dist = path_node->src_dist;
 #ifdef KS_MAZE_SOLVER_DEBUG
+	printf("construct_shortest_path: sizeof(struct sp_queue_elem): %zu\n", sizeof(struct sp_queue_elem));
+
 	printf("construct_shortest_path: Destination is %u pixels away from the source.\n", dest_dist);
 #endif
 
@@ -424,6 +429,11 @@ unsigned find_shortest_path(struct openings *const gates, struct sp_queue_head *
 
 	// create the frotier queue head
 	struct min_heap *const frontier = malloc(sizeof(struct min_heap));
+
+#ifdef KS_MAZE_SOLVER_DEBUG
+	printf("find_shortest_path: sizeof(struct min_heap): %zu\n", sizeof(struct min_heap));
+	printf("find_shortest_path: sizeof(struct heap_elem): %zu\n", sizeof(struct heap_elem));
+#endif
 
 	if (frontier == NULL)
 	{

@@ -25,6 +25,7 @@ int solve_maze(struct maze_image *const maze)
 	maze->padding = find_padding(maze->width);
 
 #ifdef KS_MAZE_SOLVER_DEBUG
+	printf("solve_maze: sizeof(struct maze_image): %zu\n", sizeof(struct maze_image));
 	printf("solve_maze: padding: %u bytes\n", maze->padding);
 
 	// find the image data size

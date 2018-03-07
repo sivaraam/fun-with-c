@@ -51,11 +51,12 @@ void activate(GtkApplication *app,
 	/* Create the window */
 	window = gtk_application_window_new (app);
 	gtk_window_set_title (GTK_WINDOW (window), "Image window");
-	gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
 	gtk_container_set_border_width (GTK_CONTAINER (window), 10);
 
 	/* Create the grid to hold multiple images */
 	grid = gtk_grid_new();
+	gtk_grid_set_row_homogeneous (GTK_GRID (grid), TRUE);
+	gtk_grid_set_column_homogeneous (GTK_GRID (grid), TRUE);
 
 	/* Create the GdkPixbuf object for the images that are to be loaded */
 	image_buf = gdk_pixbuf_new_from_file (image_path, &image_buf_load_error);

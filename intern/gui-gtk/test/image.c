@@ -89,6 +89,7 @@ void activate(GtkApplication *app,
 		/* Attach the event box to the window */
 		gtk_container_add (GTK_CONTAINER (window), grid_event_box);
 
+		/* Listen to the motion events over the grid to analyse what we get */
 		g_signal_connect (grid_event_box, "motion-notify-event", G_CALLBACK (motion_notify_event_cb), window);
 
 		gtk_widget_set_events (grid_event_box, gtk_widget_get_events (grid_event_box)

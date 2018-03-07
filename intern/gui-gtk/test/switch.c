@@ -49,8 +49,8 @@ void activate(GtkApplication *app)
 	gtk_grid_attach (GTK_GRID (grid), label, 0, 0, 1, 1);
 	gtk_grid_attach (GTK_GRID (grid), switcher, 1, 0, 1, 1);
 
-	// see what happens if we remove GTK_SWITCH ()
-	g_signal_connect (GTK_SWITCH (switcher), "notify::active", G_CALLBACK (toggle_title), window);
+	// see what happens if we remove GTK_SWITCH () - NOTHING
+	g_signal_connect (switcher, "notify::active", G_CALLBACK (toggle_title), window);
 
 	/* Set the active state of the switch to true. This would result in the callback being called. */
 	gtk_switch_set_active (GTK_SWITCH (switcher), TRUE);

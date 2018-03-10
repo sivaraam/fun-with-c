@@ -177,15 +177,15 @@ MEMORY_FAILED:
 	return NULL;
 }
 
-enum move_type move_coin (struct chess *game,
-                          square_index_type src_row,
-                          square_index_type src_col,
-                          square_index_type dest_row,
-                          square_index_type dest_col)
+int move_coin (struct chess *game,
+               square_index_type src_row,
+               square_index_type src_col,
+               square_index_type dest_row,
+               square_index_type dest_col)
 {
 	if (game == NULL)
 	{
-		return ERRNULL;
+		return ERR_NULL;
 	}
 
 	struct chess_coin *const src_coin = *(*(game->board + src_row) + src_col);
@@ -193,7 +193,15 @@ enum move_type move_coin (struct chess *game,
 
 	if (src_coin == NULL)
 	{
-		return ERRNULL;
+		return ERR_NULL;
+	}
+
+	if (
+	    (game->is_whites_turn && src_coin->colour != WHITE_COIN) ||
+	    (!game->is_whites_turn && src_coin->colour != BLACK_COIN)
+	   )
+	{
+		return ERR_TURN;
 	}
 
 #ifdef KS_CHESS_DEBUG
@@ -293,6 +301,9 @@ enum move_type move_coin (struct chess *game,
 			}
 		}
 	}
+
+	// Toggle the turn state
+	game->is_whites_turn = !game->is_whites_turn;
 
 	return ret_val;
 

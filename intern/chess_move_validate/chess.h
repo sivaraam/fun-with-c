@@ -3,6 +3,9 @@
 
 #include "chess_coins.h"
 
+#define ERR_NULL -1
+#define ERR_TURN -128
+
 /**
  * The structure that represents a chess game.
  *
@@ -51,18 +54,18 @@ enum move_type
  *                         to which the coin must be moved
  *
  * Move a coin found in the source coordinates to the position idenitified by the
- * destination coordinates by validating validating whether it is a valid move for
- * the coin at source.
+ * destination coordinates by validating whether it is a valid move for the coin
+ * at source.
  *
  * Note: The source position should contain a valid coin. It is an error if it doesn't.
  *
  * Returns: A non-negative value indicating the type of move. Negative value in case
  *          of an error.
  */
-enum move_type move_coin (struct chess *game,
-                          square_index_type src_row,
-                          square_index_type src_col,
-                          square_index_type dest_row,
-                          square_index_type dest_col);
+int move_coin (struct chess *game,
+               square_index_type src_row,
+               square_index_type src_col,
+               square_index_type dest_row,
+               square_index_type dest_col);
 
 #endif

@@ -18,6 +18,12 @@ typedef char square_index_type;
 #define QUEEN 'q'
 #define KING 'k'
 
+/**
+ * Chess coin colour constants
+ */
+#define WHITE_COIN 1
+#define BLACK_COIN -1
+
 struct chess_position
 {
 	square_index_type row, col;

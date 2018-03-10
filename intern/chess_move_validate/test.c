@@ -109,7 +109,7 @@ int main (void)
 		                  normalized_src_col = normalize_col (src_col),
 		                  normalized_dest_row = normalize_row (dest_row),
 		                  normalized_dest_col = normalize_col (dest_col);
-		enum move_type ret;
+		int ret;
 
 		printf ("Normalized values: src_row: %d src_col: %d\n",
 			normalized_src_row,
@@ -123,9 +123,13 @@ int main (void)
 			continue;
 		}
 
-		if ((ret = move_coin (game, normalized_src_row, normalized_src_col, normalized_dest_row, normalized_dest_col)))
+		if ((ret = move_coin (game, normalized_src_row, normalized_src_col, normalized_dest_row, normalized_dest_col)) > 0 )
 		{
 			printf ("Move success with code: %d\n", ret);
+		}
+		else if (ret == ERR_TURN)
+		{
+			printf ("It's not your turn!\n");
 		}
 		else
 		{

@@ -99,10 +99,22 @@ void drag_end_cb (GtkGestureDrag *drag,
 		g_print ("drag_end_cb: End point: Actual x: %d, y: %d\n", drag_end_x,
 		                                                          drag_end_y);
 
-		/* Swap the image in the squares */
 		get_grid_left_top (drag_start_x, drag_start_y, &source_left, &source_top);
 		get_grid_left_top (drag_end_x, drag_end_y, &dest_left, &dest_top);
 
+		g_print ("drag_end_cb: source_left: %d, source_top: %d\n",
+		         source_left, source_top);
+		g_print ("drag_end_cb: dest_left: %d, dest_top: %d\n",
+		         dest_left, dest_top);
+
+		/* Do nothing the source and dest are the same */
+		if (source_left == dest_left &&
+		    source_top == dest_top)
+		{
+			return;
+		}
+
+		/* Swap the image in the squares */
 		/* Update only if (left, top) is within bounds */
 		if (source_left < total_cells &&
 		    source_top < total_cells &&

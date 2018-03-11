@@ -1,0 +1,11 @@
+Sudoku solver:
+
+An application that tries to solve a sudoku puzzles of varying
+difficulty levels. It takes a "valid" sudoku board as input and
+produces a solution/parital solution for the board as output.
+
+A few test inputs for the application could be found in the
+'test_inputs/' directory. The application binary could be generated
+using 'make'. A simple way to test the application is to do,
+
+	cat test_inputs/medium/3 | ./sudoku_solver.out

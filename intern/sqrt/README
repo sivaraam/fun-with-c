@@ -1,0 +1,4 @@
+sqrt
+
+A simple application that finds the square root for the given
+number limited upto particular precision (currently 1/1024).

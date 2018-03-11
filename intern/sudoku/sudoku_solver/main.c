@@ -11,7 +11,7 @@ void print_welcome_message(void)
 	printf("A VALID sudoku table satisfies the following criteria\n");
 	printf("\t- It is a 9*9 table\n");
 	printf("\t- A cell that is yet to be filled is represented by 0\n");
-	printf("\t- A cell only has valid entries [0, 9]\n");
+	printf("\t- A cell only has valid entries 0-9, where 0 represents an empty cell\n");
 }
 
 void get_table(unsigned int table[TABLE_ORDER_MAX][TABLE_ORDER_MAX])

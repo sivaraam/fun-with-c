@@ -1,0 +1,16 @@
+maze solver
+
+A simple application that finds the shortest path from the source
+to destination in a maze which is given in the form of a BMP file.
+
+The application can be built using 'make'. Some test inputs for the
+application could be found in the 'test_inputs.bak/' folder. A simple
+way to test the application for different inputs is to use the 'run_all'
+script as follows:
+
+	./run_all
+
+Alternatively the application could be manually run as follows,
+
+	./replace_tests
+	./maze_solver.out test_inputs/BMP5.bmp

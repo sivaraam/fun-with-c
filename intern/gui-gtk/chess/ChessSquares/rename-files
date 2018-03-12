@@ -1,0 +1,8 @@
+#! /usr/bin/env python3
+import os
+
+new_old_names = open('new-old-names')
+
+for line in new_old_names:
+    names = line.rstrip('\n').split(' ')
+    os.rename (names[1], names[0])

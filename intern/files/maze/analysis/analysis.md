@@ -47,7 +47,7 @@ This document captures an analysis of different aspects of using different algor
 | 7     |           0.537            |             0.473                        |          -13.53                      |
 | 8     |           2.376            |             2.406                        |            1.25                      |
 | 9     |           6.848            |             9.332                        |           26.62                      |
-| 10    |       64m23.195            |              NA                          |             NA                       |
+| 10    |       64m23.195            |        63m48.963s                        |           -0.89                      |
 
 ## Node expansion
 
@@ -62,4 +62,4 @@ This document captures an analysis of different aspects of using different algor
 | 7     |         918257 (45.19)            |                      837282 (41.86)                  |                   8.82                          |
 | 8     |        6201755 (77.52)            |                     6023391 (75.29)                  |                   2.88                          |
 | 9     |       18642106 (100.00)           |                    18636058 (75.29)                  |                   0.03                          |
-| 10    |       38464642 (76.93)            |                              NA                      |                     NA                          |
+| 10    |       38464642 (76.93)            |                    38006213 (76.01)                  |                   1.19                          |

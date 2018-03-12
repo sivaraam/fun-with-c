@@ -19,8 +19,8 @@ for i in range(0, total_observations):
 print()
 
 total_nodes = [43, 100, 801, 20692, 82724, 2006882, 2000001, 8000001, 18642114]
-observed_expansion = [23, 72, 770, 10069, 39707, 1248103, 837282, 6023391, 18636058]
 bfs_expanded = [36, 88, 780, 13866, 70167, 1949485, 918257, 6201755, 18642106]
+observed_expansion = [23, 72, 770, 10069, 39707, 1248103, 837282, 6023391, 18636058]
 
 def percent_nodes_expanded(image_num, observed_expansion):
 	return (observed_expansion/total_nodes[image_num])*100

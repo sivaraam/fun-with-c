@@ -14,7 +14,7 @@ int insert_adjacency(struct node *const n, struct node *const adj)
 	static const unsigned increment = 2;
 
 	// re-allocate when necessary
-	if (n->adjlist.num % 2 == 0)
+	if (n->adjlist.num % increment == 0)
 	{
 		struct node **temp = realloc(n->adjlist.adjs, (n->adjlist.num+increment)*sizeof(struct node *));
 		if (temp == NULL)

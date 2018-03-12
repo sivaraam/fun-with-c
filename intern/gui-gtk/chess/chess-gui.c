@@ -20,8 +20,21 @@ static const gint grid_cells_vertical = 1;
 // Data related to game
 struct chess *game = NULL;
 
-static
-enum square_type_indices get_square_type_index (char square_type)
+/**
+ * get_square_type_index
+ *
+ * @square_type: A character that indicates the type of square.
+ *
+ * Returns the index to be used for the 'square_type' dimension of
+ * 'square_image_paths'.
+ *
+ * All characters other than those representing valid chess coins
+ * are considered to be empty square.
+ *
+ * Returns: A valid 'enum square_type_indices' value.
+ */
+inline static
+enum square_type_indices get_square_type_index (const char square_type)
 {
 	switch (square_type)
 	{
@@ -48,8 +61,18 @@ enum square_type_indices get_square_type_index (char square_type)
 	}
 }
 
-static
-enum coin_colour_indices get_coin_colour_index (int coin_colour)
+/**
+ * get_coin_colour_index:
+ *
+ * @coin_colour: Value representing the colour of a valid chess coin.
+ *
+ * Returns the index to be used for the 'coin colour' dimension of
+ * 'square_image_paths'.
+ *
+ * Returns: A valid 'enum coin_colour_indices' value.
+ */
+inline static
+enum coin_colour_indices get_coin_colour_index (const int coin_colour)
 {
 	switch (coin_colour)
 	{
@@ -60,72 +83,97 @@ enum coin_colour_indices get_coin_colour_index (int coin_colour)
 		return WHITE;
 
 	default:
-		g_assert(FALSE); // BUG: this shouldn't happen
+		g_assert(FALSE); /* BUG: this shouldn't happen */
 	}
 
-	// for sanity
+	/* for sanity */
 	return 0;
 }
 
+/**
+ * get_square_colour_index:
+ *
+ * (@row, @col): The coordinates of the square whose background colour must
+ *               be identified.
+ *
+ * Returns the index to be used for the 'square colour' dimension of
+ * 'square_image_paths'.
+ *
+ * Returns: A valid 'enum square_colour_indices' value.
+ *
+ */
 inline static
-_Bool is_dark_square (square_index_type row, square_index_type col)
+enum square_colour_indices get_square_colour_index (const square_index_type row, const square_index_type col)
 {
 /*	if (col & 1)
 	{
 		if (row & 1)
 		{
-			return 1;
+			return DARK;
 		}
 		else
 		{
-			return 0;
+			return LIGHT;
 		}
 	}
 	else
 	{
 		if (row & 1)
 		{
-			return 0;
+			return DARK;
 		}
 		else
 		{
-			return 1;
+			return LIGHT;
 		}
 	}*/
-	return !((row + col) & 1);
+
+	return !((row + col) & 1) ? DARK : LIGHT;
 }
 
 /**
- * Given the grid window relative (x, y) coordinates,
- * finds the corresonding (left, top) values which can
- * be used to index the widget found at (x, y) in the grid.
+ * get_grid_left_top:
+ *
+ * (@x, @y): The grid window relative coordinates.
+ * (@left, @top): The values used to identify the child corresponding
+ *                to the given coordinates.
+ *
+ * Tranlsate the grid window relative (x, y) coordinates,
+ * into (left, top) values values which can be used to
+ * index the widget found under (x, y) in the grid.
  *
  * Assumes that each widget are squares and have a constant
  * 'length' in the sides which is pre-determined.
  */
 static
-void get_grid_left_top(gint x, gint y,
-                       gint *left, gint *top)
+void get_grid_left_top(const gint x, const gint y,
+                       gint *const left, gint *const top)
 {
 	*left = x/grid_cell_side;
 	*top = y/grid_cell_side;
 }
 
+/**
+ * get_pixbuf_for_pos:
+ *
+ * (@row, @col): The coordinates that identify the position of the square in
+ *               the game board.
+ * @square_type: A character that identifies the type of coin in the square
+ *               or an empty square.
+ * @coin_colour: A value that specifies the colour of the coin in the square.
+ *               The value can be either 'BLACK' or 'WHITE' for an empty cells.
+ *
+ * Returns a valid pixbuf for the corresponding image of the square (with/without
+ * a coin) for the given position. The image is scaled to the required 'width'
+ * and 'height'.
+ *
+ * Returns: A pointer to a valid Pixbuf on success or NULL in case of an error.
+ *
+ * Note: The reference handling for the returned Pixbuf lies in the hands of the caller.
+ */
 static
-void drag_begin_cb (GtkGestureDrag *drag,
-                    gdouble offset_x,
-                    gdouble offset_y,
-                    gpointer user_data)
-{
-	gint drag_start_x = round (offset_x), drag_start_y = round (offset_y);
-
-	g_print ("drag_begin_cb: Start point: Got        x: %lf\t y:%lf\n", offset_x, offset_y);
-	g_print ("drag_begin_cb: Start point: Rounded to x: %d\ty: %d\n", drag_start_x, drag_start_y);
-}
-
-static
-GdkPixbuf *get_pixbuf_for_pos (square_index_type row,
-                               square_index_type col,
+GdkPixbuf *get_pixbuf_for_pos (const square_index_type row,
+                               const square_index_type col,
                                const char square_type,
                                const int coin_colour)
 {
@@ -133,14 +181,15 @@ GdkPixbuf *get_pixbuf_for_pos (square_index_type row,
 
 	const enum square_type_indices st_index = get_square_type_index (square_type);
 	const enum coin_colour_indices cc_index = get_coin_colour_index (coin_colour);
-	const enum square_colour_indices sc_index = (is_dark_square (row, col)) ? DARK : LIGHT;
+	const enum square_colour_indices sc_index = get_square_colour_index (row, col);
+
+	/* Get the path to the image with given characteristics */
 	const char *curr_coin_path = square_image_paths [st_index][cc_index][sc_index];
 
 	GdkPixbuf *coin_image_buf;
 	GdkPixbuf *scaled_coin_image_buf;
 	GError *coin_image_buf_load_error = NULL;
 
-	/* Create the GdkPixbuf object for the images that are to be loaded */
 	coin_image_buf = gdk_pixbuf_new_from_file (curr_coin_path, &coin_image_buf_load_error);
 
 	g_assert ((coin_image_buf == NULL && coin_image_buf_load_error != NULL) ||
@@ -148,12 +197,17 @@ GdkPixbuf *get_pixbuf_for_pos (square_index_type row,
 
 	if (coin_image_buf_load_error == NULL)
 	{
+		/* Scale the image to the required dimensions */
 		scaled_coin_image_buf = gdk_pixbuf_scale_simple (coin_image_buf,
 		                                                 required_width, required_height,
 		                                                 GDK_INTERP_BILINEAR);
 
 		g_assert (scaled_coin_image_buf != NULL);
 
+		/*
+		 * Unref the image buf as its not required anymore.
+		 * The scaled image is a copy and doesn't depend on this.
+		 */
 		g_object_unref (coin_image_buf);
 
 		return scaled_coin_image_buf;
@@ -167,36 +221,48 @@ GdkPixbuf *get_pixbuf_for_pos (square_index_type row,
 }
 
 /**
+ * update_coin_at_pos:
+ *
+ * @grid: The grid representing the chess board.
+ *
  * Replace the image in the grid cell corresponding to the destination
  * with the image in the grid cell corresponding to the source.
  *
  * Fill in the grid at the destination with the image of an empty cell.
  */
 static
-void update_coin_at_pos (GtkGrid *grid,
-                         gint source_left, gint source_top,
-                         gint dest_left, gint dest_top)
+void update_coin_at_pos (GtkGrid *const grid,
+                         const gint source_left, const gint source_top,
+                         const gint dest_left, const gint dest_top)
 {
 	GtkWidget *image_at_dest;
-	GtkWidget *image_at_start;
+	GtkWidget *image_at_source;
 	GdkPixbuf *new_source_image_buf;
 	GdkPixbuf *new_dest_image_buf;
 
-	// the previous source is now the new dest coin
-	const struct chess_coin *const new_dest_coin = *(*(game->board + dest_top) + dest_left);
+	/*
+	 * The coordinates to be used to access the coins in the board.
+	 * The (x,y) coordinates always correspond to (top, left).
+	 */
+	const square_index_type source_x = source_top, source_y = source_left,
+	                        dest_x = dest_top, dest_y = dest_left;
+
+	/* The source coin before moving is now the new destination coin */
+	const struct chess_coin *const new_dest_coin = *(*(game->board + dest_x) + dest_y);
 
 	g_assert (new_dest_coin != NULL);
 
-	image_at_start = gtk_grid_get_child_at (grid, source_left, source_top);
+	image_at_source = gtk_grid_get_child_at (grid, source_left, source_top);
 	image_at_dest = gtk_grid_get_child_at (grid, dest_left, dest_top);
 
-	g_assert (image_at_dest != NULL && image_at_start != NULL);
+	g_assert (image_at_dest != NULL && image_at_source != NULL);
 
-	new_dest_image_buf = get_pixbuf_for_pos (dest_top, dest_left, new_dest_coin->type, new_dest_coin->colour);
+	new_dest_image_buf = get_pixbuf_for_pos (dest_x, dest_y, new_dest_coin->type, new_dest_coin->colour);
 
-	// Empty square replacement for the destination.
-	// The colour doesn't matter for empty square.
-	new_source_image_buf = get_pixbuf_for_pos (source_top, source_left, 0, BLACK_COIN);
+	/*
+	 * Empty square replacement for the source.
+	 */
+	new_source_image_buf = get_pixbuf_for_pos (source_x, source_y, 0, BLACK_COIN);
 
 	g_assert (new_source_image_buf != NULL && new_dest_image_buf);
 
@@ -209,17 +275,49 @@ void update_coin_at_pos (GtkGrid *grid,
 	}
 
 	gtk_image_set_from_pixbuf (GTK_IMAGE (image_at_dest), new_dest_image_buf);
-	gtk_image_set_from_pixbuf (GTK_IMAGE (image_at_start), new_source_image_buf);
+	gtk_image_set_from_pixbuf (GTK_IMAGE (image_at_source), new_source_image_buf);
 
 	g_object_unref (new_source_image_buf);
 	g_object_unref (new_dest_image_buf);
 }
 
+/**
+ * drag_begin_cb:
+ *
+ * @drag: The object containing the information related to the current drag.
+ * (@offset_x, @offset_y): The coordinates of the position at which the drag begun
+ *                         relative to the event window.
+ * @user_data: Any data passed to the callback. (Not used currently)
+ *
+ * The callback function that is called when a drag gesture begins.
+ */
 static
-void drag_end_cb (GtkGestureDrag *drag,
-                  gdouble offset_x,
-                  gdouble offset_y,
-                  GtkGrid *grid)
+void drag_begin_cb (const GtkGestureDrag *const drag,
+                    const gdouble offset_x,
+                    const gdouble offset_y,
+                    const gpointer user_data)
+{
+	gint drag_start_x = round (offset_x), drag_start_y = round (offset_y);
+
+	g_print ("drag_begin_cb: Start point: Got        x: %lf\t y:%lf\n", offset_x, offset_y);
+	g_print ("drag_begin_cb: Start point: Rounded to x: %d\ty: %d\n", drag_start_x, drag_start_y);
+}
+
+/**
+ * drag_end_cb:
+ *
+ * @drag: The object containing the information related to the current drag.
+ * (@offset_x, @offset_y): The coordinates of the position at which the drag ended
+ *                         relative to the event window.
+ * @grid: The grid representing the chess board.
+ *
+ * The callback function that is called when a drag gesture ends.
+ */
+static
+void drag_end_cb (GtkGestureDrag *const drag,
+                  const gdouble offset_x,
+                  const gdouble offset_y,
+                  GtkGrid *const grid)
 {
 	gint drag_end_offset_x = round (offset_x), drag_end_offset_y = round (offset_y);
 	gdouble d_drag_start_x = 0.0, d_drag_start_y = 0.0;
@@ -236,6 +334,10 @@ void drag_end_cb (GtkGestureDrag *drag,
 		gint source_left = 0, source_top = 0,
 		     dest_left = 0, dest_top = 0;
 
+		/* Coordinates to identify squares in the game board */
+		gint source_x = 0, source_y = 0,
+		     dest_x = 0, dest_y = 0;
+
 		drag_start_x = round (d_drag_start_x), drag_start_y = round (d_drag_start_y);
 
 		g_print ("drag_end_cb: Start point: Got        x: %lf\t y:%lf\n", d_drag_start_x, d_drag_start_y);
@@ -249,26 +351,39 @@ void drag_end_cb (GtkGestureDrag *drag,
 		get_grid_left_top (drag_start_x, drag_start_y, &source_left, &source_top);
 		get_grid_left_top (drag_end_x, drag_end_y, &dest_left, &dest_top);
 
+		/* The (x,y) coordinates of the game board always correspond to (top, left) */
+		source_x = source_top, source_y = source_left;
+		dest_x = dest_top, dest_y = dest_left;
+
 		g_print ("drag_end_cb: source_left: %d, source_top: %d\n",
 		         source_left, source_top);
 		g_print ("drag_end_cb: dest_left: %d, dest_top: %d\n",
 		         dest_left, dest_top);
 
-		/* Do nothing the source and dest are the same */
-		if (source_left == dest_left &&
-		    source_top == dest_top)
-		{
-			return;
-		}
-
-		if (source_left < game->board_limits.col &&
-		    source_top < game->board_limits.row &&
-		    dest_top < game->board_limits.row &&
-		    dest_left < game->board_limits.col &&
-		    *(*(game->board + source_top) + source_left) != NULL
+		/*
+		 * Take action only if the coordinates are whithin the board limits
+		 * and the source coordinate correpsonds to a valid coin (not empty).
+		 */
+		if (source_x < game->board_limits.row &&
+		    source_y < game->board_limits.col &&
+		    dest_x < game->board_limits.row &&
+		    dest_y < game->board_limits.col
 		   )
 		{
-			int move_status = move_coin (game, source_top, source_left, dest_top, dest_left);
+			/*
+			 * Do nothing the source and dest are the same (or)
+			 * when there is no coin at the source.
+			 */
+			if (
+			    (source_left == dest_left &&
+			     source_top == dest_top) ||
+			     *(*(game->board + source_x) + source_y) == NULL
+			   )
+			{
+				return;
+			}
+
+			const int move_status = move_coin (game, source_top, source_left, dest_top, dest_left);
 
 			g_assert (move_status != ERR_NULL);
 
@@ -293,6 +408,7 @@ void drag_end_cb (GtkGestureDrag *drag,
 				break;
 			}
 
+			/* Update the display state */
 			update_coin_at_pos (grid, source_left, source_top, dest_left, dest_top);
 		}
 	}
@@ -302,15 +418,33 @@ void drag_end_cb (GtkGestureDrag *drag,
 	}
 }
 
+/**
+ * initialise_coin_at_pos:
+ *
+ * @grid: The grid representing the chess board.
+ * (@row, @col): The coordinates corresponding to the square of the game board
+ *               to initialise.
+ * @square_type: A character that identifies the type of coin in the square
+ *               or an empty square.
+ * @coin_colour: A value that specifies the colour of the coin in the square.
+ *
+ * The function that initialises the image for the cell in the graphical board corresponding
+ * to the given game board cell.
+ *
+ * Returns: 0 in case of success or a non-negative value in case of an error.
+ */
 static
-int initialise_coin_at_pos (GtkGrid *grid,
-                        square_index_type row,
-                        square_index_type col,
+int initialise_coin_at_pos (GtkGrid *const grid,
+                        const square_index_type row,
+                        const square_index_type col,
                         const char square_type,
                         const int coin_colour)
 {
 	GtkWidget *coin_image;
 	GdkPixbuf *coin_image_buf;
+
+	/* The (top, left) coordinates of the game board always correspond to (row, col) */
+	const gint coin_grid_left = col, coin_grid_top = row;
 
 	coin_image_buf = get_pixbuf_for_pos (row, col, square_type, coin_colour);
 
@@ -319,7 +453,8 @@ int initialise_coin_at_pos (GtkGrid *grid,
 	{
 		coin_image = gtk_image_new_from_pixbuf (coin_image_buf);
 
-		gtk_grid_attach (GTK_GRID (grid), coin_image, col, row, grid_cells_horizontal, grid_cells_vertical);
+		gtk_grid_attach (GTK_GRID (grid), coin_image, coin_grid_left, coin_grid_top,
+		                 grid_cells_horizontal, grid_cells_vertical);
 	}
 	else
 	{
@@ -327,11 +462,21 @@ int initialise_coin_at_pos (GtkGrid *grid,
 		return 1;
 	}
 
-	// unref the pixbuf buffer
+	/* Unref the pixbuf buffer */
 	g_object_unref (coin_image_buf);
 	return 0;
 }
 
+/**
+ * initialise_board_grid:
+ *
+ * @grid: The grid representing the chess board that needs to be initialised.
+ *
+ * Initialises the visual board grid with images corresponding to the coins
+ * in the game board.
+ *
+ * Returns: 0 in case of success or non-zero value in case of an error.
+ */
 static
 int initialise_board_grid (GtkGrid *board_grid)
 {
@@ -343,7 +488,7 @@ int initialise_board_grid (GtkGrid *board_grid)
 		{
 			const struct chess_coin *const curr_coin = *(*(game->board + row) + col);
 			const char square_type = (curr_coin != NULL) ? curr_coin->type : 0;
-			const int coin_colour = (curr_coin != NULL) ? curr_coin->colour : BLACK_COIN; // the colour doesn't matter for an empty square
+			const int coin_colour = (curr_coin != NULL) ? curr_coin->colour : BLACK_COIN;
 
 			if (initialise_coin_at_pos (board_grid, row, col, square_type, coin_colour))
 			{
@@ -356,6 +501,15 @@ int initialise_board_grid (GtkGrid *board_grid)
 	return 0;
 }
 
+/**
+ * activate:
+ *
+ * @app: Pointer to the main app instance.
+ * @user_Data: Data passed to the activation function (Currently unused)
+ *
+ * Function that sets up the application by initialising the required data
+ * and setting the user interface by registering for the required events etc.
+ */
 static
 void activate(GtkApplication *app,
               gpointer user_data)
@@ -365,7 +519,7 @@ void activate(GtkApplication *app,
 	GtkWidget *grid_event_box;
 	GtkGesture *grid_drag_gesture;
 
-	// Get a new game instance
+	/* Get a new game instance */
 	game = get_new_game();
 
 	/* Create the window */

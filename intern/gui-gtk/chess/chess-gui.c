@@ -381,15 +381,15 @@ void drag_end_cb (GtkGestureDrag *const drag,
 			 * when there is no coin at the source.
 			 */
 			if (
-			    (source_left == dest_left &&
-			     source_top == dest_top) ||
+			    (source_x == dest_x &&
+			     source_y == dest_y) ||
 			     *(*(game->board + source_x) + source_y) == NULL
 			   )
 			{
 				return;
 			}
 
-			const int move_status = move_coin (game, source_top, source_left, dest_top, dest_left);
+			const int move_status = move_coin (game, source_x, source_y, dest_x, dest_y);
 
 			g_assert (move_status != ERR_NULL);
 

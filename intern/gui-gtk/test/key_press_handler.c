@@ -51,6 +51,10 @@ void activate(GtkApplication *app,
 {
 	GtkWidget *window;
 	GtkWidget *label;
+	static const char *label_css_path = "label-styles.css";
+	GFile *label_css_file;
+	GtkCssProvider *label_css;
+	GError *label_style_load_error = NULL;
 
 	/* Create the window that can't be resized */
 	window = gtk_application_window_new (app);
@@ -63,7 +67,22 @@ void activate(GtkApplication *app,
 
 	/* Create the label */
 	label = gtk_label_new ("Label text");
-	gtk_label_set_selectable (GTK_LABEL (label), TRUE);
+//	gtk_label_set_selectable (GTK_LABEL (label), TRUE);
+
+	/* Initialise the styles for the label */
+	label_css_file = g_file_new_for_path (label_css_path);
+	label_css = gtk_css_provider_new ();
+	gtk_css_provider_load_from_file (label_css, label_css_file, &label_style_load_error);
+
+	if (label_style_load_error == NULL)
+	{
+		gtk_style_context_add_provider (gtk_widget_get_style_context (label),
+	                                        GTK_STYLE_PROVIDER (label_css), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	}
+	else
+	{
+		g_print ("Loading styles failed with error: %s\n", label_style_load_error->message);
+	}
 
 	/* Register the listener */
 	g_signal_connect (window, "key-press-event", G_CALLBACK (swap_wtitle_and_ltext), (label));

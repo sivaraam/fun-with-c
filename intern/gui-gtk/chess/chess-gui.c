@@ -187,30 +187,19 @@ GdkPixbuf *get_pixbuf_for_pos (const square_index_type row,
 	const char *curr_coin_path = square_image_paths [st_index][cc_index][sc_index];
 
 	GdkPixbuf *coin_image_buf;
-	GdkPixbuf *scaled_coin_image_buf;
 	GError *coin_image_buf_load_error = NULL;
 
-	coin_image_buf = gdk_pixbuf_new_from_file (curr_coin_path, &coin_image_buf_load_error);
+	/* Get a Pixbuf to a scaled version of the image */
+	coin_image_buf = gdk_pixbuf_new_from_file_at_scale (curr_coin_path,
+		                                            required_width, required_height, TRUE,
+	                                                    &coin_image_buf_load_error);
 
 	g_assert ((coin_image_buf == NULL && coin_image_buf_load_error != NULL) ||
 	          (coin_image_buf != NULL && coin_image_buf_load_error == NULL));
 
 	if (coin_image_buf_load_error == NULL)
 	{
-		/* Scale the image to the required dimensions */
-		scaled_coin_image_buf = gdk_pixbuf_scale_simple (coin_image_buf,
-		                                                 required_width, required_height,
-		                                                 GDK_INTERP_BILINEAR);
-
-		g_assert (scaled_coin_image_buf != NULL);
-
-		/*
-		 * Unref the image buf as its not required anymore.
-		 * The scaled image is a copy and doesn't depend on this.
-		 */
-		g_object_unref (coin_image_buf);
-
-		return scaled_coin_image_buf;
+		return coin_image_buf;
 	}
 	else
 	{

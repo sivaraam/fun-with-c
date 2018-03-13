@@ -302,12 +302,28 @@ static
 void drag_begin_cb (const GtkGestureDrag *const drag,
                     const gdouble offset_x,
                     const gdouble offset_y,
-                    const gpointer user_data)
+                    GtkGrid *const grid)
 {
-	gint drag_start_x = round (offset_x), drag_start_y = round (offset_y);
+	gint drag_start_x = round (offset_x), drag_start_y = round (offset_y),
+	     start_widget_left = 0, start_widget_top = 0,
+	     start_x = 0, start_y = 0;
+	GtkWidget *widget_at_start;
 
 	g_print ("drag_begin_cb: Start point: Got        x: %lf\t y:%lf\n", offset_x, offset_y);
 	g_print ("drag_begin_cb: Start point: Rounded to x: %d\ty: %d\n", drag_start_x, drag_start_y);
+
+	get_grid_left_top (drag_start_x, drag_start_y, &start_widget_left, &start_widget_top);
+	start_x = start_widget_top, start_y = start_widget_left;
+
+	/* Highlight the grid at the source if it's a valid square */
+	if (square_within_board (start_x, start_y))
+	{
+		widget_at_start =  gtk_grid_get_child_at (grid, start_widget_left, start_widget_top);
+
+		g_assert (widget_at_start != NULL);
+
+		gtk_drag_highlight (widget_at_start);
+	}
 }
 
 /**
@@ -372,50 +388,55 @@ void drag_end_cb (GtkGestureDrag *const drag,
 		 * and the source coordinate correpsonds to a valid coin (not empty).
 		 */
 		if (
-		    square_within_board (source_x, source_y) &&
-		    square_within_board (dest_x, dest_y)
+		    square_within_board (source_x, source_y)
 		   )
 		{
-			/*
-			 * Do nothing the source and dest are the same (or)
-			 * when there is no coin at the source.
-			 */
-			if (
-			    (source_x == dest_x &&
-			     source_y == dest_y) ||
-			     *(*(game->board + source_x) + source_y) == NULL
-			   )
+			/* Remove highlight for the widget at source */
+			gtk_drag_unhighlight (gtk_grid_get_child_at (grid, source_left, source_top));
+
+			if (square_within_board (dest_x, dest_y))
 			{
-				return;
+				/*
+				 * Do nothing the source and dest are the same (or)
+				 * when there is no coin at the source.
+				 */
+				if (
+				    (source_x == dest_x &&
+				     source_y == dest_y) ||
+				     *(*(game->board + source_x) + source_y) == NULL
+				   )
+				{
+					return;
+				}
+
+				const int move_status = move_coin (game, source_x, source_y, dest_x, dest_y);
+
+				g_assert (move_status != ERR_NULL);
+
+				if (move_status == ERR_TURN)
+				{
+					g_print ("It's not your turn!\n");
+					return;
+				}
+
+				switch (move_status)
+				{
+				case MOVE_ILLEGAL:
+					g_print ("Illegal move!\n");
+					return;
+
+				case MOVE_OCCUPY:
+					g_print ("Coin at source \"occupied\" the destination position\n");
+					break;
+
+				case MOVE_TAKEDOWN:
+					g_print ("Coin at source \"took down\" the coin at the destination\n");
+					break;
+				}
+
+				/* Update the display state */
+				update_coin_at_pos (grid, source_left, source_top, dest_left, dest_top);
 			}
-
-			const int move_status = move_coin (game, source_x, source_y, dest_x, dest_y);
-
-			g_assert (move_status != ERR_NULL);
-
-			if (move_status == ERR_TURN)
-			{
-				g_print ("It's not your turn!\n");
-				return;
-			}
-
-			switch (move_status)
-			{
-			case MOVE_ILLEGAL:
-				g_print ("Illegal move!\n");
-				return;
-
-			case MOVE_OCCUPY:
-				g_print ("Coin at source \"occupied\" the destination position\n");
-				break;
-
-			case MOVE_TAKEDOWN:
-				g_print ("Coin at source \"took down\" the coin at the destination\n");
-				break;
-			}
-
-			/* Update the display state */
-			update_coin_at_pos (grid, source_left, source_top, dest_left, dest_top);
 		}
 	}
 	else
@@ -553,7 +574,7 @@ void activate(GtkApplication *app,
 
 	/* Attach a drag gesture to the event box */
 	grid_drag_gesture = gtk_gesture_drag_new (grid_event_box);
-	g_signal_connect (grid_drag_gesture, "drag-begin", G_CALLBACK (drag_begin_cb), NULL);
+	g_signal_connect (grid_drag_gesture, "drag-begin", G_CALLBACK (drag_begin_cb), GTK_GRID (board_grid));
 	g_signal_connect (grid_drag_gesture, "drag-end", G_CALLBACK (drag_end_cb), GTK_GRID (board_grid));
 
 	gtk_widget_set_events (grid_event_box, gtk_widget_get_events (grid_event_box)

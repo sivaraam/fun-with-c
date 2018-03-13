@@ -30,3 +30,6 @@ gui-scribble-area.out: scribble_area.c
 
 gui-image.out: image.c
 	${GCC} ${GTK3_COMPILER_FLAGS} ${COMPILER_FLAGS} -o $@ $^ ${GTK3_LIBRARIES} ${LINKER_FLAGS}
+
+gui-css-style-image.out: image-css-style.c
+	${GCC} ${GTK3_COMPILER_FLAGS} ${COMPILER_FLAGS} -o $@ $^ ${GTK3_LIBRARIES} ${LINKER_FLAGS}

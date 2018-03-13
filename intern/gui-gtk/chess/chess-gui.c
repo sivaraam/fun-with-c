@@ -154,6 +154,24 @@ void get_grid_left_top(const gint x, const gint y,
 }
 
 /**
+ * square_within_board:
+ *
+ * (@x, @y): The coordinate of the board square
+ *
+ * Specifies whether the square in the given coordinates is within
+ * the board or not.
+ *
+ * Returns: Non-zero value if the square is within the board else returns 0.
+ */
+_Bool square_within_board (gint x, gint y)
+{
+	return (
+	        (x >= 0 && x < game->board_limits.row) &&
+	        (y >= 0 && y < game->board_limits.col)
+	       );
+}
+
+/**
  * get_pixbuf_for_pos:
  *
  * (@row, @col): The coordinates that identify the position of the square in
@@ -353,10 +371,9 @@ void drag_end_cb (GtkGestureDrag *const drag,
 		 * Take action only if the coordinates are whithin the board limits
 		 * and the source coordinate correpsonds to a valid coin (not empty).
 		 */
-		if (source_x < game->board_limits.row &&
-		    source_y < game->board_limits.col &&
-		    dest_x < game->board_limits.row &&
-		    dest_y < game->board_limits.col
+		if (
+		    square_within_board (source_x, source_y) &&
+		    square_within_board (dest_x, dest_y)
 		   )
 		{
 			/*

@@ -114,7 +114,6 @@ void drag_end_cb (GtkGestureDrag *drag,
 			return;
 		}
 
-		/* Swap the image in the squares */
 		/* Update only if (left, top) is within bounds */
 		if (source_left < total_cells &&
 		    source_top < total_cells &&

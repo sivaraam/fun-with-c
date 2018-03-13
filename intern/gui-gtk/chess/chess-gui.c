@@ -17,6 +17,9 @@ static const gint grid_cell_side = 50;
 static const gint grid_cells_horizontal = 1;
 static const gint grid_cells_vertical = 1;
 
+/* Image dimension constants */
+static const gint required_width = 50, required_height = 50;
+
 // Data related to game
 struct chess *game = NULL;
 
@@ -163,7 +166,7 @@ void get_grid_left_top(const gint x, const gint y,
  *
  * Returns: Non-zero value if the square is within the board else returns 0.
  */
-_Bool square_within_board (gint x, gint y)
+_Bool square_within_board (const gint x, const gint y)
 {
 	return (
 	        (x >= 0 && x < game->board_limits.row) &&
@@ -195,8 +198,6 @@ GdkPixbuf *get_pixbuf_for_pos (const square_index_type row,
                                const char square_type,
                                const int coin_colour)
 {
-	static const gint required_width = 50, required_height = 50;
-
 	const enum square_type_indices st_index = get_square_type_index (square_type);
 	const enum coin_colour_indices cc_index = get_coin_colour_index (coin_colour);
 	const enum square_colour_indices sc_index = get_square_colour_index (row, col);
@@ -225,6 +226,215 @@ GdkPixbuf *get_pixbuf_for_pos (const square_index_type row,
 		g_error_free (coin_image_buf_load_error);
 		return NULL;
 	}
+}
+
+/**
+ * highlight_image_area:
+ *
+ * @image: the image whose border must be highlighted
+ * (@start_x, @start_y): The coordinates corresponding to the start point of the
+ *                       area to highlight
+ * (@width, @height): The dimensions of the area to highlight
+ *
+ * Highlights the area of the given image with a predefined highlight colour.
+ *
+ */
+inline static
+void highlight_image_area (GtkImage *const image,
+                           const gint start_x, const gint start_y,
+                           const guint width, guint height)
+{
+	static const gint bits_per_sample = 8;
+	static const guint32 highlight_colour = 0xff000000;
+	GdkPixbuf *image_buf;
+	GdkPixbuf *temp_buf;
+
+	g_assert (image != NULL);
+
+	image_buf = gdk_pixbuf_copy (gtk_image_get_pixbuf (image));
+
+	/* Ensure image buf has standard widdth and height */
+	g_assert (gdk_pixbuf_get_width (image_buf) == required_width &&
+	          gdk_pixbuf_get_height (image_buf) == required_height);
+
+	/* Create buffer to highlight the area */
+	temp_buf = gdk_pixbuf_new (GDK_COLORSPACE_RGB,
+	                           FALSE,
+	                           bits_per_sample,
+	                           width, height);
+
+	g_assert (image_buf != NULL && temp_buf != NULL);
+
+	/* Highlight the area in pixbuf */
+	gdk_pixbuf_copy_area (image_buf, start_x, start_y,
+	                      width, height,
+	                      temp_buf, 0, 0);
+	gdk_pixbuf_fill (temp_buf, highlight_colour);
+	gdk_pixbuf_copy_area (temp_buf, 0, 0,
+	                      width, height,
+	                      image_buf, start_x, start_y);
+
+
+	gtk_image_set_from_pixbuf (image, image_buf);
+
+	/* Throw away the unnecessary buffers */
+	g_object_unref (temp_buf);
+	g_object_unref (image_buf);
+}
+
+/**
+ * highlight_image_border:
+ *
+ * @image: Pointer to the image to highlight.
+ *
+ * Highlight the border of the given image with a predefinedd colour.
+ * Assumes that the given image has the dimensions (required_width, required_height).
+ */
+static
+void highlight_image_border (GtkImage *const image)
+{
+	g_assert (image != NULL);
+
+	static const gint highlight_thickness = 2;
+
+	/* Highlight the top border */
+	highlight_image_area (image, 0, 0,
+	                      required_width, highlight_thickness);
+
+	/* Highlight the bottom border */
+	const gint bottom_x_start = 0,
+	           bottom_y_start = required_height - highlight_thickness;
+	highlight_image_area (image, bottom_x_start, bottom_y_start,
+	                      required_width, highlight_thickness);
+
+	/* Highlight the left border */
+	highlight_image_area (image, 0, 0,
+	                      highlight_thickness, required_height);
+
+	/* Highlight the right border */
+	const gint right_x_start = required_width - highlight_thickness,
+	           right_y_start = 0;
+	highlight_image_area (image, right_x_start, right_y_start,
+	                      highlight_thickness, required_height);
+}
+
+/**
+ * drag_begin_cb:
+ *
+ * @drag: The object containing the information related to the current drag.
+ * (@offset_x, @offset_y): The coordinates of the position at which the drag begun
+ *                         relative to the event window.
+ * @user_data: Any data passed to the callback. (Not used currently)
+ *
+ * The callback function that is called when a drag gesture begins.
+ */
+static
+void drag_begin_cb (const GtkGestureDrag *const drag,
+                    const gdouble offset_x,
+                    const gdouble offset_y,
+                    GtkGrid *const grid)
+{
+	gint drag_start_x = round (offset_x), drag_start_y = round (offset_y),
+	     start_widget_left = 0, start_widget_top = 0,
+	     start_x = 0, start_y = 0;
+	GtkWidget *widget_at_start;
+
+	g_print ("drag_begin_cb: Start point: Got        x: %lf\t y:%lf\n", offset_x, offset_y);
+	g_print ("drag_begin_cb: Start point: Rounded to x: %d\ty: %d\n", drag_start_x, drag_start_y);
+
+	get_grid_left_top (drag_start_x, drag_start_y, &start_widget_left, &start_widget_top);
+	start_x = start_widget_top, start_y = start_widget_left;
+
+	if (square_within_board (start_x, start_y))
+	{
+		const struct chess_coin *const coin_at_source = *(*(game->board + start_x) + start_y);
+
+		widget_at_start =  gtk_grid_get_child_at (grid, start_widget_left, start_widget_top);
+
+		g_assert (widget_at_start != NULL);
+
+		if (coin_at_source != NULL &&
+		    (
+		     (game->is_whites_turn && coin_at_source->colour == WHITE_COIN) ||
+		     (!game->is_whites_turn && coin_at_source->colour == BLACK_COIN)
+		    )
+		   )
+		{
+			/* Highlight the grid at the source if it's a valid square */
+			gtk_drag_highlight (widget_at_start);
+
+			/* Highlight the possible moves of the source */
+			for (unsigned possible_move_index = 0;
+			     possible_move_index < coin_at_source->possible_moves_num;
+			     possible_move_index++)
+			{
+				const gint possible_move_widget_left = (*(coin_at_source->possible_moves + possible_move_index)).col,
+				           possible_move_widget_top = (*(coin_at_source->possible_moves + possible_move_index)).row;
+				GtkWidget *const possible_move_image = gtk_grid_get_child_at (grid,
+				                                                              possible_move_widget_left,
+				                                                              possible_move_widget_top);
+
+				highlight_image_border (GTK_IMAGE (possible_move_image));
+			}
+		}
+	}
+}
+
+/**
+ * initialise_coin_at_pos:
+ *
+ * @grid: The grid representing the chess board.
+ * (@row, @col): The coordinates corresponding to the square of the game board
+ *               to initialise.
+ *
+ * The function that initialises the image for the cell in the graphical board corresponding
+ * to the given game board cell.
+ *
+ * Returns: 0 in case of success or a non-negative value in case of an error.
+ */
+static
+int initialise_coin_at_pos (GtkGrid *const grid,
+                            const square_index_type row,
+                            const square_index_type col)
+{
+	const struct chess_coin *const curr_coin = *(*(game->board + row) + col);
+	const char square_type = (curr_coin != NULL) ? curr_coin->type : 0;
+	const int coin_colour = (curr_coin != NULL) ? curr_coin->colour : BLACK_COIN;
+
+	GtkWidget *coin_image;
+	GdkPixbuf *coin_image_buf;
+
+	/* The (top, left) coordinates of the game board always correspond to (row, col) */
+	const gint coin_grid_left = col, coin_grid_top = row;
+
+	coin_image = gtk_grid_get_child_at (grid, coin_grid_left, coin_grid_top);
+	coin_image_buf = get_pixbuf_for_pos (row, col, square_type, coin_colour);
+
+        /* Attach image to the grid if successful */
+	if (coin_image_buf != NULL)
+	{
+		/* Attach a new image if there is no image else update the existing image */
+		if (coin_image == NULL)
+		{
+			coin_image = gtk_image_new_from_pixbuf (coin_image_buf);
+
+			gtk_grid_attach (GTK_GRID (grid), coin_image, coin_grid_left, coin_grid_top,
+			                 grid_cells_horizontal, grid_cells_vertical);
+		}
+		else
+		{
+			gtk_image_set_from_pixbuf (GTK_IMAGE (coin_image), coin_image_buf);
+		}
+	}
+	else
+	{
+		g_print ("Initialising coin with coin image failed!\n");
+		return 1;
+	}
+
+	/* Unref the pixbuf buffer */
+	g_object_unref (coin_image_buf);
+	return 0;
 }
 
 /**
@@ -286,44 +496,6 @@ void update_coin_at_pos (GtkGrid *const grid,
 
 	g_object_unref (new_source_image_buf);
 	g_object_unref (new_dest_image_buf);
-}
-
-/**
- * drag_begin_cb:
- *
- * @drag: The object containing the information related to the current drag.
- * (@offset_x, @offset_y): The coordinates of the position at which the drag begun
- *                         relative to the event window.
- * @user_data: Any data passed to the callback. (Not used currently)
- *
- * The callback function that is called when a drag gesture begins.
- */
-static
-void drag_begin_cb (const GtkGestureDrag *const drag,
-                    const gdouble offset_x,
-                    const gdouble offset_y,
-                    GtkGrid *const grid)
-{
-	gint drag_start_x = round (offset_x), drag_start_y = round (offset_y),
-	     start_widget_left = 0, start_widget_top = 0,
-	     start_x = 0, start_y = 0;
-	GtkWidget *widget_at_start;
-
-	g_print ("drag_begin_cb: Start point: Got        x: %lf\t y:%lf\n", offset_x, offset_y);
-	g_print ("drag_begin_cb: Start point: Rounded to x: %d\ty: %d\n", drag_start_x, drag_start_y);
-
-	get_grid_left_top (drag_start_x, drag_start_y, &start_widget_left, &start_widget_top);
-	start_x = start_widget_top, start_y = start_widget_left;
-
-	/* Highlight the grid at the source if it's a valid square */
-	if (square_within_board (start_x, start_y))
-	{
-		widget_at_start =  gtk_grid_get_child_at (grid, start_widget_left, start_widget_top);
-
-		g_assert (widget_at_start != NULL);
-
-		gtk_drag_highlight (widget_at_start);
-	}
 }
 
 /**
@@ -394,6 +566,21 @@ void drag_end_cb (GtkGestureDrag *const drag,
 			/* Remove highlight for the widget at source */
 			gtk_drag_unhighlight (gtk_grid_get_child_at (grid, source_left, source_top));
 
+			const struct chess_coin *const coin_at_source = *(*(game->board + source_x) + source_y);
+
+			/* Unhighlight the possible moves by restoring the original images */
+			for (unsigned possible_move_index = 0;
+			     possible_move_index < coin_at_source->possible_moves_num;
+			     possible_move_index++)
+			{
+				const struct chess_position possible_move_pos = *(coin_at_source->possible_moves +
+				                                                  possible_move_index);
+				if (initialise_coin_at_pos (grid, possible_move_pos.row, possible_move_pos.col))
+				{
+					g_print ("drag_end_cb: Updating coin position failed!\n");
+				}
+			}
+
 			if (square_within_board (dest_x, dest_y))
 			{
 				/*
@@ -434,7 +621,7 @@ void drag_end_cb (GtkGestureDrag *const drag,
 					break;
 				}
 
-				/* Update the display state */
+				/* Update the images of source and destiantion coins */
 				update_coin_at_pos (grid, source_left, source_top, dest_left, dest_top);
 			}
 		}
@@ -443,55 +630,6 @@ void drag_end_cb (GtkGestureDrag *const drag,
 	{
 		g_print ("drag_end_cb: Could not get start point!\n");
 	}
-}
-
-/**
- * initialise_coin_at_pos:
- *
- * @grid: The grid representing the chess board.
- * (@row, @col): The coordinates corresponding to the square of the game board
- *               to initialise.
- * @square_type: A character that identifies the type of coin in the square
- *               or an empty square.
- * @coin_colour: A value that specifies the colour of the coin in the square.
- *
- * The function that initialises the image for the cell in the graphical board corresponding
- * to the given game board cell.
- *
- * Returns: 0 in case of success or a non-negative value in case of an error.
- */
-static
-int initialise_coin_at_pos (GtkGrid *const grid,
-                        const square_index_type row,
-                        const square_index_type col,
-                        const char square_type,
-                        const int coin_colour)
-{
-	GtkWidget *coin_image;
-	GdkPixbuf *coin_image_buf;
-
-	/* The (top, left) coordinates of the game board always correspond to (row, col) */
-	const gint coin_grid_left = col, coin_grid_top = row;
-
-	coin_image_buf = get_pixbuf_for_pos (row, col, square_type, coin_colour);
-
-        /* Attach image to the grid if successful */
-	if (coin_image_buf != NULL)
-	{
-		coin_image = gtk_image_new_from_pixbuf (coin_image_buf);
-
-		gtk_grid_attach (GTK_GRID (grid), coin_image, coin_grid_left, coin_grid_top,
-		                 grid_cells_horizontal, grid_cells_vertical);
-	}
-	else
-	{
-		g_print ("Initialising coin with coin image failed!\n");
-		return 1;
-	}
-
-	/* Unref the pixbuf buffer */
-	g_object_unref (coin_image_buf);
-	return 0;
 }
 
 /**
@@ -513,11 +651,7 @@ int initialise_board_grid (GtkGrid *board_grid)
 	{
 		for (square_index_type col = 0; col < game->board_limits.col; col++)
 		{
-			const struct chess_coin *const curr_coin = *(*(game->board + row) + col);
-			const char square_type = (curr_coin != NULL) ? curr_coin->type : 0;
-			const int coin_colour = (curr_coin != NULL) ? curr_coin->colour : BLACK_COIN;
-
-			if (initialise_coin_at_pos (board_grid, row, col, square_type, coin_colour))
+			if (initialise_coin_at_pos (board_grid, row, col))
 			{
 				g_print ("Updating coin position failed!\n");
 				return 1;

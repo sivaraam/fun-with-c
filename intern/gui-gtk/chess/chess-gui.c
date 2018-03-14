@@ -266,9 +266,6 @@ void highlight_image_area (GtkImage *const image,
 	g_assert (image_buf != NULL && temp_buf != NULL);
 
 	/* Highlight the area in pixbuf */
-	gdk_pixbuf_copy_area (image_buf, start_x, start_y,
-	                      width, height,
-	                      temp_buf, 0, 0);
 	gdk_pixbuf_fill (temp_buf, highlight_colour);
 	gdk_pixbuf_copy_area (temp_buf, 0, 0,
 	                      width, height,

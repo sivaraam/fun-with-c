@@ -565,29 +565,37 @@ void drag_end_cb (GtkGestureDrag *const drag,
 
 			const struct chess_coin *const coin_at_source = *(*(game->board + source_x) + source_y);
 
-			/* Unhighlight the possible moves by restoring the original images */
-			for (unsigned possible_move_index = 0;
-			     possible_move_index < coin_at_source->possible_moves_num;
-			     possible_move_index++)
+			/*
+			 * Unhighlight the possible moves by restoring the original images if
+			 * the square represents a valid coin else return.
+			 */
+			if (coin_at_source != NULL)
 			{
-				const struct chess_position possible_move_pos = *(coin_at_source->possible_moves +
-				                                                  possible_move_index);
-				if (initialise_coin_at_pos (grid, possible_move_pos.row, possible_move_pos.col))
+				for (unsigned possible_move_index = 0;
+				     possible_move_index < coin_at_source->possible_moves_num;
+				     possible_move_index++)
 				{
-					g_print ("drag_end_cb: Updating coin position failed!\n");
+					const struct chess_position possible_move_pos = *(coin_at_source->possible_moves +
+					                                                  possible_move_index);
+					if (initialise_coin_at_pos (grid, possible_move_pos.row, possible_move_pos.col))
+					{
+						g_print ("drag_end_cb: Updating coin position failed!\n");
+					}
 				}
+			}
+			else
+			{
+				return;
 			}
 
 			if (square_within_board (dest_x, dest_y))
 			{
 				/*
-				 * Do nothing the source and dest are the same (or)
-				 * when there is no coin at the source.
+				 * Do nothing the source and destination are the same.
 				 */
 				if (
-				    (source_x == dest_x &&
-				     source_y == dest_y) ||
-				     *(*(game->board + source_x) + source_y) == NULL
+				    source_x == dest_x &&
+				    source_y == dest_y
 				   )
 				{
 					return;

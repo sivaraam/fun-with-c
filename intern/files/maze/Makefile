@@ -1,0 +1,19 @@
+COMPILER_FLAGS = "-Wall"
+COMPILER_FLAGS += "-Wpedantic"
+COMPILER_FLAGS += "-Wextra"
+COMPILER_FLAGS += "-O3"
+COMPILER_FLAGS += "-Wshadow"
+
+BMP_LIBRARY = bmp/bmp_helpers.c
+GRAPH_LIBRARY = graph/maze_graph.c
+MY_MATH_LIBRARY = ../../my_math/math.c
+A_STAR_FRONTIER_QUEUE_LIBRARY = a_star/frontier/pqueue.c ${MY_MATH_LIBRARY}
+SHORTEST_PATH_QUEUE_LIBRARY = shortest_path/queue.c
+
+LIBRARIES = ${BMP_LIBRARY}
+LIBRARIES += ${GRAPH_LIBRARY}
+LIBRARIES += ${A_STAR_FRONTIER_QUEUE_LIBRARY}
+LIBRARIES += ${SHORTEST_PATH_QUEUE_LIBRARY}
+
+maze_solver.out: *.c ${LIBRARIES}
+	gcc ${COMPILER_FLAGS} $^ -o $@

@@ -1,0 +1,22 @@
+#! /usr/bin/env python3
+# A simple script to convert a file into a C-style array declaration
+# in the required format
+
+coins = open ('coins-sorted')
+index = 0
+coin_array = []
+
+# Create the array of lines
+for line in coins:
+    coin_array.insert (index, line.rstrip('\n'))
+    index += 1
+
+print_index = 0
+# Print the output in the required format
+for i in range (0, 6):
+    print ("\t{")
+    print ('\t\t{ "', coin_array[print_index], '", "', coin_array[print_index+1], '" },', sep='')
+    print ('\t\t{ "', coin_array[print_index+2], '", "', coin_array[print_index+3], '" }', sep='')
+    print ("\t},")
+    print_index +=4
+

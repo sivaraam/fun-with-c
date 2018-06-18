@@ -1,0 +1,10 @@
+COMPILER_FLAGS = "-Wall"
+COMPILER_FLAGS += "-Wpedantic"
+COMPILER_FLAGS += "-Wextra"
+COMPILER_FLAGS += "-O3"
+COMPILER_FLAGS += "-Wshadow"
+
+GCC = gcc
+
+output.out: *.c
+	${GCC} ${COMPILER_FLAGS} $^ -o $@

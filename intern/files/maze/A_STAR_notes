@@ -1,0 +1,15 @@
+A* computes f(n) = g(n) + h(n). To add two values, those two values need to be at the same scale. If g(n) is measured in hours and h(n) is measured in meters, then A* is going to consider g or h too much or too little, and you either won’t get as good paths or you A* will run slower than it could.
+
+
+Steven van Dijk suggests that a more straightforward way to do this would to pass h to the comparison function. When the f values are equal, the comparison function would break the tie by looking at h.
+
+A different way to break ties is to prefer paths that are along the straight line from the starting point to the goal:
+dx1 = current.x - goal.x
+dy1 = current.y - goal.y
+dx2 = start.x - goal.x
+dy2 = start.y - goal.y
+cross = abs(dx1*dy2 - dx2*dy1)
+heuristic += cross*0.001
+This code computes the vector cross-product between the start to goal vector and the current point to goal vector. When these vectors don’t line up, the cross product will be larger. The result is that this code will give some slight preference to a path that lies along the straight line path from the start to the goal.
+
+Yet another way to break ties is to carefully construct your A* priority queue so that new insertions with a specific f value are always ranked better (lower) than old insertions with the same f value.

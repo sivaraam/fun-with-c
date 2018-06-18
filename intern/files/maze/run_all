@@ -1,0 +1,42 @@
+#! /bin/bash
+# Script to run all test inputs for a given executable
+
+TOTAL_TEST_CASES=9
+DEFAULT_EXEC="./maze_solver.out"
+MAX_ARGS=2
+
+if (test $# -lt 1) || (test "$1" == "")
+then
+    echo "Falling back to default executable: $DEFAULT_EXEC"
+    EXEC="$DEFAULT_EXEC"
+elif (test $# -gt $MAX_ARGS)
+then
+    echo "Required only $MAX_ARGS arguments: maze solver executable, test case upto which test should be run"
+    exit 1
+else
+    EXEC="$1"
+fi
+
+if !(test -x "$EXEC")
+then
+    echo "Invalid executable: $EXEC"
+    exit 1
+fi
+
+if (test $# -eq 2)
+then
+    TOTAL_TEST_CASES=$2
+fi
+
+# Replace existing test inputs
+./replace_tests $TOTAL_TEST_CASES
+
+for test in `seq $TOTAL_TEST_CASES`
+do
+	if !(time "$EXEC" "test_inputs/BMP$test.bmp")
+	then
+		echo "Test case '$test' failed!"
+		exit 1
+	fi
+	echo
+done

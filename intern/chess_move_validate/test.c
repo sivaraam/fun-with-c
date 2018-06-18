@@ -65,7 +65,7 @@ int main (void)
 	{
 		for (square_index_type col = 0; col < game->board_limits.col; col++)
 		{
-				printf ("%p\t", *(*(game->board + row) + col));
+				printf ("%p\t", (void *)*(*(game->board + row) + col));
 		}
 		printf ("\n");
 	}

@@ -3,4 +3,6 @@ test_inputs.bak/BMP10.bmp
 test_inputs.bak/BMP11.bmp
 test_inputs/
 test_inputs.solved.a_star__straight_line_biased/
+test_inputs.solved.a_star__manhattan_heuristic/BMP10.bmp
+test_inputs.solved.a_star__manhattan_heuristic/BMP9.bmp
 l1-path-finder/

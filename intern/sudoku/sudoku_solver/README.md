@@ -3,9 +3,9 @@
 A simple sudoku solver implementation that tries to solve sudoku using
 the following solving techniques:
 
-	1. [Naked single detection](http://www.sudoku9x9.com/naked_single.html)
-	2. [Hidden single detection](http://www.sudoku9x9.com/hidden_single.html)
-	3. [Naked double detection](http://www.sudoku9x9.com/naked_pair.html)
+1. [Naked single detection](http://www.sudoku9x9.com/naked_single.html)
+2. [Hidden single detection](http://www.sudoku9x9.com/hidden_single.html)
+3. [Naked double detection](http://www.sudoku9x9.com/naked_pair.html)
 
 It gives a complete solution if the board could be solved using the mentioned
 techniques else it would return a partial solution.

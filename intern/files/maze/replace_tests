@@ -14,7 +14,12 @@ fi
 
 echo "Replacing $TOTAL_TEST_CASES tests."
 
-rm -f test_inputs/*.bmp
+if test -d test_inputs/
+then
+    rm -f test_inputs/*.bmp
+else
+    mkdir test_inputs/
+fi
 
 for i in `seq $TOTAL_TEST_CASES`
 do

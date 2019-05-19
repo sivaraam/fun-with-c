@@ -1,0 +1,2 @@
+test_inputs.bak/BMP9.bmp filter=lfs diff=lfs merge=lfs -text
+test_inputs.bak/BMP10.bmp filter=lfs diff=lfs merge=lfs -text

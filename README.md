@@ -27,3 +27,17 @@ folder](intern/). Specifically,
 
 - [Chess GUI](intern/gui-gtk/chess/) - a simple GUI for the game of chess
   (using GTK+-3.0)
+
+### Dependencies
+#### Git LFS
+This repository tracks some very large test inputs using Git LFS. So,
+Git LFS needs to be installed for the clone to succeed. You can
+install Git LFS by following the instructions in [its website](https://git-lfs.github.com).
+
+In case you have already cloned the repository without installing
+Git LFS, run the following command **after installing** Git LFS
+to fix the invalid state in which Git leaves the repo:
+
+```
+git checkout -f HEAD
+```

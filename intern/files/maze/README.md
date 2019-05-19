@@ -38,8 +38,9 @@ The size of the maze increases with increasing test-file-suffix number.
 Specific details about the test cases could be found in the analysis
 document found in the [analysis folder](analysis/).
 
-Very large test inputs are available but not put into this repository
-due to their huge files sizes.
+Some very large test inputs are available in the repository. They are tracked
+using [Git LFS](https://git-lfs.github.com). One very very large test input is
+not put into this repository due to its size.
 
 #### Solved test cases
 Some solved test cases could are be found in the following folders:

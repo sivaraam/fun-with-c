@@ -74,6 +74,8 @@ int insert_last(list l, int value)
 		l->tail->next = n;
 		l->tail = n;
 	}
+
+	return 0;
 }
 
 /*

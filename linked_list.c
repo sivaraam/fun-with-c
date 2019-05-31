@@ -126,16 +126,21 @@ int main(void)
 	int ret = 0;
 
 	if (l == NULL)
+	{
+		fprintf(stderr, "List creation failed\n");
 		return -1;
+	}
 
 	if (insert_last(l, 1) < 0)
 	{
+		fprintf(stderr, "Insert failed\n");
 		ret = -1;
 		goto cleanup;
 	}
 
 	if (insert_last(l, 2) < 0)
 	{
+		fprintf(stderr, "Insert failed\n");
 		ret = -1;
 		goto cleanup;
 	}

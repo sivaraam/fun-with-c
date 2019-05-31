@@ -98,6 +98,45 @@ void print_list(list l)
 }
 
 /*
+ * Delete the node that has the given value
+ */
+void delete_node(list l, int value)
+{
+	node del;
+
+	if (l == NULL)
+		return;
+
+	del = l->head;
+
+	if (del->value == value)
+	{
+		l->head = del->next;
+		if (l->head == NULL)
+			l->tail = NULL;
+
+		free(del);
+
+		return;
+	}
+
+	while (del != NULL && del->next != NULL)
+	{
+		node next = del->next->next;
+
+		if (del->next->value == value)
+		{
+			if (del->next == l->tail)
+				l->tail = next;
+			free(del->next);
+			del->next = next;
+		}
+
+		del = next;
+	}
+}
+
+/*
  * Delete the list by free()-ing the memory
  * allocated for it
  */
@@ -138,12 +177,29 @@ int main(void)
 		goto cleanup;
 	}
 
+	if (insert_last(l, 5) < 0)
+	{
+		fprintf(stderr, "Insert failed\n");
+		ret = -1;
+		goto cleanup;
+	}
+
 	if (insert_last(l, 2) < 0)
 	{
 		fprintf(stderr, "Insert failed\n");
 		ret = -1;
 		goto cleanup;
 	}
+
+	print_list(l);
+
+	delete_node(l, 5);
+
+	delete_node(l, 1);
+
+	print_list(l);
+
+	delete_node(l, 2);
 
 	print_list(l);
 

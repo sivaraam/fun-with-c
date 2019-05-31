@@ -95,6 +95,29 @@ void print_list(list l)
 	printf("\n");
 }
 
+/*
+ * Delete the list by free()-ing the memory
+ * allocated for it
+ */
+void delete_list(list l)
+{
+	node curr;
+
+	if (l == NULL)
+		return;
+
+	curr = l->head;
+
+	while (curr != NULL)
+	{
+		node temp = curr;
+		curr = curr->next;
+		free(temp);
+	}
+
+	free(l);
+}
+
 int main(void)
 {
 	list l = new_list();
@@ -118,6 +141,6 @@ int main(void)
 	print_list(l);
 
 cleanup:
-//	delete_list();
+	delete_list(l);
 	return ret;
 }

@@ -73,6 +73,12 @@ int main(int argc, char *argv[]) {
   }
 
   /*
+   * NEEDSWORK:
+   * We call the API to allow 5 clients to connect to the server
+   * but we don't invoke clients in threads. Need to change the
+   * code accordingly.
+   */
+  /*
    * listen() marks the socket referred to by sockfd as a passive
    * socket, that is, as a socket that will be used to accept incoming
    * connection requests using accept(2).
@@ -89,6 +95,10 @@ int main(int argc, char *argv[]) {
   if (cli_sockfd < 0) {
     error("Error on accept");
   }
+  else
+  {
+    printf("A client has connected to the server.\n");
+  }
 
   while (1) {
     bzero(buffer, 255);
@@ -98,7 +108,7 @@ int main(int argc, char *argv[]) {
       error("Error on reading.");
     }
 
-    printf("Client: %s\n", buffer);
+    printf("Client: %s", buffer);
     printf("Your message: ");
     fgets(buffer, 255, stdin);
 

@@ -53,7 +53,8 @@ int main(int argc, char *argv[]) {
     error("Error opening socket.");
   }
 
-  bzero((char *) &serv_addr, sizeof(serv_addr));
+  memset(&serv_addr, 0, sizeof(serv_addr));
+//  bzero((char *) &serv_addr, sizeof(serv_addr));
   portno = atoi(argv[1]);
 
   serv_addr.sin_family = AF_INET;
@@ -101,7 +102,8 @@ int main(int argc, char *argv[]) {
   }
 
   while (1) {
-    bzero(buffer, 255);
+    memset(&buffer, 0, sizeof(buffer));
+//    bzero(buffer, 255);
     n = read(cli_sockfd, buffer, 255);
 
     if (n < 0) {

@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
   }
 
   memset(&serv_addr, 0, sizeof(serv_addr));
-//  bzero((char *) &serv_addr, sizeof(serv_addr));
+
   portno = atoi(argv[1]);
 
   serv_addr.sin_family = AF_INET;
@@ -98,12 +98,12 @@ int main(int argc, char *argv[]) {
   }
   else
   {
-    printf("A client has connected to the server.\n");
+    printf("A client has connected to the server. Receiving message from it ..\n");
   }
 
   while (1) {
     memset(&buffer, 0, sizeof(buffer));
-//    bzero(buffer, 255);
+
     n = read(cli_sockfd, buffer, 255);
 
     if (n < 0) {

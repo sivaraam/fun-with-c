@@ -40,10 +40,15 @@ int main(int argc, char *argv[])
   char buffer[255];
   if (argc < 3)
   {
+    /*
+     * Ref: https://stackoverflow.com/a/1775487/5614968
+     */
     ssize_t usage_bufsz = snprintf(NULL, 0, "usage: %s <hostname> <port>\n", argv[0]);
-    char usage_msg[255];
 
-    snprintf(usage_msg, usage_bufsz, "usage: %s <hostname> <port>\n", argv[0]);
+    char usage_msg[255];
+    memset(usage_msg, 0, sizeof(usage_msg));
+
+    snprintf(usage_msg, usage_bufsz+1, "usage: %s <hostname> <port>\n", argv[0]);
     error(usage_msg);
   }
 
@@ -77,14 +82,12 @@ int main(int argc, char *argv[])
   }
 
   memset(&serv_addr, 0, sizeof(serv_addr));
-//  bzero((char *) &serv_addr, sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;
 
   /*
    * Copy the server address to connect to.
    */
-  printf("Server address: %s", server->h_name);
-  memcpy(&serv_addr.sin_addr.s_addr, &(server->h_name), server->h_length);
+  memcpy(&serv_addr.sin_addr.s_addr, server->h_addr_list[0], server->h_length);
   serv_addr.sin_port = htons(portno);
 
   if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
@@ -98,8 +101,9 @@ int main(int argc, char *argv[])
 
   while (1)
   {
-    memset(&buffer, 0, sizeof(buffer));
-//    bzero(buffer, 255);
+    memset(buffer, 0, sizeof(buffer));
+
+    printf("Your message: ");
     fgets(buffer, 255, stdin);
     n = write(sockfd, buffer, strlen(buffer));
     if (n == 0)
@@ -107,8 +111,7 @@ int main(int argc, char *argv[])
       error("ERROR: failed to write to server");
     }
 
-    memset(&buffer, 0, sizeof(buffer));
-//    bzero(buffer, 255);
+    memset(buffer, 0, sizeof(buffer));
     n = read(sockfd, buffer, 255);
     if (n < 0)
     {

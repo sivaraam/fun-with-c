@@ -28,6 +28,9 @@ folder](intern/). Specifically,
 - [Chess GUI](intern/gui-gtk/chess/) - a simple GUI for the game of chess
   (using GTK+-3.0)
 
+- [Socket Chat Application](sockets) - a simple client-server chat application
+  implemented in C using socket programming.
+
 ### Dependencies
 #### Git LFS
 This repository tracks some very large test inputs using Git LFS. So,
